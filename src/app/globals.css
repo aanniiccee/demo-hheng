@@ -203,8 +203,8 @@
   .product-table th.col-note { min-width: 150px; }
   .product-table th.col-admin-name { min-width: 150px; }
   .product-table th.col-void { min-width: 100px; text-align: center; }
-  .product-table th.col-total-periods { min-width: 80px; }
-  .product-table th.col-current-period { min-width: 80px; }
+  .product-table th.col-total-periods { min-width: 100px; }
+  .product-table th.col-current-period { min-width: 100px; }
   .product-table th.col-deal-date { min-width: 120px; }
 
   .table-empty-row {
