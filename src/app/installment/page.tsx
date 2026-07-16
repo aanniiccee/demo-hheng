@@ -417,45 +417,51 @@ export default function InstallmentPage() {
   const filteredData = getFilteredTransactions();
   const todayObj = new Date(todayStr);
 
+  const getHomeUrl = () => {
+    const adminLineId = sessionStorage.getItem("admin_line_id") || "";
+    const params = new URLSearchParams();
+    if (token) params.set("token", token);
+    if (adminLineId) params.set("admin_line_id", adminLineId);
+    return params.toString() ? `/?${params.toString()}` : "/";
+  };
+
   return (
-    <div className="main-container" style={{ fontFamily: "sans-serif", padding: "20px" }}>
+    <div>
       
       {/* --- HEADER --- */}
-      <div className="header-container" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+      <div className="header-container">
         <h2 style={{ margin: 0 }}>ระบบผ่อนสินค้า (Installment Transactions)</h2>
-        <div className="action-buttons" style={{ display: "flex", gap: "10px" }}>
-          <Link href={`/?token=${token}&admin_line_id=${adminLineId}`} className="btn btn-default">
+        <div className="action-buttons">
+          <Link href={getHomeUrl()} className="btn btn-default">
             <ArrowLeft size={16} /> กลับหน้าหลัก
           </Link>
-          <button onClick={() => loadData()} className="btn btn-default">
-            <RefreshCw size={16} /> รีเฟรช
+          <button type="button" onClick={loadData} className="btn btn-default" disabled={loading}>
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> รีเฟรช
           </button>
-          <button onClick={clearForm} className="btn btn-primary">
+          <button type="button" onClick={clearForm} className="btn btn-primary">
             <Plus size={16} /> สร้างรายการผ่อน
           </button>
         </div>
       </div>
 
-      <div className="main-layout" style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+      <div className="main-layout">
         
         {/* --- LEFT SIDE: TABLE AND FILTERS --- */}
-        <div className="table-container" style={{ flex: 1, minWidth: 0 }}>
-          <div className="table-header-bar" style={{ display: "flex", flexWrap: "wrap", gap: "15px", marginBottom: "15px", alignItems: "center", padding: "10px", backgroundColor: "#f9fafb", borderRadius: "8px" }}>
-            
-            <div className="search-wrapper" style={{ position: "relative", display: "flex", alignItems: "center", flex: "1 1 200px" }}>
-              <Search size={16} className="search-icon" style={{ position: "absolute", left: "10px", color: "#9ca3af" }} />
+        <div className="table-container">
+          <div className="table-header-bar">            
+            <div className="search-wrapper">
+              <Search className="search-icon" size={16} />
               <input 
                 type="text" 
                 className="search-input" 
                 placeholder="ชื่อลูกค้า สินค้า หรือ Transaction ID..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: "35px", width: "100%", height: "36px", borderRadius: "6px", border: "1px solid #d1d5db" }}
               />
             </div>
 
             <div>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", display: "block", marginBottom: "4px" }}>ปิดยอดแล้ว:</span>
+              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ปิดยอดแล้ว:</span>
               <div className="filter-group" style={{ display: "flex", gap: "4px" }}>
                 <button className={`filter-btn ${filterClosed === "ALL" ? "active" : ""}`} onClick={() => handleClosedFilterChange("ALL")}>ทั้งหมด</button>
                 <button className={`filter-btn ${filterClosed === "NO" ? "active" : ""}`} onClick={() => handleClosedFilterChange("NO")}>เปิดอยู่ (NO)</button>
@@ -464,8 +470,8 @@ export default function InstallmentPage() {
             </div>
 
             <div>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", display: "block", marginBottom: "4px" }}>ซ่อนรายการที่ชำระแล้ว:</span>
-              <div className="filter-group" style={{ display: "flex", gap: "4px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ซ่อนรายการที่ชำระแล้ว:</span>
+              <div className="filter-group">
                 <button 
                   className={`filter-btn ${filterExcludePaid === "YES" ? "active" : ""}`} 
                   onClick={() => setFilterExcludePaid("YES")}
@@ -482,8 +488,8 @@ export default function InstallmentPage() {
             </div>
 
             <div>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", display: "block", marginBottom: "4px" }}>สถานะจากระบบ:</span>
-              <div className="filter-group" style={{ display: "flex", gap: "4px" }}>
+              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>สถานะจากระบบ:</span>
+              <div className="filter-group">
                 <button className={`filter-btn ${filterStatus === "ALL" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ALL")}>ทั้งหมด</button>
                 <button className={`filter-btn ${filterStatus === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
                 <button className={`filter-btn ${filterStatus === "ครบกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ครบกำหนด")}>ครบกำหนด</button>
@@ -493,35 +499,43 @@ export default function InstallmentPage() {
           </div>
 
           {/* --- TABLE CONTENT --- */}
-          <div className="table-wrapper" style={{ overflowX: "auto", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
-            <table className="product-table" style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+          <div className="table-wrapper">
+            <table className="product-table">
               <thead>
-                <tr style={{ backgroundColor: "#f3f4f6" }}>
-                  <th style={{ minWidth: "100px", textAlign: "center", padding: "10px" }}>ยกเลิกสัญญา</th>
-                  <th style={{ minWidth: "120px", padding: "10px" }}>Transaction ID</th>
-                  <th style={{ minWidth: "150px", padding: "10px" }}>รหัสสินค้า</th>
-                  <th style={{ minWidth: "120px", padding: "10px" }}>ชื่อลูกค้า</th>
-                  <th style={{ minWidth: "100px", padding: "10px" }}>เบอร์โทร</th>
-                  <th style={{ minWidth: "70px", padding: "10px" }}>ช่องทาง</th>
-                  <th style={{ minWidth: "110px", padding: "10px" }}>สถานะจากระบบ</th>
-                  <th style={{ minWidth: "100px", padding: "10px" }}>ยอดผ่อนต่องวด</th>
-                  <th style={{ minWidth: "80px", padding: "10px" }}>จำนวนงวด</th>
-                  <th style={{ minWidth: "70px", padding: "10px" }}>งวดที่</th>
-                  <th style={{ minWidth: "100px", padding: "10px" }}>วันดีลนัดชำระ</th>
-                  <th style={{ minWidth: "110px", padding: "10px" }}>วันที่ชำระ</th>
-                  <th style={{ minWidth: "110px", padding: "10px" }}>ยอดเงินที่ชำระ</th>
-                  <th style={{ minWidth: "100px", padding: "10px" }}>กำหนดชำระ</th>
-                  <th style={{ minWidth: "100px", padding: "10px" }}>ยอดค้างชำระ</th>
-                  <th style={{ minWidth: "110px", padding: "10px" }}>สถานะจากแอดมิน</th>
-                  <th style={{ minWidth: "80px", padding: "10px" }}>ปิดยอดแล้ว</th>
-                  <th style={{ minWidth: "140px", padding: "10px" }}>หมายเหตุ</th>
-                  <th style={{ minWidth: "120px", padding: "10px" }}>แอดมินที่ทำรายการ</th>
+                <tr}}>
+                  <th style={{ minWidth: "100px", textAlign: "center"}}>ยกเลิกสัญญา</th>
+                  <th style={{ minWidth: "120px"}}>Transaction ID</th>
+                  <th style={{ minWidth: "180px"}}>รหัสสินค้า</th>
+                  <th style={{ minWidth: "120px"}}>ชื่อลูกค้า</th>
+                  <th style={{ minWidth: "100px"}}>เบอร์โทร</th>
+                  <th style={{ minWidth: "80px"}}>ช่องทาง</th>
+                  <th style={{ minWidth: "110px"}}>สถานะจากระบบ</th>
+                  <th style={{ minWidth: "100px"}}>ยอดผ่อนต่องวด</th>
+                  <th style={{ minWidth: "80px"}}>จำนวนงวด</th>
+                  <th style={{ minWidth: "80px"}}>งวดที่</th>
+                  <th style={{ minWidth: "100px"}}>วันดีลนัดชำระ</th>
+                  <th style={{ minWidth: "100px"}}>วันที่ชำระ</th>
+                  <th style={{ minWidth: "140px"}}>ยอดเงินที่ชำระ</th>
+                  <th style={{ minWidth: "100px"}}>กำหนดชำระ</th>
+                  <th style={{ minWidth: "100px"}}>ยอดค้างชำระ</th>
+                  <th style={{ minWidth: "120px"}}>สถานะจากแอดมิน</th>
+                  <th style={{ minWidth: "80px"}}>ปิดยอดแล้ว</th>
+                  <th style={{ minWidth: "150px"}}>หมายเหตุ</th>
+                  <th style={{ minWidth: "120px"}}>แอดมินที่ทำรายการ</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredData.length === 0 ? (
+                {loading ? (
                   <tr>
-                    <td colSpan={19} style={{ textAlign: "left", color: "#9ca3af", padding: "30px" }}>ไม่พบข้อมูลการผ่อนชำระที่ตรงเงื่อนไข</td>
+                    <td colSpan={15} style={{ textAlign: "left", color: "#6b7280", padding: "30px" }}>
+                      กำลังดึงข้อมูลการผ่อนชำระ...
+                    </td>
+                  </tr>
+                ) : filteredTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={15} style={{ textAlign: "left", color: "#9ca3af", padding: "30px" }}>
+                      ไม่พบข้อมูลการผ่อนชำระที่ตรงเงื่อนไข
+                    </td>
                   </tr>
                 ) : (
                   filteredData.map((x: any, idx: number) => {
