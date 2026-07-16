@@ -13,7 +13,7 @@
   }
 }
 
-/* 2. สไตล์ระดับ Global ของระบบ (คัดลอกจากโค้ดเดิมของคุณ) */
+/* 2. สไตล์ระดับ Global ของระบบ */
 @layer base {
   body {
     font-family: sans-serif;
@@ -122,10 +122,10 @@
   }
 
   .filter-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #4b5563;
-  margin-right: 6px;  
+    font-size: 12px;
+    font-weight: 500;
+    color: #4b5563;
+    margin-right: 6px;  
   }
 
   .filter-group {
@@ -186,16 +186,17 @@
     background-color: #f0fdf4;
   }
 
-  .product-table th.col-id { min-width: 110px; }
-  .product-table th.col-product { min-width: 180px; }
-  .product-table th.col-customer { min-width: 120px; }
+  /* 🌟 มัดรวมขนาดคอลัมน์ตาราง (ทั้งของหน้า Pawn และ Installment) */
+  .product-table th.col-id { min-width: 120px; }
+  .product-table th.col-product { min-width: 170px; }
+  .product-table th.col-customer { min-width: 130px; }
   .product-table th.col-phone { min-width: 100px; }
   .product-table th.col-channel { min-width: 80px; }
   .product-table th.col-sys-status { min-width: 110px; }
   .product-table th.col-interest { min-width: 100px; }
   .product-table th.col-pay-date { min-width: 100px; }
   .product-table th.col-pay-amount { min-width: 140px; }
-  .product-table th.col-due-date { min-width: 100px; }
+  .product-table th.col-due-date { min-width: 110px; }
   .product-table th.col-overdue { min-width: 100px; }
   .product-table th.col-admin-status { min-width: 120px; }
   .product-table th.col-closed { min-width: 80px; }
@@ -248,6 +249,7 @@
     font-weight: 500;
   }
 
+  /* 🌟 ส่วนการจัดการฟอร์ม Box ขวา */
   .form-card {
     background: #ffffff;
     padding: 20px;
@@ -285,22 +287,30 @@
     color: #374151;
   }
 
+  /* 🌟 ล็อกความสูงทุกช่องกรอกข้อมูลให้เท่ากันเป๊ะ 38px */
   .form-group input, 
-  .form-group textarea, 
   .form-group select,
   .form-control {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    box-sizing: border-box; /* สำคัญมาก: เพื่อไม่ให้ padding ไปเพิ่มความสูง/กว้าง */
+    box-sizing: border-box; 
     font-family: sans-serif;
     font-size: 13px;
-    height: 38px; /* 🌟 ล็อกความสูงทุกช่องให้ออกมาเท่ากันเป๊ะ */
+    height: 38px;
   }
 
+  /* ยกเว้นสำหรับ textarea ให้ขยายตามแถว */
   .form-group textarea {
-  height: auto; 
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    font-size: 13px;
+    height: auto; 
   }
 
   .form-group input:disabled,
@@ -309,13 +319,6 @@
   .form-control[readonly] {
     background-color: #f3f4f6 !important;
     cursor: not-allowed !important;
-  }
-
-  .form-row-3 {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr 2fr;
-    gap: 8px;
-    align-items: center;
   }
 
   .status-badge {
@@ -364,6 +367,7 @@
     border-bottom: none;
   }
 
+  /* 🌟 มัดรวมกล่องสรุปการจ่ายเงินสีฟ้า */
   .payment-summary {
     background: #eff6ff;
     padding: 12px;
@@ -371,15 +375,12 @@
     margin-bottom: 15px;
     font-size: 13px;
     border: 1px solid #bfdbfe;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
-
-  .payment-summary div {
-    margin-bottom: 5px;
-  }
-
-  .payment-summary div:last-child {
-    margin-bottom: 0;
-  }
+  .payment-summary span.highlight-blue { color: #2563eb; font-weight: bold; }
+  .payment-summary span.bold { font-weight: bold; }
 
   .nav-button {
     display: flex;
@@ -394,81 +395,40 @@
     transition: all 0.2s ease;
   }
 
-  .nav-button:hover {
-    background-color: #e5e7eb;
-    color: #000000;
-  }
+  .nav-button:hover { background-color: #e5e7eb; color: #000000; }
+  .label-blue { color: #2563eb !important; }
+  .label-muted-bold { color: #6b7280; font-weight: 500; }
 
-  .label-blue {
-    color: #2563eb !important;
-  }
-
-  /* 🌟 3. จัดกลุ่มแถววัน/เดือน/ปี แบบ Flex แทนของเดิมที่เคยพัง */
+  /* 🌟 บังคับแถว วัน/เดือน/ปีนัดงวดแรก ให้อยู่ในแถวหน้ากระดานเดียวกัน */
   .due-date-row {
     display: flex;
     gap: 6px;
     width: 100%;
   }
-
-  /* 🌟 ปรับความกว้างตามสัดส่วน flex ของแต่ละช่องในแถวเดียวกัน */
-  .due-date-row input[type="number"] {
-    flex: 1;
-    width: auto; /* เคลียร์ width: 100% ของเดิมออก */
+  .due-date-row input,
+  .due-date-row select {
+    width: auto !important; /* ปลดล็อก width: 100% ออก */
   }
+  .due-date-row input[type="number"] { flex: 1; }
+  .due-date-row select#start_month { flex: 1.2; }
+  .due-date-row select#start_year { flex: 1.5; }
 
-  .due-date-row select#start_month {
-    flex: 1.2;
-    width: auto;
-  }
-
-  .due-date-row select#start_year {
-    flex: 1.5;
-    width: auto;
-  }
-
-  /* 🌟 4. คลาสสำหรับกล่องเตือนค้างชำระ (Overdue Alert Box) */
-  .alert-danger-box {
+  /* 🌟 กล่องเตือนค้างชำระสีแดง */
+  .alert-danger-box,
+  .alert-warning-box {
     background-color: #fef2f2;
     border-left: 4px solid #ef4444;
     padding: 12px;
     margin-bottom: 15px;
     border-radius: 4px;
-  }
-  .alert-danger-box span {
     color: #991b1b;
     font-size: 13px;
     font-weight: bold;
-    display: block;
     line-height: 1.5;
   }
-  .alert-danger-box span span.underline {
-    text-decoration: underline;
-  }
-  .alert-danger-box span span.price {
-    font-size: 15px;
-  }
+  .alert-danger-box span span.underline { text-decoration: underline; }
+  .alert-danger-box span span.price { font-size: 15px; }
 
-  /* 🌟 5. คลาสสำหรับกล่อง Payment Summary ภายในโหมดรับชำระ */
-  .payment-summary {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .payment-summary span.highlight-blue {
-    color: #2563eb;
-    font-weight: bold;
-  }
-  .payment-summary span.bold {
-    font-weight: bold;
-  }
-
-  /* 🌟 6. บังคับ input ที่ล็อกไว้ (Read Only) ให้แสดงสถานะห้ามกด */
-  .form-control:read-only {
-    background-color: #f3f4f6;
-    cursor: not-allowed;
-  }
-
-  /* 🌟 7. จัดการลิสต์จำลองวันครบกำหนดด้านล่าง */
   .due-preview-container {
     max-height: 140px;
     overflow-y: auto;
@@ -477,81 +437,10 @@
     gap: 4px;
   }
 
-  /* 🌟 8. ขยายปุ่มบันทึก/ปุ่มสีแดง ให้กว้างเต็มกล่องฟอร์ม */
-  .btn-block {
-    width: 100%;
-    justify-content: center;
-    height: 40px;
-  }
-  .btn-submit {
-    margin-bottom: 10px;
-  }
-  .btn-danger {
-    color: white;
-  }
-  .btn-danger:not(:disabled) {
-    background-color: #dc2626;
-  }
-  .btn-danger:disabled {
-    background-color: #9ca3af;
-  }
-
-  .form-title-text {
-    margin-left: 6px;
-  }
-
-  .form-sub-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .form-sub-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #4b5563;
-  }
-
-  .form-edit-checkbox-label {
-    font-size: 12px;
-    color: #2563eb;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .label-blue {
-    color: #2563eb !important;
-  }
-  .label-muted-bold {
-    color: #6b7280;
-    font-weight: 500;
-  }
-
   .divider-dashed {
     border: 0;
     border-top: 1px dashed #d1d5db;
     margin: 15px 0;
-  }
-
-  .input-overdue-balance {
-    font-weight: 600;
-  }
-  .input-overdue-balance.red { color: #b91c1c; }
-  .input-overdue-balance.green { color: #10b981; }
-
-  .alert-warning-box {
-    background-color: #fef2f2;
-    border-left: 4px solid #ef4444;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-  }
-  .alert-warning-box span {
-    color: #991b1b;
-    font-size: 13px;
-    font-weight: bold;
   }
 
   .inner-payment-card {
@@ -561,44 +450,36 @@
     border-radius: 8px;
     margin-bottom: 12px;
   }
-  .inner-payment-card.unlocked {
-    background: #e5e7eb;
-  }
+  .inner-payment-card.unlocked { background: #e5e7eb; }
 
+  .input-overdue-balance { font-weight: 600; }
+  .input-overdue-balance.red { color: #b91c1c; }
+  .input-overdue-balance.green { color: #10b981; }
+  .form-title-text { margin-left: 6px; }
+  .form-sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .form-sub-title { font-size: 13px; font-weight: 600; color: #4b5563; }
+  .form-edit-checkbox-label { font-size: 12px; color: #2563eb; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+  /* 🌟 คลาสจัดการปุ่มบันทึก & ปุ่มขยายเต็มหน้ากว้างความสูงเท่ากันหมด */
+  .btn-block {
+    width: 100%;
+    justify-content: center;
+    height: 40px;
+  }
+  .btn-submit {
+    margin-bottom: 10px;
+  }
 }
 
-/* 4. สไตล์ส่วน Responsive เมื่อเปิดบนมือถือ (ใช้คำสั่ง @media ของเดิม) */
+/* 4. สไตล์ส่วน Responsive เมื่อเปิดบนมือถือ */
 @media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-  .header-container {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .action-buttons {
-    width: 100%;
-    justify-content: flex-start;
-  }
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
-  .table-header-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .search-wrapper {
-    width: 100%;
-  }
-  .form-card {
-    order: 1;
-    position: static;
-    margin-bottom: 15px;
-  }
-  .table-container {
-    order: 2;
-  }
-  h2 {
-    font-size: 20px;
-  }
+  body { padding: 10px; }
+  .header-container { flex-direction: column; align-items: flex-start; }
+  .action-buttons { width: 100%; justify-content: flex-start; }
+  .main-layout { grid-template-columns: 1fr; }
+  .table-header-bar { flex-direction: column; align-items: stretch; }
+  .search-wrapper { width: 100%; }
+  .form-card { order: 1; position: static; margin-bottom: 15px; width: 100%; }
+  .table-container { order: 2; }
+  h2 { font-size: 20px; }
 }
