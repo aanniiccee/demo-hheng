@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { 
@@ -38,7 +38,7 @@ interface Transaction {
   transaction_pawn?: PawnDetail[] | PawnDetail;
 }
 
-export default function PawnPage() {
+function PawnPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -84,43 +84,19 @@ export default function PawnPage() {
   // ==========================================
   // 1. ระบบตรวจสอบ Session Admin & โหลดข้อมูลเริ่มต้น
   // ==========================================
-  // useEffect(() => {
-  //   // ตรวจเช็คความปลอดภัยของ Admin Session
-  //   const adminName = sessionStorage.getItem("admin_name");
-  //   const adminLineId = sessionStorage.getItem("admin_line_id");
-
-  //   if (!adminName || !adminLineId) {
-  //     const currentParams = new URLSearchParams(window.location.search);
-  //     currentParams.set("goto", window.location.pathname);
-  //     window.location.href = "https://hheng-system.vercel.app/liff-router?" + currentParams.toString();
-  //     return;
-  //   }
-
-  //   loadData();
-  // }, [token]);
   useEffect(() => {
-  // 🌟 BYPASS MODE: จำลอง Session แอดมินสำหรับทดสอบ Localhost
-  if (!sessionStorage.getItem("admin_name")) {
-    sessionStorage.setItem("admin_name", "Admin Tester");
-  }
-  if (!sessionStorage.getItem("admin_line_id")) {
-    sessionStorage.setItem("admin_line_id", "U1234567890abcdefmockid");
-  }
+    // ตรวจเช็คความปลอดภัยของ Admin Session
+    const adminName = sessionStorage.getItem("admin_name");
+    const adminLineId = sessionStorage.getItem("admin_line_id");
 
-  // คอมเมนต์ระบบไล่ไปหน้า LIFFRouter ออกชั่วคราว
-  /*
-  const adminName = sessionStorage.getItem("admin_name");
-  const adminLineId = sessionStorage.getItem("admin_line_id");
+    if (!adminName || !adminLineId) {
+      const currentParams = new URLSearchParams(window.location.search);
+      currentParams.set("goto", window.location.pathname);
+      window.location.href = "https://hheng-system.vercel.app/liff-router?" + currentParams.toString();
+      return;
+    }
 
-  if (!adminName || !adminLineId) {
-    const currentParams = new URLSearchParams(window.location.search);
-    currentParams.set("goto", window.location.pathname);
-    window.location.href = "https://hheng-system.vercel.app/liff-router?" + currentParams.toString();
-    return;
-  }
-  */
-
-  loadData();
+    loadData();
   }, [token]);
 
   // จัดการ Trigger คลิกเปิดฟอร์มแก้ข้อมูลออโต้หากมี tx_id พ่วงมาใน URL
@@ -807,5 +783,13 @@ export default function PawnPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PawnPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "20px" }}>กำลังโหลดระบบต่อดอก...</div>}>
+      <PawnPageContent />
+    </Suspense>
   );
 }
