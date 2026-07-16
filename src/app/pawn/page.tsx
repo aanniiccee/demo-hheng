@@ -381,13 +381,13 @@ return (
         <h2>ระบบต่อดอก (Pawn Transactions)</h2>
         <div className="action-buttons">
           <Link href={getHomeUrl()} className="btn btn-default">
-            <ArrowLeft size={14} /> กลับหน้าหลัก
+            <ArrowLeft size={24} /> กลับหน้าหลัก
           </Link>
           <button type="button" onClick={loadData} className="btn btn-default" disabled={loading}>
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> รีเฟรช
+            <RefreshCw size={24} className={loading ? "animate-spin" : ""} /> รีเฟรช
           </button>
           <button type="button" onClick={clearForm} className="btn btn-primary">
-            <Plus size={14} /> สร้างรายการต่อดอก
+            <Plus size={24} /> สร้างรายการต่อดอก
           </button>
         </div>
       </div>
@@ -531,7 +531,7 @@ return (
         {/* ฝั่งขวา: ฟอร์มสร้าง/แก้ไขข้อมูลแบบ Sticky */}
         <div className="form-card">
           <h3>
-            {formMode === "add" ? <PlusCircle size={18} /> : <SquarePen size={18} />}
+            {formMode === "add" ? <PlusCircle size={24} /> : <SquarePen size={24} />}
             <span className="form-title-text">{formMode === "add" ? "สร้างรายการต่อดอก" : "บันทึกรายการต่อดอก"}</span>
           </h3>
           
