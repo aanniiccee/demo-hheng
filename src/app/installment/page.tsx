@@ -601,7 +601,7 @@ return (
 
                   return (
   <tr key={x.transaction_id} style={{ borderBottom: "1px solid #e5e7eb" }} className={editTxId === pData?.transaction_id ? "row-active" : ""}>
-    {/* 🔴 เพิ่มปุ่ม Void คืนชีพกลับมาให้แล้วครับ! อยู่ช่องแรกสุดเลย */}
+    {/* 1. ปุ่ม Void */}
     <td style={{ textAlign: "center", padding: "8px" }}>
       <button 
         className="btn" 
@@ -612,17 +612,17 @@ return (
       </button>
     </td>
 
-    {/* คอลัมน์ ID */}
+    {/* 2. Transaction ID */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", fontWeight: "bold" }}>
       {x.transaction_id}
     </td>
 
-    {/* คอลัมน์ Product */}
+    {/* 3. Product */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       {x.product || "-"}
     </td>
 
-    {/* คอลัมน์ Customer */}
+    {/* 4. Customer Name & Chat Link */}
     <td className="clickable-cell" style={{ padding: "8px" }}>
       {x.chat_link ? (
         <a 
@@ -638,42 +638,57 @@ return (
       )}
     </td>
 
-    {/* คอลัมน์ Phone */}
+    {/* 5. Phone Number */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       {x.phone_number || "-"}
     </td>
 
-    {/* คอลัมน์ Channel */}
+    {/* 6. Channel */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
-      <small>{x.channel}</small>
+      {x.channel}
     </td>
 
-    {/* คอลัมน์ System Status */}
+    {/* 7. System Status */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       <span className={`status-badge ${badgeClass}`}>{statusText}</span>
     </td>
 
-    {/* คอลัมน์ Interest */}
+    {/* 8. ยอดต่องวด (amtPerPeriod) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
-      {pData?.interest_per_month ? Number(pData.interest_per_month).toLocaleString() : "0"} บ.
+      {amtPerPeriod ? Number(amtPerPeriod).toLocaleString() : "0"} บ.
     </td>
 
-    {/* คอลัมน์ Payment Date */}
+    {/* 9. งวดทั้งหมด (total_periods) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
-      {pData?.payment_date || "-"}
+      {pData?.total_periods || "-"} งวด
     </td>
 
-    {/* คอลัมน์ Pay Amount */}
+    {/* 10. งวดปัจจุบัน (current_period) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      <strong>{pData?.current_period || "-"}</strong>
+    </td>
+
+    {/* 11. ดิวทุกวันที่ (monthly_due_day) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      ทุกวันที่ {pData?.monthly_due_day || "-"}
+    </td>
+
+    {/* 12. วันที่จ่าย (pDateText) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {pDateText}
+    </td>
+
+    {/* 13. ยอดที่จ่ายแล้ว (paidAmountText) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", color: "#2563eb", fontWeight: "bold" }}>
-      {pData?.total_paid_amount ? Number(pData.total_paid_amount).toLocaleString() : "0"} บ.
+      {paidAmountText} บ.
     </td>
 
-    {/* คอลัมน์ Due Date */}
+    {/* 14. วันครบกำหนด (dueDateText) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
-      {pData?.next_due_date || "-"}
+      {dueDateText}
     </td>
 
-    {/* คอลัมน์ Overdue */}
+    {/* 15. ยอดค้างชำระ (overdueAmount) */}
     <td style={{ padding: "8px" }} onClick={() => openPaymentMode(x, pData)}>
       <span style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>
         {overdueAmount.toLocaleString()} บ.
@@ -683,22 +698,22 @@ return (
       </div>
     </td>
 
-    {/* คอลัมน์ Admin Status */}
+    {/* 16. สถานะแอดมิน (inputStatusText) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
-      {pData?.input_status || "-"}
+      {inputStatusText}
     </td>
 
-    {/* คอลัมน์ Closed */}
+    {/* 17. ปิดเคส (x.closed) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       <span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span>
     </td>
 
-    {/* คอลัมน์ Note */}
+    {/* 18. หมายเหตุ (x.note) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       <span style={{ color: "#6b7280", fontSize: "12px" }}>{x.note || "-"}</span>
     </td>
 
-    {/* คอลัมน์ Admin Name */}
+    {/* 19. แอดมินผู้ดูแล (adminUserText) */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       <span style={{ color: "#4b5563", fontWeight: 500 }}>{adminUserText}</span>
     </td>
