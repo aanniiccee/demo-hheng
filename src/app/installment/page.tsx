@@ -26,6 +26,7 @@ export default function InstallmentPage() {
   const [token, setToken] = useState("");
   const [adminLineId, setAdminLineId] = useState("");
   const [allTransactions, setAllTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPayoffSubmitting, setIsPayoffSubmitting] = useState(false);
 
