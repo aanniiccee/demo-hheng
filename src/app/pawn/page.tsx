@@ -460,7 +460,7 @@ export default function PawnPage() {
                 {loading ? (
                   <tr>
                     <td colSpan={15} style={{ textAlign: "left", color: "#6b7280", padding: "30px" }}>
-                      กำลังดึงข้อมูลธุรกรรม...
+                      กำลังดึงข้อมูลการต่อดอก...
                     </td>
                   </tr>
                 ) : filteredTransactions.length === 0 ? (
