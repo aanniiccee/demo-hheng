@@ -750,7 +750,7 @@ return (
                   style={{ width: "100%", justifyContent: "space-between", padding: "6px 12px", fontSize: "12px" }}
                   onClick={() => setShowContractDetail(!showContractDetail)}
                 >
-                  <span>ข้อมูลการผ่อน</span>
+                  <span>ข้อมูลการผ่อนชำระ</span>
                   {showContractDetail ? <ChevronDown size={16} style={{ color: "#6b7280" }} /> : <ChevronRight size={16} style={{ color: "#6b7280" }} />}
                 </button>
                 
