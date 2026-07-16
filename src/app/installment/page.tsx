@@ -526,25 +526,25 @@ return (
           <table className="product-table">
             <thead>
               <tr>
-                <th style={{ minWidth: "100px", textAlign: "center"}}>ยกเลิกสัญญา</th>
-                <th style={{ minWidth: "120px"}}>Transaction ID</th>
-                <th style={{ minWidth: "180px"}}>รหัสสินค้า</th>
-                <th style={{ minWidth: "120px"}}>ชื่อลูกค้า</th>
-                <th style={{ minWidth: "100px"}}>เบอร์โทร</th>
-                <th style={{ minWidth: "80px"}}>ช่องทาง</th>
-                <th style={{ minWidth: "110px"}}>สถานะจากระบบ</th>
-                <th style={{ minWidth: "100px"}}>ยอดผ่อนต่องวด</th>
-                <th style={{ minWidth: "80px"}}>จำนวนงวด</th>
-                <th style={{ minWidth: "80px"}}>งวดที่</th>
-                <th style={{ minWidth: "100px"}}>วันดีลนัดชำระ</th>
-                <th style={{ minWidth: "100px"}}>วันที่ชำระ</th>
-                <th style={{ minWidth: "140px"}}>ยอดเงินที่ชำระ</th>
-                <th style={{ minWidth: "100px"}}>กำหนดชำระ</th>
-                <th style={{ minWidth: "100px"}}>ยอดค้างชำระ</th>
-                <th style={{ minWidth: "120px"}}>สถานะจากแอดมิน</th>
-                <th style={{ minWidth: "80px"}}>ปิดยอดแล้ว</th>
-                <th style={{ minWidth: "150px"}}>หมายเหตุ</th>
-                <th style={{ minWidth: "120px"}}>แอดมินที่ทำรายการ</th>
+                <th className="col-void">ยกเลิกสัญญา</th>
+                <th className="col-id">Transaction ID</th>
+                <th className="col-product">รหัสสินค้า</th>
+                <th className="col-customer">ชื่อลูกค้า</th>
+                <th className="col-phone">เบอร์โทร</th>
+                <th className="col-channel">ช่องทาง</th>
+                <th className="col-sys-status">สถานะจากระบบ</th>
+                <th className="col-interest">ยอดผ่อนต่องวด</th>
+                <th className="col-total-periods">จำนวนงวด</th>
+                <th className="col-current-period">งวดที่</th>
+                <th className="col-deal-date">วันดีลนัดชำระ</th>
+                <th className="col-pay-date">วันที่ชำระ</th>
+                <th className="col-pay-amount">ยอดเงินที่ชำระ</th>
+                <th className="col-due-date">กำหนดชำระ</th>
+                <th className="col-overdue">ยอดค้างชำระ</th>
+                <th className="col-admin-status">สถานะจากแอดมิน</th>
+                <th className="col-closed">ปิดยอดแล้ว</th>
+                <th className="col-note">หมายเหตุ</th>
+                <th className="col-admin-name">แอดมินที่ทำรายการ</th>
               </tr>
             </thead>
             <tbody>
