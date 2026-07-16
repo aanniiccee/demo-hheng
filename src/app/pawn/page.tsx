@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+export const dynamic = "force-dynamic";
+import React, { useState, useEffect} from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { 
@@ -38,7 +39,7 @@ interface Transaction {
   transaction_pawn?: PawnDetail[] | PawnDetail;
 }
 
-function PawnPageContent() {
+export default function PawnPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
