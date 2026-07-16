@@ -600,43 +600,99 @@ return (
                     : (x.created_by_name || "-");
 
                   return (
-                    <tr key={idx} style={{ borderBottom: "1px solid #e5e7eb" }} className={editTxId === pData?.transaction_id ? "row-active" : ""}>
-                      <td style={{ textAlign: "center", padding: "8px" }}>
-                        <button 
-                          className="btn" 
-                          style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 10px", fontSize: "11px", borderRadius: "6px" }} 
-                          onClick={() => voidEntireContract(x.transaction_id)}
-                        >Void</button>
-                      </td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", fontWeight: "bold" }}>{x.transaction_id}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{x.product}</td>
-                      <td className="clickable-cell" style={{ padding: "8px" }}>
-                        {x.chat_link ? (
-                          <a href={x.chat_link} target="_blank" rel="noreferrer" style={{ color: "#2563eb", textDecoration: "underline", fontWeight: 500 }}>{x.customer_name}</a>
-                        ) : (
-                          <span onClick={() => openPaymentMode(x, pData)}>{x.customer_name}</span>
-                        )}
-                      </td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{x.phone_number || "-"}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><small>{x.channel}</small></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{Number(amtPerPeriod).toLocaleString()} บ.</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{pData?.total_periods || "-"} งวด</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><strong>{pData?.current_period || "-"}</strong></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>ทุกวันที่ {pData?.monthly_due_day || "-"}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{pDateText}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", color: "#2563eb", fontWeight: "bold" }}>{paidAmountText} บ.</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{dueDateText}</td>
-                      <td style={{ padding: "8px" }} onClick={() => openPaymentMode(x, pData)}>
-                        <span style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>{overdueAmount.toLocaleString()} บ.</span>
-                        <div style={{ fontSize: "10px", color: "#6b7280", fontStyle: "italic" }}>({durationText})</div>
-                      </td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{inputStatusText}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span style={{ color: "#6b7280", fontSize: "12px" }}>{x.note || "-"}</span></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span style={{ color: "#4b5563", fontWeight: 500 }}>{adminUserText}</span></td>
-                    </tr>
-                  );
+  <tr key={x.transaction_id} style={{ borderBottom: "1px solid #e5e7eb" }} className={editTxId === pData?.transaction_id ? "row-active" : ""}>
+    {/* คอลัมน์ ID (ตัวหนา คลิกเปิดโหมดได้เหมือนกัน) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", fontWeight: "bold" }}>
+      {x.transaction_id}
+    </td>
+
+    {/* คอลัมน์ Product */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {x.product || "-"}
+    </td>
+
+    {/* คอลัมน์ Customer (ถ้ามีลิงก์จะกดลิงก์ไปคุย ถ้าไม่มีจะกดเปิดโหมดชำระเงิน) */}
+    <td className="clickable-cell" style={{ padding: "8px" }}>
+      {x.chat_link ? (
+        <a 
+          href={x.chat_link} 
+          target="_blank" 
+          rel="noreferrer" 
+          style={{ color: "#2563eb", textDecoration: "underline", fontWeight: 500 }}
+        >
+          {x.customer_name}
+        </a>
+      ) : (
+        <span onClick={() => openPaymentMode(x, pData)}>{x.customer_name}</span>
+      )}
+    </td>
+
+    {/* คอลัมน์ Phone */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {x.phone_number || "-"}
+    </td>
+
+    {/* คอลัมน์ Channel */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      <small>{x.channel}</small>
+    </td>
+
+    {/* คอลัมน์ System Status */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      <span className={`status-badge ${badgeClass}`}>{statusText}</span>
+    </td>
+
+    {/* คอลัมน์ Interest (ดอกเบี้ยต่อเดือน) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {pData?.interest_per_month ? Number(pData.interest_per_month).toLocaleString() : "0"} บ.
+    </td>
+
+    {/* คอลัมน์ Payment Date (วันที่จ่าย) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {pData?.payment_date || "-"}
+    </td>
+
+    {/* คอลัมน์ Pay Amount (จำนวนเงินที่จ่าย - สีน้ำเงินตัวหนา) */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", color: "#2563eb", fontWeight: "bold" }}>
+      {pData?.total_paid_amount ? Number(pData.total_paid_amount).toLocaleString() : "0"} บ.
+    </td>
+
+    {/* คอลัมน์ Due Date */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {pData?.next_due_date || "-"}
+    </td>
+
+    {/* คอลัมน์ Overdue (ยอดค้างชำระ แดง/เขียว ตามจำนวนเงินค้าง) */}
+    <td style={{ padding: "8px" }} onClick={() => openPaymentMode(x, pData)}>
+      <span style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>
+        {overdueAmount.toLocaleString()} บ.
+      </span>
+      <div style={{ fontSize: "10px", color: "#6b7280", fontStyle: "italic" }}>
+        ({durationText})
+      </div>
+    </td>
+
+    {/* คอลัมน์ Admin Status */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      {pData?.input_status || "-"}
+    </td>
+
+    {/* คอลัมน์ Closed */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      <span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span>
+    </td>
+
+    {/* คอลัมน์ Note */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      <span style={{ color: "#6b7280", fontSize: "12px" }}>{x.note || "-"}</span>
+    </td>
+
+    {/* คอลัมน์ Admin Name */}
+    <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
+      <span style={{ color: "#4b5563", fontWeight: 500 }}>{adminUserText}</span>
+    </td>
+  </tr>
+);
                 })
               )}
             </tbody>
