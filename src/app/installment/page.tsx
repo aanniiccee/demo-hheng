@@ -435,7 +435,7 @@ export default function InstallmentPage() {
             <ArrowLeft size={16} /> กลับหน้าหลัก
           </Link>
           <button onClick={() => loadData()} className="btn btn-default">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> รีเฟรช
+            <RefreshCw size={16} /> รีเฟรช
           </button>
           <button type="button" onClick={clearForm} className="btn btn-primary">
             <Plus size={16} /> สร้างรายการผ่อน
