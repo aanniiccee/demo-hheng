@@ -601,7 +601,18 @@ return (
 
                   return (
   <tr key={x.transaction_id} style={{ borderBottom: "1px solid #e5e7eb" }} className={editTxId === pData?.transaction_id ? "row-active" : ""}>
-    {/* คอลัมน์ ID (ตัวหนา คลิกเปิดโหมดได้เหมือนกัน) */}
+    {/* 🔴 เพิ่มปุ่ม Void คืนชีพกลับมาให้แล้วครับ! อยู่ช่องแรกสุดเลย */}
+    <td style={{ textAlign: "center", padding: "8px" }}>
+      <button 
+        className="btn" 
+        style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 10px", fontSize: "11px", borderRadius: "6px" }} 
+        onClick={() => voidEntireContract(x.transaction_id)}
+      >
+        Void
+      </button>
+    </td>
+
+    {/* คอลัมน์ ID */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", fontWeight: "bold" }}>
       {x.transaction_id}
     </td>
@@ -611,7 +622,7 @@ return (
       {x.product || "-"}
     </td>
 
-    {/* คอลัมน์ Customer (ถ้ามีลิงก์จะกดลิงก์ไปคุย ถ้าไม่มีจะกดเปิดโหมดชำระเงิน) */}
+    {/* คอลัมน์ Customer */}
     <td className="clickable-cell" style={{ padding: "8px" }}>
       {x.chat_link ? (
         <a 
@@ -642,17 +653,17 @@ return (
       <span className={`status-badge ${badgeClass}`}>{statusText}</span>
     </td>
 
-    {/* คอลัมน์ Interest (ดอกเบี้ยต่อเดือน) */}
+    {/* คอลัมน์ Interest */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       {pData?.interest_per_month ? Number(pData.interest_per_month).toLocaleString() : "0"} บ.
     </td>
 
-    {/* คอลัมน์ Payment Date (วันที่จ่าย) */}
+    {/* คอลัมน์ Payment Date */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>
       {pData?.payment_date || "-"}
     </td>
 
-    {/* คอลัมน์ Pay Amount (จำนวนเงินที่จ่าย - สีน้ำเงินตัวหนา) */}
+    {/* คอลัมน์ Pay Amount */}
     <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", color: "#2563eb", fontWeight: "bold" }}>
       {pData?.total_paid_amount ? Number(pData.total_paid_amount).toLocaleString() : "0"} บ.
     </td>
@@ -662,7 +673,7 @@ return (
       {pData?.next_due_date || "-"}
     </td>
 
-    {/* คอลัมน์ Overdue (ยอดค้างชำระ แดง/เขียว ตามจำนวนเงินค้าง) */}
+    {/* คอลัมน์ Overdue */}
     <td style={{ padding: "8px" }} onClick={() => openPaymentMode(x, pData)}>
       <span style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>
         {overdueAmount.toLocaleString()} บ.
