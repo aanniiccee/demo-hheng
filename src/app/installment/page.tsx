@@ -543,7 +543,7 @@ return (
                   </td>
                 </tr>
               ) : (
-                getFilteredTransactions.map((x: any, idx: number) => {
+                filteredData.map((x: any, idx: number) => {
                   const insList = x.transaction_installment;
                   const pData = Array.isArray(insList) && insList.length > 0 ? insList[0] : (insList || {});
 
