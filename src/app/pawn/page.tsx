@@ -653,9 +653,10 @@ export default function PawnPage() {
                   <label style={{ color: "#2563eb" }}>วันครบกำหนดชำระ (รอบปัจจุบัน)</label>
                   <input
                     type="date"
-                    readOnly
-                    style={{ backgroundColor: "#f3f4f6", color: "#374151", cursor: "not-allowed" }}
+                    disabled={!isPawnUnlocked}
+                    style={{ backgroundColor: !isPawnUnlocked ? "#f3f4f6" : "#ffffff", color: "#374151", cursor: !isPawnUnlocked ? "not-allowed" : "text" }}
                     value={currentDueDate}
+                    onChange={(e) => setCurrentDueDate(e.target.value)}
                   />
                 </div>
 
