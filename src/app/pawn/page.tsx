@@ -84,19 +84,43 @@ export default function PawnPage() {
   // ==========================================
   // 1. ระบบตรวจสอบ Session Admin & โหลดข้อมูลเริ่มต้น
   // ==========================================
+  // useEffect(() => {
+  //   // ตรวจเช็คความปลอดภัยของ Admin Session
+  //   const adminName = sessionStorage.getItem("admin_name");
+  //   const adminLineId = sessionStorage.getItem("admin_line_id");
+
+  //   if (!adminName || !adminLineId) {
+  //     const currentParams = new URLSearchParams(window.location.search);
+  //     currentParams.set("goto", window.location.pathname);
+  //     window.location.href = "https://hheng-system.vercel.app/liff-router?" + currentParams.toString();
+  //     return;
+  //   }
+
+  //   loadData();
+  // }, [token]);
   useEffect(() => {
-    // ตรวจเช็คความปลอดภัยของ Admin Session
-    const adminName = sessionStorage.getItem("admin_name");
-    const adminLineId = sessionStorage.getItem("admin_line_id");
+  // 🌟 BYPASS MODE: จำลอง Session แอดมินสำหรับทดสอบ Localhost
+  if (!sessionStorage.getItem("admin_name")) {
+    sessionStorage.setItem("admin_name", "Admin Tester");
+  }
+  if (!sessionStorage.getItem("admin_line_id")) {
+    sessionStorage.setItem("admin_line_id", "U1234567890abcdefmockid");
+  }
 
-    if (!adminName || !adminLineId) {
-      const currentParams = new URLSearchParams(window.location.search);
-      currentParams.set("goto", window.location.pathname);
-      window.location.href = "https://hheng-system.vercel.app/liff-router?" + currentParams.toString();
-      return;
-    }
+  // คอมเมนต์ระบบไล่ไปหน้า LIFFRouter ออกชั่วคราว
+  /*
+  const adminName = sessionStorage.getItem("admin_name");
+  const adminLineId = sessionStorage.getItem("admin_line_id");
 
-    loadData();
+  if (!adminName || !adminLineId) {
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set("goto", window.location.pathname);
+    window.location.href = "https://hheng-system.vercel.app/liff-router?" + currentParams.toString();
+    return;
+  }
+  */
+
+  loadData();
   }, [token]);
 
   // จัดการ Trigger คลิกเปิดฟอร์มแก้ข้อมูลออโต้หากมี tx_id พ่วงมาใน URL
