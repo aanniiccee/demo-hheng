@@ -459,13 +459,13 @@ return (
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={19} className="table-empty-row">
+                    <td colSpan={15} className="table-empty-row">
                       กำลังดึงข้อมูลการต่อดอก...
                     </td>
                   </tr>
                 ) : filteredTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={19} className="table-empty-row no-match">
+                    <td colSpan={15} className="table-empty-row no-match">
                       ไม่พบข้อมูลการต่อดอกที่ตรงเงื่อนไข
                     </td>
                   </tr>
