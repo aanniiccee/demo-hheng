@@ -15,7 +15,9 @@ import {
   Save, 
   ShieldCheck, 
   Search,
-  Loader2
+  Loader2,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 
 export default function InstallmentPage() {
@@ -203,6 +205,7 @@ export default function InstallmentPage() {
       
       const unPaidPreviousPeriods = currentTransactionsList.filter(item => {
         const itemInsList = item.transaction_installment;
+        // 🌟 แก้จุดที่ 1: ดึงโครงสร้าง pData ให้ถูกต้องรองรับทั้ง Array และ Object
         const itemPData = Array.isArray(itemInsList) && itemInsList.length > 0 ? itemInsList[0] : (itemInsList || {});
         const itemPeriodNum = parseInt(itemPData.current_period) || 0;
         
@@ -213,17 +216,28 @@ export default function InstallmentPage() {
 
       if (unPaidPreviousPeriods.length > 0) {
         unPaidPreviousPeriods.sort((a, b) => {
-          const pA = parseInt(a.transaction_installment?.[0]?.current_period || 0);
-          const pB = parseInt(b.transaction_installment?.[0]?.current_period || 0);
+          // 🌟 แก้จุดที่ 2: ตอนจัดเรียง (Sort) ก็ต้องดึงข้อมูลให้ถูกโครงสร้างเช่นกัน
+          const aIns = a.transaction_installment;
+          const bIns = b.transaction_installment;
+          const aPData = Array.isArray(aIns) && aIns.length > 0 ? aIns[0] : (aIns || {});
+          const bPData = Array.isArray(bIns) && bIns.length > 0 ? bIns[0] : (bIns || {});
+          
+          const pA = parseInt(aPData.current_period || 0);
+          const pB = parseInt(bPData.current_period || 0);
           return pA - pB;
         });
 
         let sumAmount = 0;
         const labels = unPaidPreviousPeriods.map(item => {
-          const itemPData = item.transaction_installment?.[0] || {};
+          // 🌟 แก้จุดที่ 3: ตอน Map ข้อมูลออกมาแสดงผลใน Alert Box
+          const itemIns = item.transaction_installment;
+          const itemPData = Array.isArray(itemIns) && itemIns.length > 0 ? itemIns[0] : (itemIns || {});
+          
           const instAmt = parseFloat(itemPData.installment_amount) || 0;
+          const periodStr = itemPData.current_period || "-";
+          
           sumAmount += instAmt;
-          return `งวดที่ ${itemPData.current_period} (${instAmt.toLocaleString()} บ.)`;
+          return `งวดที่ ${periodStr} (${instAmt.toLocaleString()} บ.)`;
         });
 
         setOverdueNoticeList(labels);
@@ -736,7 +750,8 @@ return (
                   style={{ width: "100%", justifyContent: "space-between", padding: "6px 12px", fontSize: "12px" }}
                   onClick={() => setShowContractDetail(!showContractDetail)}
                 >
-                  <span>{showContractDetail ? "👇 ซ่อนข้อมูลสัญญาเดิม" : "👉 ดูข้อมูลสัญญาเดิม"}</span>
+                  <span>ข้อมูลการผ่อน</span>
+                  {showContractDetail ? <ChevronDown size={16} style={{ color: "#6b7280" }} /> : <ChevronRight size={16} style={{ color: "#6b7280" }} />}
                 </button>
                 
                 {showContractDetail && (
