@@ -633,160 +633,147 @@ return (
           
           {/* --- ZONE 1: CONTRACT FIELDS (โหมดสร้างสัญญา) --- */}
           {formMode === "add" && (
-            <div id="contract_fields_zone">
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="product" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>รหัสสินค้า</label>
-                <input type="text" id="product" required className="form-control" placeholder="กรอกรายละเอียดสินค้า" value={product} onChange={(e) => setProduct(e.target.value)} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="customer_name" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ชื่อลูกค้า</label>
-                <input type="text" id="customer_name" required className="form-control" placeholder="ชื่อ-นามสกุล" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="chat_link" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ลิงก์แชทลูกค้า</label>
-                <input type="text" id="chat_link" className="form-control" placeholder="วางลิงก์แชท เช่น https://line.me/..." value={chatLink} onChange={(e) => setChatLink(e.target.value)} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="phone_number" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>เบอร์โทรศัพท์</label>
-                <input type="text" id="phone_number" className="form-control" placeholder="0xxxxxxxxx" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="channel" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ช่องทางติดต่อ</label>
-                <select id="channel" className="form-control" value={channel} onChange={(e) => setChannel(e.target.value)}>
-                  <option value="LINE">LINE</option>
-                  <option value="FB">FB</option>
-                  <option value="IG">IG</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="installment_amount" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ยอดผ่อนต่องวด (บาท)</label>
-                <input type="number" step="0.01" id="installment_amount" required className="form-control" placeholder="0.00" value={installmentAmount} onChange={(e) => setInstallmentAmount(e.target.value)} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="total_periods" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>จำนวนงวดทั้งหมด</label>
-                <input type="number" id="total_periods" required className="form-control" placeholder="ระบุจำนวนงวด เช่น 6" min="1" value={totalPeriods} onChange={(e) => setTotalPeriods(e.target.value)} />
-              </div>
+  <div id="contract_fields_zone">
+    <div className="form-group">
+      <label htmlFor="product">รหัสสินค้า</label>
+      <input type="text" id="product" required className="form-control" placeholder="กรอกรายละเอียดสินค้า" value={product} onChange={(e) => setProduct(e.target.value)} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="customer_name">ชื่อลูกค้า</label>
+      <input type="text" id="customer_name" required className="form-control" placeholder="ชื่อ-นามสกุล" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="chat_link">ลิงก์แชทลูกค้า</label>
+      <input type="text" id="chat_link" className="form-control" placeholder="วางลิงก์แชท เช่น https://line.me/..." value={chatLink} onChange={(e) => setChatLink(e.target.value)} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="phone_number">เบอร์โทรศัพท์</label>
+      <input type="text" id="phone_number" className="form-control" placeholder="0xxxxxxxxx" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="channel">ช่องทางติดต่อ</label>
+      <select id="channel" className="form-control" value={channel} onChange={(e) => setChannel(e.target.value)}>
+        <option value="LINE">LINE</option>
+        <option value="FB">FB</option>
+        <option value="IG">IG</option>
+        <option value="OTHER">Other</option>
+      </select>
+    </div>
+    <div className="form-group">
+      <label htmlFor="installment_amount">ยอดผ่อนต่องวด (บาท)</label>
+      <input type="number" step="0.01" id="installment_amount" required className="form-control" placeholder="0.00" value={installmentAmount} onChange={(e) => setInstallmentAmount(e.target.value)} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="total_periods">จำนวนงวดทั้งหมด</label>
+      <input type="number" id="total_periods" required className="form-control" placeholder="ระบุจำนวนงวด เช่น 6" min="1" value={totalPeriods} onChange={(e) => setTotalPeriods(e.target.value)} />
+    </div>
 
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#2563eb"}}>วันนัดชำระงวดแรก (วัน / เดือน / ปี)</label>
-                <div className="form-row-3" style={{ display: "flex", gap: "6px" }}>
-                  <input type="number" id="monthly_due_day" required className="form-control" placeholder="วันที่" min="1" max="31" value={monthlyDueDay} onChange={(e) => setMonthlyDueDay(e.target.value)} style={{ flex: 1 }} />
-                  <select id="start_month" required className="form-control" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} style={{ flex: 1.2 }}>
-                    <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
-                    <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
-                    <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
-                    <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
-                  </select>
-                  <select id="start_year" required className="form-control" value={startYear} onChange={(e) => setStartYear(e.target.value)} style={{ flex: 1.5 }}>
-                    {yearOptions.map(y => (
-                      <option key={y} value={y}>ค.ศ. {y} (พ.ศ. {y + 543})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+    <div className="form-group">
+      <label className="label-blue">วันนัดชำระงวดแรก (วัน / เดือน / ปี)</label>
+      <div className="due-date-row">
+        <input type="number" id="monthly_due_day" required className="form-control" placeholder="วันที่" min="1" max="31" value={monthlyDueDay} onChange={(e) => setMonthlyDueDay(e.target.value)} style={{ flex: 1 }} />
+        <select id="start_month" required className="form-control" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} style={{ flex: 1.2 }}>
+          <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
+          <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
+          <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
+          <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+        </select>
+        <select id="start_year" required className="form-control" value={startYear} onChange={(e) => setStartYear(e.target.value)} style={{ flex: 1.5 }}>
+          {yearOptions.map(y => (
+            <option key={y} value={y}>ค.ศ. {y} (พ.ศ. {y + 543})</option>
+          ))}
+        </select>
+      </div>
+    </div>
 
-              <div className="preview-box" style={{ marginTop: "15px", padding: "10px", backgroundColor: "#f3f4f6", borderRadius: "6px" }}>
-                <div className="preview-title" style={{ fontSize: "12px", fontWeight: "bold", color: "#4b5563", marginBottom: "8px", display: "flex", alignItems: "center", gap: "4px" }}>
-                  <CalendarRange size={14} /> ตารางประมาณการวันครบกำหนด
-                </div>
-                <div id="due_preview_list" style={{ maxHeight: "140px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }}>
-                  {renderDuePreviews()}
-                </div>
-              </div>
-            </div>
-          )}
+    <div className="preview-box">
+      <div className="preview-title">
+        <CalendarRange size={14} /> ตารางประมาณการวันครบกำหนด
+      </div>
+      <div id="due_preview_list" className="due-preview-container">
+        {renderDuePreviews()}
+      </div>
+    </div>
+  </div>
+)}
 
-          {/* --- ZONE 2: PAYMENT FIELDS (โหมดบันทึกรับชำระค่างวด) --- */}
-          {formMode === "edit_payment" && (
-            <div id="payment_fields_zone">
-              {/* กล่องแจ้งเตือนค้างชำระ */}
-              {overdueNoticeList.length > 0 && (
-                <div style={{ backgroundColor: "#fef2f2", borderLeft: "4px solid #ef4444", padding: "12px", marginBottom: "15px", borderRadius: "4px" }}>
-                  <span style={{ color: "#991b1b", fontSize: "13px", fontWeight: "bold", display: "block", lineHeight: "1.5" }}>
-                    ⚠️ แจ้งเตือน: มีรายการผ่อนที่ยังไม่ได้ชำระ กรุณาบันทึกการรับชำระที่รายการผ่อนก่อนหน้า<br/>
-                    • งวดที่ยังไม่ได้ชำระ: <span style={{ textDecoration: "underline" }}>{overdueNoticeList.join(", ")}</span><br/>
-                    • รวมยอดที่ยังไม่ได้ชำระ: <span style={{ fontSize: "15px" }}>{overdueSumAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท</span>
-                  </span>
-                </div>
-              )}
+{formMode === "edit_payment" && (
+  <div id="payment_fields_zone">
+    {overdueNoticeList.length > 0 && (
+      <div className="alert-danger-box">
+        <span>
+          ⚠️ แจ้งเตือน: มีรายการผ่อนที่ยังไม่ได้ชำระ กรุณาบันทึกการรับชำระที่รายการผ่อนก่อนหน้า<br/>
+          • งวดที่ยังไม่ได้ชำระ: <span className="underline">{overdueNoticeList.join(", ")}</span><br/>
+          • รวมยอดที่ยังไม่ได้ชำระ: <span className="price">{overdueSumAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท</span>
+        </span>
+      </div>
+    )}
 
-              <div className="payment-summary" style={{ backgroundColor: "#eff6ff", padding: "12px", borderRadius: "6px", marginBottom: "15px", fontSize: "13px", display: "flex", flexDirection: "column", gap: "6px" }}>
-                <div><strong>Transaction ID:</strong> <span style={{ fontWeight: "bold" }}>{editTxId}</span></div>
-                <div><strong>ชื่อลูกค้า:</strong> <span>{customerName}</span></div>
-                <div><strong>ชำระงวดที่:</strong> <span style={{ color: "#2563eb", fontWeight: "bold" }}>{lblPeriod}</span></div>
-                <div><strong>ยอดผ่อนชำระงวดนี้:</strong> <span style={{ fontWeight: "bold" }}>{lblAmount}</span> บาท</div>
-              </div>
+    <div className="payment-summary">
+      <div><strong>Transaction ID:</strong> <span className="bold">{editTxId}</span></div>
+      <div><strong>ชื่อลูกค้า:</strong> <span>{customerName}</span></div>
+      <div><strong>ชำระงวดที่:</strong> <span className="highlight-blue">{lblPeriod}</span></div>
+      <div><strong>ยอดผ่อนชำระงวดนี้:</strong> <span className="bold">{lblAmount}</span> บาท</div>
+    </div>
 
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="chat_link_readonly" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ลิงก์แชทลูกค้า</label>
-                <input type="text" id="chat_link_readonly" className="form-control" readOnly value={chatLink} style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="payment_date" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>วันที่ชำระเงิน</label>
-                <input type="date" id="payment_date" className="form-control" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
-              </div>
-              <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="total_paid_amount" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ยอดเงินที่ชำระ (บาท)</label>
-                <input type="number" step="0.01" id="total_paid_amount" className="form-control" placeholder="0.00" value={totalPaidAmount} onChange={(e) => setTotalPaidAmount(e.target.value)} />
-              </div>
-            </div>
-          )}
+    <div className="form-group">
+      <label htmlFor="chat_link_readonly">ลิงก์แชทลูกค้า</label>
+      <input type="text" id="chat_link_readonly" className="form-control" readOnly value={chatLink} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="payment_date">วันที่ชำระเงิน</label>
+      <input type="date" id="payment_date" className="form-control" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
+    </div>
+    <div className="form-group">
+      <label htmlFor="total_paid_amount">ยอดเงินที่ชำระ (บาท)</label>
+      <input type="number" step="0.01" id="total_paid_amount" className="form-control" placeholder="0.00" value={totalPaidAmount} onChange={(e) => setTotalPaidAmount(e.target.value)} />
+    </div>
+  </div>
+)}
 
-          {/* --- ZONE 3: COMMON FIELDS (มีร่วมกันทั้งสองโหมด) --- */}
-          <div className="form-group" style={{ marginBottom: "12px", marginTop: "10px" }}>
-            <label htmlFor="input_status" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>สถานะจากแอดมิน</label>
-            <input type="text" id="input_status" className="form-control" placeholder="ระบุสถานะ..." value={inputStatus} onChange={(e) => setInputStatus(e.target.value)} />
-          </div>
-          <div className="form-group" style={{ marginBottom: "15px" }}>
-            <label htmlFor="note" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>หมายเหตุ</label>
-            <textarea id="note" rows={2} className="form-control" placeholder="ระบุหมายเหตุ..." value={note} onChange={(e) => setNote(e.target.value)}></textarea>
-          </div>
+<div className="form-group">
+  <label htmlFor="input_status">สถานะจากแอดมิน</label>
+  <input type="text" id="input_status" className="form-control" placeholder="ระบุสถานะ..." value={inputStatus} onChange={(e) => setInputStatus(e.target.value)} />
+</div>
+<div className="form-group">
+  <label htmlFor="note">หมายเหตุ</label>
+  <textarea id="note" rows={2} className="form-control" placeholder="ระบุหมายเหตุ..." value={note} onChange={(e) => setNote(e.target.value)}></textarea>
+</div>
 
-          {/* ปุ่มหลัก บันทึกข้อมูล */}
-          <button 
-            type="submit" 
-            className={`btn ${isSubmitting ? "btn-secondary" : "btn-success"}`} 
-            disabled={isSubmitting || isPayoffSubmitting} 
-            style={{ width: "100%", justifyContent: "center", marginBottom: "10px", height: "40px" }}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" /> กำลังบันทึกข้อมูล...
-              </>
-            ) : (
-              <>
-                <Save size={16} /> บันทึกข้อมูลการผ่อนชำระ
-              </>
-            )}
-          </button>
+<button 
+  type="submit" 
+  className={`btn btn-block btn-submit ${isSubmitting ? "btn-secondary" : "btn-success"}`} 
+  disabled={isSubmitting || isPayoffSubmitting}
+>
+  {isSubmitting ? (
+    <>
+      <Loader2 size={16} className="animate-spin" /> กำลังบันทึกข้อมูล...
+    </>
+  ) : (
+    <>
+      <Save size={16} /> บันทึกข้อมูลการผ่อนชำระ
+    </>
+  )}
+</button>
 
-          {/* ปุ่มสำหรับปิดยอดทั้งหมด (โชว์เฉพาะโหมดอัปเดตชำระเงิน) */}
-          {formMode === "edit_payment" && (
-            <button 
-              type="button" 
-              className="btn"
-              onClick={payoffEntireContract}
-              disabled={isSubmitting || isPayoffSubmitting}
-              style={{ 
-                width: "100%", 
-                justifyContent: "center", 
-                backgroundColor: isPayoffSubmitting ? "#9ca3af" : "#dc2626", 
-                color: "white", 
-                height: "40px" 
-              }}
-            >
-              {isPayoffSubmitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> กำลังดำเนินการปิดยอดผ่อนชำระ...
-                </>
-              ) : (
-                <>
-                  <ShieldCheck size={16} /> ปิดยอดสัญญาก่อนกำหนด (ปิดทุกงวด)
-                </>
-              )}
-            </button>
-          )}
+{formMode === "edit_payment" && (
+  <button 
+    type="button" 
+    className="btn btn-block btn-danger"
+    onClick={payoffEntireContract}
+    disabled={isSubmitting || isPayoffSubmitting}
+  >
+    {isPayoffSubmitting ? (
+      <>
+        <Loader2 size={16} className="animate-spin" /> กำลังดำเนินการปิดยอดผ่อนชำระ...
+      </>
+    ) : (
+      <>
+        <ShieldCheck size={16} /> ปิดยอดสัญญาก่อนกำหนด (ปิดทุกงวด)
+      </>
+    )}
+  </button>
+)}
         </form>
       </div>
     </div>
