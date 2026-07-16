@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Repeat, CreditCard } from "lucide-react"; // ใช้ lucide-react สำหรับ Next.js
+import { Repeat, CreditCard } from "lucide-react";
 
 export default function HomePage() {
   const searchParams = useSearchParams();
@@ -45,24 +45,7 @@ export default function HomePage() {
         </Link>
       </div>
 
-      <style jsx>{`
-        .nav-button {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 20px;
-          background-color: #f3f4f6;
-          color: #1f2937;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.2s ease;
-        }
-        .nav-button:hover {
-          background-color: #e5e7eb;
-          color: #000000;
-        }
-      `}</style>
+      {/* 🌟 ลบโค้ดแท็ก <style jsx> เดิมตรงนี้ออกไปเรียบร้อยแล้ว */}
     </div>
   );
 }
