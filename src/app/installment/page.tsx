@@ -433,13 +433,13 @@ return (
       <h2 style={{ margin: 0 }}>ระบบผ่อนสินค้า (Installment Transactions)</h2>
       <div className="action-buttons">
         <Link href={getHomeUrl()} className="btn btn-default">
-          <ArrowLeft size={22} /> กลับหน้าหลัก
+          <ArrowLeft size={24} /> กลับหน้าหลัก
         </Link>
         <button type="button" onClick={() => loadData()} className="btn btn-default" disabled={loading}>
-          <RefreshCw size={22} className={loading ? "animate-spin" : ""} /> รีเฟรช
+          <RefreshCw size={24} className={loading ? "animate-spin" : ""} /> รีเฟรช
         </button>
         <button type="button" onClick={clearForm} className="btn btn-primary">
-          <Plus size={22} /> สร้างรายการผ่อน
+          <Plus size={24} /> สร้างรายการผ่อน
         </button>
       </div>
     </div>
@@ -625,7 +625,7 @@ return (
       {/* --- RIGHT SIDE: ACTION FORM CARD --- */}
       <div className="form-card">
         <h3>
-          {formMode === "add" ? <PlusCircle size={22} /> : <BadgeDollarSign size={22} />}
+          {formMode === "add" ? <PlusCircle size={24} /> : <BadgeDollarSign size={24} />}
           <span>{formMode === "add" ? "สร้างรายการผ่อนใหม่" : "บันทึกชำระค่างวด"}</span>
         </h3>
 
