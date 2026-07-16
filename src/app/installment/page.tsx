@@ -92,14 +92,16 @@ export default function InstallmentPage() {
   // --- 2. Load Data ---
   const loadData = async (currentToken = token, currentLineId = adminLineId) => {
     try {
+      setLoading(true); // 🌟 1. เปิดสถานะ Loading เพื่อให้ปุ่มหมุน และ Disable ปุ่มไว้กันกดซ้ำ
+    
       const txIdFromUrl = searchParams.get("tx_id")?.trim();
       const r = await fetch(`/api/installment-transactions?token=${currentToken}&admin_line_id=${currentLineId}&_=${new Date().getTime()}`);
       const data = await r.json();
-      
+    
       if (Array.isArray(data)) {
         setAllTransactions(data);
 
-        // ดักเอาไว้ตรวจถ้าเจอ tx_id ใน URL ให้เปิดโหมดชำระเงินทันที
+      // ดักเอาไว้ตรวจถ้าเจอ tx_id ใน URL ให้เปิดโหมดชำระเงินทันที
         if (txIdFromUrl) {
           const found = data.find((x: any) => {
             const insList = x.transaction_installment;
@@ -110,13 +112,15 @@ export default function InstallmentPage() {
           if (found) {
             const insList = found.transaction_installment;
             const pData = Array.isArray(insList) && insList.length > 0 ? insList[0] : (insList || {});
-            
+          
             openPaymentMode(found, pData, data);
           }
         }
       }
     } catch (err) {
       console.error("เกิดข้อผิดพลาดในการโหลดข้อมูลสัญญา:", err);
+    } finally {
+      setLoading(false); // 🌟 2. ปิดสถานะ Loading เมื่อทำงานเสร็จสิ้น (ไม่ว่าจะสำเร็จหรือ Error) เพื่อให้ปุ่มหยุดหมุน
     }
   };
 
