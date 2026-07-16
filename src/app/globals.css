@@ -205,7 +205,7 @@
   .table-empty-row {
     text-align: left;
     color: #6b7280;
-    padding: 30px;
+    padding: 60px;
   }
   .table-empty-row.no-match {
     color: #9ca3af;
