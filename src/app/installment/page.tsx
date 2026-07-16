@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { 
-  ArrowLeft, 
+  ArrowLeft,
   RefreshCw, 
   Plus, 
   PlusCircle, 
@@ -558,7 +558,6 @@ return (
                     statusText = "ชำระแล้ว";
                     badgeClass = "closed-yes";
                     durationText = "เรียบร้อย";
-                    length = "เรียบร้อย";
                   } else if (pData && pData.due_date) {
                     const dueDate = new Date(pData.due_date);
                     if (dueDate.getTime() === todayObj.getTime()) {
