@@ -382,17 +382,21 @@ export default function InstallmentPage() {
     const todayObj = new Date(todayStr);
 
     return allTransactions.filter(x => {
-      if (filterClosed !== "ALL" && x.closed !== filterClosed) return false;
-
+      // ดึงงวดแรกหรือข้อมูลผ่อนเบื้องต้น
       const insList = x.transaction_installment;
       const pData = Array.isArray(insList) && insList.length > 0 ? insList[0] : (insList || {});
 
+      // ป้องกันเรื่องสลับตัวแปร closed / status หลุดฟิลเตอร์
+      const itemClosedStatus = x.closed || x.status || "NO";
+      if (filterClosed !== "ALL" && itemClosedStatus !== filterClosed) return false;
+
       let cStatus = "ยังไม่ถึงกำหนด";
-      if (x.current_status === "ชำระแล้ว") {
+      if (x.current_status === "ชำrateแล้ว" || x.current_status === "ชำระแล้ว") {
         cStatus = "ชำระแล้ว";
-      } else if (pData && pData.due_date) {
-        const dueDate = new Date(pData.due_date);
-        if (dueDate.getTime() === todayObj.getTime()) cStatus = "ครบกำหนด";
+      } else if (pData && (pData.due_date || pData.next_due_date)) {
+        const rawDate = pData.due_date || pData.next_due_date;
+        const dueDate = new Date(rawDate);
+        if (dueDate.toDateString() === todayObj.toDateString()) cStatus = "ครบกำหนด";
         else if (dueDate < todayObj) cStatus = "เกินกำหนด";
       }
 
@@ -400,7 +404,7 @@ export default function InstallmentPage() {
       if (filterExcludePaid === "YES" && cStatus === "ชำระแล้ว") return false;
 
       const name = (x.customer_name || "").toLowerCase();
-      const txId = (x.transaction_id || "").toLowerCase();
+      const txId = (pData.transaction_id || x.transaction_id || "").toLowerCase();
       const pId = (x.product || "").toLowerCase();
       const noteText = (x.note || "").toLowerCase();
 
@@ -427,356 +431,350 @@ export default function InstallmentPage() {
   };
 
 return (
-  <div>
-    {/* ส่วนหัวระบบ */}
-    <div className="header-container">
-      <h2 style={{ margin: 0 }}>ระบบผ่อนสินค้า (Installment Transactions)</h2>
-      <div className="action-buttons">
-        <Link href={getHomeUrl()} className="btn btn-default">
-          <ArrowLeft size={24} /> กลับหน้าหลัก
-        </Link>
-        <button type="button" onClick={() => loadData()} className="btn btn-default" disabled={loading}>
-          <RefreshCw size={24} className={loading ? "animate-spin" : ""} /> รีเฟรช
-        </button>
-        <button type="button" onClick={clearForm} className="btn btn-primary">
-          <Plus size={24} /> สร้างรายการผ่อน
-        </button>
-      </div>
-    </div>
-
-    <div className="main-layout">
-      
-      {/* --- LEFT SIDE: TABLE AND FILTERS --- */}
-      <div className="table-container">
-        <div className="table-header-bar">            
-          <div className="search-wrapper">
-            <Search className="search-icon" size={16} />
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="ชื่อลูกค้า สินค้า หรือ Transaction ID..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ปิดยอดแล้ว:</span>
-            <div className="filter-group">
-              <button className={`filter-btn ${filterClosed === "ALL" ? "active" : ""}`} onClick={() => handleClosedFilterChange("ALL")}>ทั้งหมด</button>
-              <button className={`filter-btn ${filterClosed === "NO" ? "active" : ""}`} onClick={() => handleClosedFilterChange("NO")}>เปิดอยู่ (NO)</button>
-              <button className={`filter-btn ${filterClosed === "YES" ? "active" : ""}`} onClick={() => handleClosedFilterChange("YES")}>ปิดแล้ว (YES)</button>
-            </div>
-          </div>
-
-          <div>
-            <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ซ่อนรายการที่ชำระแล้ว:</span>
-            <div className="filter-group">
-              <button 
-                className={`filter-btn ${filterExcludePaid === "YES" ? "active" : ""}`} 
-                onClick={() => setFilterExcludePaid("YES")}
-                disabled={filterClosed === "YES"}
-                style={filterClosed === "YES" ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-              >YES</button>
-              <button 
-                className={`filter-btn ${filterExcludePaid === "NO" ? "active" : ""}`} 
-                onClick={() => setFilterExcludePaid("NO")}
-                disabled={filterClosed === "YES"}
-                style={filterClosed === "YES" ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-              >NO</button>
-            </div>
-          </div>
-
-          <div>
-            <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>สถานะจากระบบ:</span>
-            <div className="filter-group">
-              <button className={`filter-btn ${filterStatus === "ALL" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ALL")}>ทั้งหมด</button>
-              <button className={`filter-btn ${filterStatus === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
-              <button className={`filter-btn ${filterStatus === "ครบกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ครบกำหนด")}>ครบกำหนด</button>
-              <button className={`filter-btn ${filterStatus === "เกินกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("เกินกำหนด")}>เกินกำหนด</button>
-            </div>
-          </div>
-        </div>
-
-        {/* --- TABLE CONTENT --- */}
-        <div className="table-wrapper">
-          <table className="product-table">
-            <thead>
-              {/* จุดที่ 1: แก้ไขตรงนี้จาก <tr}}> เป็น <tr> */}
-              <tr>
-                <th style={{ minWidth: "100px", textAlign: "center"}}>ยกเลิกสัญญา</th>
-                <th style={{ minWidth: "120px"}}>Transaction ID</th>
-                <th style={{ minWidth: "180px"}}>รหัสสินค้า</th>
-                <th style={{ minWidth: "120px"}}>ชื่อลูกค้า</th>
-                <th style={{ minWidth: "100px"}}>เบอร์โทร</th>
-                <th style={{ minWidth: "80px"}}>ช่องทาง</th>
-                <th style={{ minWidth: "110px"}}>สถานะจากระบบ</th>
-                <th style={{ minWidth: "100px"}}>ยอดผ่อนต่องวด</th>
-                <th style={{ minWidth: "80px"}}>จำนวนงวด</th>
-                <th style={{ minWidth: "80px"}}>งวดที่</th>
-                <th style={{ minWidth: "100px"}}>วันดีลนัดชำระ</th>
-                <th style={{ minWidth: "100px"}}>วันที่ชำระ</th>
-                <th style={{ minWidth: "140px"}}>ยอดเงินที่ชำระ</th>
-                <th style={{ minWidth: "100px"}}>กำหนดชำระ</th>
-                <th style={{ minWidth: "100px"}}>ยอดค้างชำระ</th>
-                <th style={{ minWidth: "120px"}}>สถานะจากแอดมิน</th>
-                <th style={{ minWidth: "80px"}}>ปิดยอดแล้ว</th>
-                <th style={{ minWidth: "150px"}}>หมายเหตุ</th>
-                <th style={{ minWidth: "120px"}}>แอดมินที่ทำรายการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={19} style={{ textAlign: "left", color: "#6b7280", padding: "30px" }}>
-                    กำลังดึงข้อมูลการผ่อนชำระ...
-                  </td>
-                </tr>
-              ) : getFilteredTransactions.length === 0 ? (
-                <tr>
-                  <td colSpan={19} style={{ textAlign: "left", color: "#9ca3af", padding: "30px" }}>
-                    ไม่พบข้อมูลการผ่อนชำระที่ตรงเงื่อนไข
-                  </td>
-                </tr>
-              ) : (
-                filteredData.map((x: any, idx: number) => {
-                  const insList = x.transaction_installment;
-                  const pData = Array.isArray(insList) && insList.length > 0 ? insList[0] : (insList || {});
-
-                  let statusText = "ยังไม่ถึงกำหนด";
-                  let badgeClass = "st-normal";
-                  let overdueAmount = 0;
-                  let durationText = "";
-
-                  let pDateText = pData?.payment_date || "-";
-                  let dueDateText = pData?.due_date || "-";
-                  let inputStatusText = pData?.input_status || "-";
-                  let amtPerPeriod = pData?.installment_amount || 0;
-                  let paidAmountText = pData?.total_paid_amount ? Number(pData.total_paid_amount).toLocaleString() : "0";
-
-                  if (x.current_status === "ชำระแล้ว") {
-                    statusText = "ชำระแล้ว";
-                    badgeClass = "closed-yes";
-                    durationText = "เรียบร้อย";
-                  } else if (pData && pData.due_date) {
-                    const dueDate = new Date(pData.due_date);
-                    if (dueDate.getTime() === todayObj.getTime()) {
-                      statusText = "ครบกำหนด"; badgeClass = "st-today"; durationText = "วันนี้";
-                    } else if (dueDate < todayObj) {
-                      statusText = "เกินกำหนด"; badgeClass = "st-overdue";
-                      const diffDays = Math.floor((todayObj.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
-                      durationText = `ค้าง ${diffDays} วัน`;
-                      overdueAmount = amtPerPeriod;
-                    } else {
-                      const diffDays = Math.ceil((dueDate.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
-                      durationText = `อีก ${diffDays} วัน`;
-                    }
-                  }
-
-                  let adminUserText = x.updated_by_name && x.updated_by_name !== "Unknown" 
-                    ? x.updated_by_name 
-                    : (x.created_by_name || "-");
-
-                  return (
-                    <tr key={idx} style={{ borderBottom: "1px solid #e5e7eb" }} className={editTxId === pData?.transaction_id ? "row-active" : ""}>
-                      <td style={{ textAlign: "center", padding: "8px" }}>
-                        <button 
-                          className="btn" 
-                          style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 10px", fontSize: "11px", borderRadius: "6px" }} 
-                          onClick={() => voidEntireContract(x.transaction_id)}
-                        >Void</button>
-                      </td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", fontWeight: "bold" }}>{x.transaction_id}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{x.product}</td>
-                      <td className="clickable-cell" style={{ padding: "8px" }}>
-                        {x.chat_link ? (
-                          <a href={x.chat_link} target="_blank" rel="noreferrer" style={{ color: "#2563eb", textDecoration: "underline", fontWeight: 500 }}>{x.customer_name}</a>
-                        ) : (
-                          <span onClick={() => openPaymentMode(x, pData)}>{x.customer_name}</span>
-                        )}
-                      </td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{x.phone_number || "-"}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><small>{x.channel}</small></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{Number(amtPerPeriod).toLocaleString()} บ.</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{pData?.total_periods || "-"} งวด</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><strong>{pData?.current_period || "-"}</strong></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>ทุกวันที่ {pData?.monthly_due_day || "-"}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{pDateText}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px", color: "#2563eb", fontWeight: "bold" }}>{paidAmountText} บ.</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{dueDateText}</td>
-                      <td style={{ padding: "8px" }} onClick={() => openPaymentMode(x, pData)}>
-                        <span style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>{overdueAmount.toLocaleString()} บ.</span>
-                        <div style={{ fontSize: "10px", color: "#6b7280", fontStyle: "italic" }}>({durationText})</div>
-                      </td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}>{inputStatusText}</td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span style={{ color: "#6b7280", fontSize: "12px" }}>{x.note || "-"}</span></td>
-                      <td className="clickable-cell" onClick={() => openPaymentMode(x, pData)} style={{ padding: "8px" }}><span style={{ color: "#4b5563", fontWeight: 500 }}>{adminUserText}</span></td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+    <div>
+      {/* ส่วนหัวระบบ */}
+      <div className="header-container">
+        <h2>ระบบผ่อนชำระ (Installment Transactions)</h2>
+        <div className="action-buttons">
+          <Link href={getHomeUrl()} className="btn btn-default">
+            <ArrowLeft size={14} /> กลับหน้าหลัก
+          </Link>
+          <button type="button" onClick={() => loadData(token, adminLineId)} className="btn btn-default" disabled={loading}>
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> รีเฟรช
+          </button>
+          <button type="button" onClick={clearForm} className="btn btn-primary">
+            <Plus size={14} /> สร้างสัญญาสมาชิกผ่อน
+          </button>
         </div>
       </div>
 
-      {/* --- RIGHT SIDE: ACTION FORM CARD --- */}
-      <div className="form-card">
-        <h3>
-          {formMode === "add" ? <PlusCircle size={24} /> : <BadgeDollarSign size={24} />}
-          <span>{formMode === "add" ? "สร้างรายการผ่อนใหม่" : "บันทึกชำระค่างวด"}</span>
-        </h3>
+      <div className="main-layout">
+        {/* ฝั่งซ้าย: ตารางรายการข้อมูล */}
+        <div className="table-container">
+          <div className="table-header-bar">
+            <div className="search-wrapper">
+              <Search className="search-icon" size={16} />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="ชื่อลูกค้า สินค้า หรือ Transaction ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
 
-        <form onSubmit={saveTransaction}>
-          
-          {/* --- ZONE 1: CONTRACT FIELDS (โหมดสร้างสัญญา) --- */}
-          {formMode === "add" && (
-  <div id="contract_fields_zone">
-    <div className="form-group">
-      <label htmlFor="product">รหัสสินค้า</label>
-      <input type="text" id="product" required className="form-control" placeholder="กรอกรายละเอียดสินค้า" value={product} onChange={(e) => setProduct(e.target.value)} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="customer_name">ชื่อลูกค้า</label>
-      <input type="text" id="customer_name" required className="form-control" placeholder="ชื่อ-นามสกุล" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="chat_link">ลิงก์แชทลูกค้า</label>
-      <input type="text" id="chat_link" className="form-control" placeholder="วางลิงก์แชท เช่น https://line.me/..." value={chatLink} onChange={(e) => setChatLink(e.target.value)} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="phone_number">เบอร์โทรศัพท์</label>
-      <input type="text" id="phone_number" className="form-control" placeholder="0xxxxxxxxx" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="channel">ช่องทางติดต่อ</label>
-      <select id="channel" className="form-control" value={channel} onChange={(e) => setChannel(e.target.value)}>
-        <option value="LINE">LINE</option>
-        <option value="FB">FB</option>
-        <option value="IG">IG</option>
-        <option value="OTHER">Other</option>
-      </select>
-    </div>
-    <div className="form-group">
-      <label htmlFor="installment_amount">ยอดผ่อนต่องวด (บาท)</label>
-      <input type="number" step="0.01" id="installment_amount" required className="form-control" placeholder="0.00" value={installmentAmount} onChange={(e) => setInstallmentAmount(e.target.value)} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="total_periods">จำนวนงวดทั้งหมด</label>
-      <input type="number" id="total_periods" required className="form-control" placeholder="ระบุจำนวนงวด เช่น 6" min="1" value={totalPeriods} onChange={(e) => setTotalPeriods(e.target.value)} />
-    </div>
+            <div>
+              <span className="filter-label">ปิดสัญญาแล้ว:</span>
+              <div className="filter-group">
+                <button type="button" className={`filter-btn ${filterClosed === "ALL" ? "active" : ""}`} onClick={() => handleClosedFilterChange("ALL")}>ทั้งหมด</button>
+                <button type="button" className={`filter-btn ${filterClosed === "NO" ? "active" : ""}`} onClick={() => handleClosedFilterChange("NO")}>เปิดอยู่ (NO)</button>
+                <button type="button" className={`filter-btn ${filterClosed === "YES" ? "active" : ""}`} onClick={() => handleClosedFilterChange("YES")}>ปิดแล้ว (YES)</button>
+              </div>
+            </div>
 
-    <div className="form-group">
-      <label className="label-blue">วันนัดชำระงวดแรก (วัน / เดือน / ปี)</label>
-      <div className="due-date-row">
-        <input type="number" id="monthly_due_day" required className="form-control" placeholder="วันที่" min="1" max="31" value={monthlyDueDay} onChange={(e) => setMonthlyDueDay(e.target.value)} style={{ flex: 1 }} />
-        <select id="start_month" required className="form-control" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} style={{ flex: 1.2 }}>
-          <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
-          <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
-          <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
-          <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
-        </select>
-        <select id="start_year" required className="form-control" value={startYear} onChange={(e) => setStartYear(e.target.value)} style={{ flex: 1.5 }}>
-          {yearOptions.map(y => (
-            <option key={y} value={y}>ค.ศ. {y} (พ.ศ. {y + 543})</option>
-          ))}
-        </select>
+            <div>
+              <span className="filter-label">ซ่อนรายการชำระแล้ว:</span>
+              <div className="filter-group">
+                <button type="button" className={`filter-btn ${filterExcludePaid === "YES" ? "active" : ""}`} onClick={() => setFilterExcludePaid("YES")}>YES</button>
+                <button type="button" className={`filter-btn ${filterExcludePaid === "NO" ? "active" : ""}`} onClick={() => setFilterExcludePaid("NO")}>NO</button>
+              </div>
+            </div>
+
+            <div>
+              <span className="filter-label">สถานะงวดชำระ:</span>
+              <div className="filter-group">
+                <button type="button" className={`filter-btn ${filterStatus === "ALL" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ALL")}>ทั้งหมด</button>
+                <button type="button" className={`filter-btn ${filterStatus === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
+                <button type="button" className={`filter-btn ${filterStatus === "ครบกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ครบกำหนด")}>ครบกำหนด</button>
+                <button type="button" className={`filter-btn ${filterStatus === "เกินกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("เกินกำหนด")}>เกินกำหนด</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="table-wrapper">
+            <table className="product-table">
+              <thead>
+                <tr>
+                  <th style={{ minWidth: "120px" }}>Transaction ID</th>
+                  <th style={{ minWidth: "160px" }}>รายการสินค้า</th>
+                  <th style={{ minWidth: "130px" }}>ชื่อลูกค้า</th>
+                  <th style={{ minWidth: "100px" }}>เบอร์โทร</th>
+                  <th style={{ minWidth: "80px" }}>ช่องทาง</th>
+                  <th style={{ minWidth: "100px" }}>ค่างวดผ่อน</th>
+                  <th style={{ minWidth: "90px" }}>งวดปัจจุบัน</th>
+                  <th style={{ minWidth: "110px" }}>กำหนดชำระ</th>
+                  <th style={{ minWidth: "110px" }}>สถานะงวดนี้</th>
+                  <th style={{ minWidth: "100px" }}>การจัดการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={10} className="table-empty-row">กำลังดึงข้อมูลตารางผ่อนชำระ...</td>
+                  </tr>
+                ) : filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="table-empty-row no-match">ไม่พบข้อมูลสัญญาผ่อนชำระที่ตรงตามเงื่อนไข</td>
+                  </tr>
+                ) : (
+                  filteredData.map((x, idx) => {
+                    const insList = x.transaction_installment;
+                    const pData = Array.isArray(insList) && insList.length > 0 ? insList[0] : (insList || {});
+                    
+                    return (
+                      <tr key={pData.transaction_id || idx} onClick={() => openPaymentMode(x, pData, allTransactions)}>
+                        <td><strong>{pData.transaction_id || x.transaction_id || "-"}</strong></td>
+                        <td><small>{x.product || "-"}</small></td>
+                        <td>
+                          {x.chat_link ? (
+                            <a href={x.chat_link} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} style={{ color: "#2563eb", textDecoration: "underline" }}>
+                              {x.customer_name}
+                            </a>
+                          ) : (
+                            x.customer_name
+                          )}
+                        </td>
+                        <td>{x.phone_number || "-"}</td>
+                        <td><small>{x.channel}</small></td>
+                        <td>{pData.installment_amount ? Number(pData.installment_amount).toLocaleString() : "0"} บ.</td>
+                        <td>{pData.current_period || 1} / {pData.total_periods || x.total_periods || 6}</td>
+                        <td>{pData.due_date || pData.next_due_date || "-"}</td>
+                        <td>
+                          <span className={`status-badge ${x.current_status === "ชำระแล้ว" ? "closed-yes" : "overdue"}`}>
+                            {x.current_status || "ค้างชำระ"}
+                          </span>
+                        </td>
+                        <td>
+                          <button 
+                            type="button" 
+                            className="btn btn-default"
+                            style={{ padding: "4px 8px", fontSize: "11px", color: "#dc2626" }} 
+                            onClick={(e) => { e.stopPropagation(); voidEntireContract(pData.transaction_id || x.transaction_id); }}
+                          >
+                            ยกเลิกสัญญา
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ฝั่งขวา: ฟอร์มสร้าง/บันทึกการรับค่างวด */}
+        <div className="form-card">
+          <h3>
+            {formMode === "add" ? <PlusCircle size={18} /> : <BadgeDollarSign size={18} />}
+            <span className="form-title-text">{formMode === "add" ? "สร้างสัญญาผ่อนใหม่" : "บันทึกชำระค่างวด"}</span>
+          </h3>
+
+          <form onSubmit={saveTransaction}>
+            <div className="form-sub-header">
+              <span className="form-sub-title">รายละเอียดข้อมูลสัญญา</span>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="product">รายการสินค้า</label>
+              <input
+                type="text"
+                id="product"
+                required
+                placeholder="ชื่อสินค้า/แบรนด์สินค้า"
+                disabled={formMode === "edit_payment"}
+                value={product}
+                onChange={(e) => setProduct(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="customer_name">ชื่อลูกค้า</label>
+              <input
+                type="text"
+                id="customer_name"
+                required
+                placeholder="ชื่อ-นามสกุลลูกค้า"
+                disabled={formMode === "edit_payment"}
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="chat_link">ลิงก์ติดต่อลูกค้า</label>
+              <input
+                type="text"
+                id="chat_link"
+                placeholder="ลิ้งค์แชท Line / Facebook"
+                disabled={formMode === "edit_payment"}
+                value={chatLink}
+                onChange={(e) => setChatLink(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="phone_number">เบอร์โทรศัพท์</label>
+              <input
+                type="text"
+                id="phone_number"
+                placeholder="กรอกเบอร์โทรศัพท์"
+                disabled={formMode === "edit_payment"}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="channel">ช่องทางสั่งซื้อ</label>
+              <select
+                id="channel"
+                disabled={formMode === "edit_payment"}
+                value={channel}
+                onChange={(e) => setChannel(e.target.value)}
+              >
+                <option value="LINE">LINE</option>
+                <option value="FB">FB</option>
+                <option value="IG">IG</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+            {/* โหมดสร้างสัญญาใหม่: กำหนดแพ็กเกจส่งผ่อน */}
+            {formMode === "add" && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="installment_amount">ยอดส่งต่องวด (บาท)</label>
+                  <input
+                    type="number"
+                    id="installment_amount"
+                    required
+                    placeholder="0.00"
+                    value={installmentAmount}
+                    onChange={(e) => setInstallmentAmount(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="total_periods">จำนวนงวดผ่อนทั้งหมด</label>
+                  <select id="total_periods" value={totalPeriods} onChange={(e) => setTotalPeriods(e.target.value)}>
+                    <option value="3">3 งวด</option>
+                    <option value="6">6 งวด</option>
+                    <option value="9">9 งวด</option>
+                    <option value="12">12 งวด</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="label-blue">วันนัดชำระงวดแรก (วัน / เดือน / ปี)</label>
+                  <div className="due-date-row">
+                    <input type="number" id="monthly_due_day" required className="form-control" placeholder="วันที่" min="1" max="31" value={monthlyDueDay} onChange={(e) => setMonthlyDueDay(e.target.value)} />
+                    <select id="start_month" required className="form-control" value={startMonth} onChange={(e) => setStartMonth(e.target.value)}>
+                      <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
+                      <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
+                      <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
+                      <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+                    </select>
+                    <select id="start_year" required className="form-control" value={startYear} onChange={(e) => setStartYear(e.target.value)}>
+                      {yearOptions.map(y => (
+                        <option key={y} value={y}>ค.ศ. {y}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: "12px", fontWeight: "600" }}>พรีวิวตารางค่างวด:</label>
+                  <div className="preview-container">
+                    {renderDuePreviews()}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* โหมดบันทึกการชำระเงิน (Edit Payment) */}
+            {formMode === "edit_payment" && (
+              <>
+                <hr className="divider-dashed" />
+                <div style={{ background: "#eff6ff", padding: "12px", border: "1px solid #bfdbfe", borderRadius: "6px", marginBottom: "12px" }}>
+                  <div style={{ fontSize: "13px", fontWeight: "bold", color: "#1e40af" }}>{lblPeriod}</div>
+                  <div style={{ fontSize: "12px", color: "#1e40af" }}>ยอดที่ต้องชำระตามดิว: <strong style={{ fontSize: "14px" }}>{lblAmount} บาท</strong></div>
+                </div>
+
+                {overdueNoticeList.length > 0 && (
+                  <div className="alert-warning-box">
+                    <div>⚠️ ลูกค้ามียอดค้างชำระจากงวดก่อนหน้า!</div>
+                    {overdueNoticeList.map((lbl, idx) => <div key={idx} style={{ fontWeight: "normal", paddingLeft: "8px" }}>- {lbl}</div>)}
+                    <div style={{ marginTop: "4px", borderTop: "1px dashed #fca5a5", paddingTop: "4px" }}>รวมยอดค้างเก่า: {overdueSumAmount.toLocaleString()} บ.</div>
+                  </div>
+                )}
+
+                <div className="form-group">
+                  <label htmlFor="payment_date" className="label-blue">วันที่โอนชำระ</label>
+                  <input
+                    type="date"
+                    id="payment_date"
+                    required
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="total_paid_amount" className="label-blue">ยอดเงินที่ชำระเข้ามาจริง (บาท)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    id="total_paid_amount"
+                    required
+                    placeholder="0.00"
+                    value={totalPaidAmount}
+                    onChange={(e) => setTotalPaidAmount(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="form-group">
+              <label htmlFor="input_status">สถานะระบุโดยแอดมิน</label>
+              <input
+                type="text"
+                id="input_status"
+                placeholder="เช่น รอเช็คยอด, โอนแล้ว"
+                value={inputStatus}
+                onChange={(e) => setInputStatus(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="note">หมายเหตุระบบ</label>
+              <textarea
+                id="note"
+                rows={2}
+                placeholder="ระบุรายละเอียดเพิ่มเติม..."
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              ></textarea>
+            </div>
+
+            <button type="submit" className={`btn btn-block ${isSubmitting ? "btn-default" : "btn-success"}`} disabled={isSubmitting}>
+              {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> กำลังบันทึกข้อมูล...</> : <><Save size={16} /> บันทึกสัญญารายการ</>}
+            </button>
+
+            {formMode === "edit_payment" && (
+              <button
+                type="button"
+                className="btn btn-block"
+                style={{ backgroundColor: "#dc2626", color: "#ffffff", marginTop: "8px" }}
+                disabled={isPayoffSubmitting}
+                onClick={payoffEntireContract}
+              >
+                {isPayoffSubmitting ? "กำลังปิดยอด..." : "🌟 ปิดยอดผ่อนชำระทั้งหมดก่อนกำหนด"}
+              </button>
+            )}
+          </form>
+        </div>
       </div>
     </div>
-
-    <div className="preview-box">
-      <div className="preview-title">
-        <CalendarRange size={14} /> ตารางประมาณการวันครบกำหนด
-      </div>
-      <div id="due_preview_list" className="due-preview-container">
-        {renderDuePreviews()}
-      </div>
-    </div>
-  </div>
-)}
-
-{formMode === "edit_payment" && (
-  <div id="payment_fields_zone">
-    {overdueNoticeList.length > 0 && (
-      <div className="alert-danger-box">
-        <span>
-          ⚠️ แจ้งเตือน: มีรายการผ่อนที่ยังไม่ได้ชำระ กรุณาบันทึกการรับชำระที่รายการผ่อนก่อนหน้า<br/>
-          • งวดที่ยังไม่ได้ชำระ: <span className="underline">{overdueNoticeList.join(", ")}</span><br/>
-          • รวมยอดที่ยังไม่ได้ชำระ: <span className="price">{overdueSumAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} บาท</span>
-        </span>
-      </div>
-    )}
-
-    <div className="payment-summary">
-      <div><strong>Transaction ID:</strong> <span className="bold">{editTxId}</span></div>
-      <div><strong>ชื่อลูกค้า:</strong> <span>{customerName}</span></div>
-      <div><strong>ชำระงวดที่:</strong> <span className="highlight-blue">{lblPeriod}</span></div>
-      <div><strong>ยอดผ่อนชำระงวดนี้:</strong> <span className="bold">{lblAmount}</span> บาท</div>
-    </div>
-
-    <div className="form-group">
-      <label htmlFor="chat_link_readonly">ลิงก์แชทลูกค้า</label>
-      <input type="text" id="chat_link_readonly" className="form-control" readOnly value={chatLink} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="payment_date">วันที่ชำระเงิน</label>
-      <input type="date" id="payment_date" className="form-control" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
-    </div>
-    <div className="form-group">
-      <label htmlFor="total_paid_amount">ยอดเงินที่ชำระ (บาท)</label>
-      <input type="number" step="0.01" id="total_paid_amount" className="form-control" placeholder="0.00" value={totalPaidAmount} onChange={(e) => setTotalPaidAmount(e.target.value)} />
-    </div>
-  </div>
-)}
-
-<div className="form-group">
-  <label htmlFor="input_status">สถานะจากแอดมิน</label>
-  <input type="text" id="input_status" className="form-control" placeholder="ระบุสถานะ..." value={inputStatus} onChange={(e) => setInputStatus(e.target.value)} />
-</div>
-<div className="form-group">
-  <label htmlFor="note">หมายเหตุ</label>
-  <textarea id="note" rows={2} className="form-control" placeholder="ระบุหมายเหตุ..." value={note} onChange={(e) => setNote(e.target.value)}></textarea>
-</div>
-
-<button 
-  type="submit" 
-  className={`btn btn-block btn-submit ${isSubmitting ? "btn-secondary" : "btn-success"}`} 
-  disabled={isSubmitting || isPayoffSubmitting}
->
-  {isSubmitting ? (
-    <>
-      <Loader2 size={16} className="animate-spin" /> กำลังบันทึกข้อมูล...
-    </>
-  ) : (
-    <>
-      <Save size={16} /> บันทึกข้อมูลการผ่อนชำระ
-    </>
-  )}
-</button>
-
-{formMode === "edit_payment" && (
-  <button 
-    type="button" 
-    className="btn btn-block btn-danger"
-    onClick={payoffEntireContract}
-    disabled={isSubmitting || isPayoffSubmitting}
-  >
-    {isPayoffSubmitting ? (
-      <>
-        <Loader2 size={16} className="animate-spin" /> กำลังดำเนินการปิดยอดผ่อนชำระ...
-      </>
-    ) : (
-      <>
-        <ShieldCheck size={16} /> ปิดยอดสัญญาก่อนกำหนด (ปิดทุกงวด)
-      </>
-    )}
-  </button>
-)}
-        </form>
-      </div>
-    </div>
-  </div>
-);
+  );
 }
