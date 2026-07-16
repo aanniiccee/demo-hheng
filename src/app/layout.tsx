@@ -38,7 +38,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return isAuthorized ? (
     <>{children}</>
   ) : (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
       กำลังตรวจสอบสิทธิ์การเข้าถึงระบบ...
     </div>
   );
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         
         {/* 🌟 3. ครอบด้วย Suspense และ AuthGuard ตรงนี้ทีเดียวจบทุกหน้า */}
         <Suspense fallback={
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
             กำลังโหลดโครงสร้างระบบ...
           </div>
         }>
