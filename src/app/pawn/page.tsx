@@ -786,11 +786,3 @@ export default function PawnPage() {
     </div>
   );
 }
-
-export default function PawnPage() {
-  return (
-    <Suspense fallback={<div style={{ padding: "20px" }}>กำลังโหลดระบบต่อดอก...</div>}>
-      <PawnPageContent />
-    </Suspense>
-  );
-}
