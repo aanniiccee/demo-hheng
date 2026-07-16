@@ -1,0 +1,316 @@
+/* 1. โหลด Core ของ Tailwind CSS เข้ามาใช้งาน */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 2. สไตล์ระดับ Global ของระบบ (คัดลอกจากโค้ดเดิมของคุณ) */
+@layer base {
+  body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f9fafb;
+    color: #1f2937;
+  }
+  
+  h2 {
+    margin: 0;
+    font-size: 24px;
+  }
+}
+
+/* 3. สไตล์ของ Component และ Layout ต่างๆ */
+@layer components {
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto 20px auto;
+    gap: 15px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .btn-default { background-color: #e5e7eb; color: #1f2937; }
+  .btn-default:hover { background-color: #d1d5db; }
+  .btn-primary { background-color: #2563eb; color: #ffffff; }
+  .btn-primary:hover { background-color: #1d4ed8; }
+  .btn-success { background-color: #10b981; color: #ffffff; }
+  .btn-success:hover { background-color: #059669; }
+
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .table-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    height: fit-content;
+  }
+
+  .table-header-bar {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    background-color: #f3f4f6;
+    border-bottom: 2px solid #e5e7eb;
+    gap: 15px;
+    align-items: center;
+  }
+
+  .search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    color: #9ca3af;
+    width: 16px;
+    height: 16px;
+  }
+
+  .filter-group {
+    display: inline-flex;
+    background-color: #e5e7eb;
+    padding: 4px;
+    border-radius: 8px;
+    gap: 2px;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #4b5563;
+  }
+
+  .filter-btn.active {
+    background-color: #ffffff;
+    color: #1f2937;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 1000px;
+    font-size: 13px;
+  }
+
+  .product-table th {
+    background-color: #fafafa;
+    padding: 12px 14px;
+    font-weight: 600;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .product-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .product-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .product-table tbody tr:hover {
+    background-color: #f0fdf4;
+  }
+
+  .form-card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+  }
+
+  .form-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .form-group input, 
+  .form-group textarea, 
+  .form-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    font-size: 13px;
+  }
+
+  .form-row-3 {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr 2fr;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .st-normal { background-color: #d1fae5; color: #065f46; }      /* ยังไม่ถึงกำหนด */
+  .st-today { background-color: #dbeafe; color: #1e40af; }       /* ครบกำหนด */
+  .st-overdue { background-color: #fee2e2; color: #991b1b; }     /* เลยกำหนด */
+  .closed-yes { background-color: #e5e7eb; color: #374151; }
+
+  .preview-box {
+    margin-top: 15px;
+    background: #fdfdfd;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .preview-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 4px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .preview-item:last-child {
+    border-bottom: none;
+  }
+
+  .payment-summary {
+    background: #eff6ff;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    border: 1px solid #bfdbfe;
+  }
+
+  .payment-summary div {
+    margin-bottom: 5px;
+  }
+
+  .payment-summary div:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* 4. สไตล์ส่วน Responsive เมื่อเปิดบนมือถือ (ใช้คำสั่ง @media ของเดิม) */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+  .table-header-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-wrapper {
+    width: 100%;
+  }
+  .form-card {
+    order: 1;
+    position: static;
+    margin-bottom: 15px;
+  }
+  .table-container {
+    order: 2;
+  }
+  h2 {
+    font-size: 20px;
+  }
+}
