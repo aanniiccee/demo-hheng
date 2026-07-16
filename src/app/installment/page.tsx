@@ -427,8 +427,7 @@ export default function InstallmentPage() {
 
   return (
     <div>
-      
-      {/* --- HEADER --- */}
+      {/* ส่วนหัวระบบ */}
       <div className="header-container">
         <h2 style={{ margin: 0 }}>ระบบผ่อนสินค้า (Installment Transactions)</h2>
         <div className="action-buttons">
@@ -502,7 +501,7 @@ export default function InstallmentPage() {
           <div className="table-wrapper">
             <table className="product-table">
               <thead>
-                <tr}}>
+                <tr>
                   <th style={{ minWidth: "100px", textAlign: "center"}}>ยกเลิกสัญญา</th>
                   <th style={{ minWidth: "120px"}}>Transaction ID</th>
                   <th style={{ minWidth: "180px"}}>รหัสสินค้า</th>
