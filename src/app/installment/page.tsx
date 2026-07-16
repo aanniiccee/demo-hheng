@@ -434,7 +434,7 @@ return (
         <Link href={getHomeUrl()} className="btn btn-default">
           <ArrowLeft size={16} /> กลับหน้าหลัก
         </Link>
-        <button type="button" onClick={loadData} className="btn btn-default" disabled={loading}>
+        <button type="button" onClick={() => loadData()} className="btn btn-default" disabled={loading}>
           <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> รีเฟรช
         </button>
         <button type="button" onClick={clearForm} className="btn btn-primary">
