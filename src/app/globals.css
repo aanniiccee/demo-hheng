@@ -256,6 +256,7 @@
 
   .preview-box {
     margin-top: 15px;
+    margin-bottom: 15px;
     background: #fdfdfd;
     border: 1px dashed #cbd5e1;
     border-radius: 8px;
