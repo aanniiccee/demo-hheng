@@ -433,13 +433,13 @@ return (
       <h2 style={{ margin: 0 }}>ระบบผ่อนสินค้า (Installment Transactions)</h2>
       <div className="action-buttons">
         <Link href={getHomeUrl()} className="btn btn-default">
-          <ArrowLeft size={20} /> กลับหน้าหลัก
+          <ArrowLeft size={22} /> กลับหน้าหลัก
         </Link>
         <button type="button" onClick={() => loadData()} className="btn btn-default" disabled={loading}>
-          <RefreshCw size={20} className={loading ? "animate-spin" : ""} /> รีเฟรช
+          <RefreshCw size={22} className={loading ? "animate-spin" : ""} /> รีเฟรช
         </button>
         <button type="button" onClick={clearForm} className="btn btn-primary">
-          <Plus size={20} /> สร้างรายการผ่อน
+          <Plus size={22} /> สร้างรายการผ่อน
         </button>
       </div>
     </div>
@@ -623,9 +623,9 @@ return (
       </div>
 
       {/* --- RIGHT SIDE: ACTION FORM CARD --- */}
-      <div className="form-card" style={{ width: "360px", padding: "20px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-        <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px", fontWeight: 600}}>
-          {formMode === "add" ? <PlusCircle size={20} /> : <BadgeDollarSign size={20} />}
+      <div className="form-card">
+        <h3>
+          {formMode === "add" ? <PlusCircle size={22} /> : <BadgeDollarSign size={22} />}
           <span>{formMode === "add" ? "สร้างรายการผ่อนใหม่" : "บันทึกชำระค่างวด"}</span>
         </h3>
 
