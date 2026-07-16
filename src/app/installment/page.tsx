@@ -558,7 +558,7 @@ return (
                     statusText = "ชำระแล้ว";
                     badgeClass = "closed-yes";
                     durationText = "เรียบร้อย";
-                    maxLength = "เรียบร้อย";
+                    length = "เรียบร้อย";
                   } else if (pData && pData.due_date) {
                     const dueDate = new Date(pData.due_date);
                     if (dueDate.getTime() === todayObj.getTime()) {
