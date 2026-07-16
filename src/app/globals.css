@@ -277,6 +277,24 @@
   .payment-summary div:last-child {
     margin-bottom: 0;
   }
+
+  .nav-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background-color: #f3f4f6;
+    color: #1f2937;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background-color: #e5e7eb;
+    color: #000000;
+  }
 }
 
 /* 4. สไตล์ส่วน Responsive เมื่อเปิดบนมือถือ (ใช้คำสั่ง @media ของเดิม) */
