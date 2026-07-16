@@ -462,7 +462,7 @@ return (
 
           <div>
             <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ปิดยอดแล้ว:</span>
-            <div className="filter-group" style={{ display: "flex", gap: "4px" }}>
+            <div className="filter-group">
               <button className={`filter-btn ${filterClosed === "ALL" ? "active" : ""}`} onClick={() => handleClosedFilterChange("ALL")}>ทั้งหมด</button>
               <button className={`filter-btn ${filterClosed === "NO" ? "active" : ""}`} onClick={() => handleClosedFilterChange("NO")}>เปิดอยู่ (NO)</button>
               <button className={`filter-btn ${filterClosed === "YES" ? "active" : ""}`} onClick={() => handleClosedFilterChange("YES")}>ปิดแล้ว (YES)</button>
