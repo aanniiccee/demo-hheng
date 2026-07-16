@@ -200,6 +200,8 @@
     align-items: center;
     gap: 8px;
     font-weight: 600;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 10px;
   }
 
   .form-group {
@@ -216,14 +218,20 @@
 
   .form-group input, 
   .form-group textarea, 
-  .form-group select {
+  .form-group select,
+  .form-control {
     width: 100%;
     padding: 8px 10px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
-    box-sizing: border-box;
+    box-sizing: border-box; /* สำคัญมาก: เพื่อไม่ให้ padding ไปเพิ่มความสูง/กว้าง */
     font-family: sans-serif;
     font-size: 13px;
+    height: 38px; /* 🌟 ล็อกความสูงทุกช่องให้ออกมาเท่ากันเป๊ะ */
+  }
+
+  .form-group textarea {
+  height: auto; 
   }
 
   .form-row-3 {
@@ -311,6 +319,103 @@
   .nav-button:hover {
     background-color: #e5e7eb;
     color: #000000;
+  }
+
+  .label-blue {
+    color: #2563eb !important;
+  }
+
+  /* 🌟 3. จัดกลุ่มแถววัน/เดือน/ปี แบบ Flex แทนของเดิมที่เคยพัง */
+  .due-date-row {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+  }
+
+  /* 🌟 ปรับความกว้างตามสัดส่วน flex ของแต่ละช่องในแถวเดียวกัน */
+  .due-date-row input[type="number"] {
+    flex: 1;
+    width: auto; /* เคลียร์ width: 100% ของเดิมออก */
+  }
+
+  .due-date-row select#start_month {
+    flex: 1.2;
+    width: auto;
+  }
+
+  .due-date-row select#start_year {
+    flex: 1.5;
+    width: auto;
+  }
+
+  /* 🌟 4. คลาสสำหรับกล่องเตือนค้างชำระ (Overdue Alert Box) */
+  .alert-danger-box {
+    background-color: #fef2f2;
+    border-left: 4px solid #ef4444;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+  }
+  .alert-danger-box span {
+    color: #991b1b;
+    font-size: 13px;
+    font-weight: bold;
+    display: block;
+    line-height: 1.5;
+  }
+  .alert-danger-box span span.underline {
+    text-decoration: underline;
+  }
+  .alert-danger-box span span.price {
+    font-size: 15px;
+  }
+
+  /* 🌟 5. คลาสสำหรับกล่อง Payment Summary ภายในโหมดรับชำระ */
+  .payment-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .payment-summary span.highlight-blue {
+    color: #2563eb;
+    font-weight: bold;
+  }
+  .payment-summary span.bold {
+    font-weight: bold;
+  }
+
+  /* 🌟 6. บังคับ input ที่ล็อกไว้ (Read Only) ให้แสดงสถานะห้ามกด */
+  .form-control:read-only {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+  }
+
+  /* 🌟 7. จัดการลิสต์จำลองวันครบกำหนดด้านล่าง */
+  .due-preview-container {
+    max-height: 140px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* 🌟 8. ขยายปุ่มบันทึก/ปุ่มสีแดง ให้กว้างเต็มกล่องฟอร์ม */
+  .btn-block {
+    width: 100%;
+    justify-content: center;
+    height: 40px;
+  }
+  .btn-submit {
+    margin-bottom: 10px;
+  }
+  .btn-danger {
+    color: white;
+  }
+  .btn-danger:not(:disabled) {
+    background-color: #dc2626;
+  }
+  .btn-danger:disabled {
+    background-color: #9ca3af;
   }
 }
 
