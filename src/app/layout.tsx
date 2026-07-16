@@ -1,12 +1,12 @@
-// src/app/layout.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import "./globals.css"; // สไตล์รวมของระบบ
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+// 🌟 1. แยก Logic ตรวจสอบสิทธิ์ที่ใช้ useSearchParams ออกมาเป็น Component ย่อย
+function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -35,6 +35,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     }
   }, [pathname, searchParams, router]);
 
+  return isAuthorized ? (
+    <>{children}</>
+  ) : (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
+      กำลังตรวจสอบสิทธิ์การเข้าถึงระบบ...
+    </div>
+  );
+}
+
+// 🌟 2. RootLayout หลัก: จะสะอาดและไม่เรียกใช้ useSearchParams โดยตรง
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -46,11 +57,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="https://static.line-scdn.net/liff/edge/2/sdk.js" 
           strategy="beforeInteractive"
         />
-        {isAuthorized ? children : (
+        
+        {/* 🌟 3. ครอบด้วย Suspense และ AuthGuard ตรงนี้ทีเดียวจบทุกหน้า */}
+        <Suspense fallback={
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
-            กำลังตรวจสอบสิทธิ์การเข้าถึงระบบ...
+            กำลังโหลดโครงสร้างระบบ...
           </div>
-        )}
+        }>
+          <AuthGuard>{children}</AuthGuard>
+        </Suspense>
       </body>
     </html>
   );
