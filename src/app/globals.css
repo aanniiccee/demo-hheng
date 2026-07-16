@@ -207,11 +207,15 @@
     text-align: left;
     color: #6b7280;
     padding: 30px;
+    height: 100px;            /* 🌟 ล็อกความสูงให้เท่ากัน */
+    vertical-align: middle;
   }
   .table-empty-row.no-match {
     text-align: left;
     color: #9ca3af;
     padding: 30px;
+    height: 100px;            /* 🌟 ล็อกความสูงให้เท่ากัน */
+    vertical-align: middle;
   }
 
   .table-link-customer {
