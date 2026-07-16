@@ -374,7 +374,7 @@ export default function PawnPage() {
     return params.toString() ? `/?${params.toString()}` : "/";
   };
 
-  return (
+return (
     <div>
       {/* ส่วนหัวระบบ */}
       <div className="header-container">
@@ -408,7 +408,7 @@ export default function PawnPage() {
             </div>
 
             <div>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ปิดยอดแล้ว:</span>
+              <span className="filter-label">ปิดยอดแล้ว:</span>
               <div className="filter-group">
                 <button type="button" className={`filter-btn ${closedFilter === "ALL" ? "active" : ""}`} onClick={() => changeClosedFilter("ALL")}>ทั้งหมด</button>
                 <button type="button" className={`filter-btn ${closedFilter === "NO" ? "active" : ""}`} onClick={() => changeClosedFilter("NO")}>เปิดอยู่ (NO)</button>
@@ -417,7 +417,7 @@ export default function PawnPage() {
             </div>
 
             <div>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>ซ่อนรายการที่ชำระแล้ว:</span>
+              <span className="filter-label">ซ่อนรายการที่ชำระแล้ว:</span>
               <div className="filter-group">
                 <button type="button" className={`filter-btn ${excludePaidFilter === "YES" ? "active" : ""}`} onClick={() => setExcludePaidFilter("YES")}>YES</button>
                 <button type="button" className={`filter-btn ${excludePaidFilter === "NO" ? "active" : ""}`} onClick={() => setExcludePaidFilter("NO")}>NO</button>
@@ -425,7 +425,7 @@ export default function PawnPage() {
             </div>
 
             <div>
-              <span style={{ fontSize: "12px", fontWeight: 500, color: "#4b5563", marginRight: "6px" }}>สถานะจากระบบ:</span>
+              <span className="filter-label">สถานะจากระบบ:</span>
               <div className="filter-group">
                 <button type="button" className={`filter-btn ${statusFilter === "ALL" ? "active" : ""}`} onClick={() => changeStatusFilter("ALL")}>ทั้งหมด</button>
                 <button type="button" className={`filter-btn ${statusFilter === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
@@ -439,33 +439,33 @@ export default function PawnPage() {
             <table className="product-table">
               <thead>
                 <tr>
-                  <th style={{ minWidth: "110px" }}>Transaction ID</th>
-                  <th style={{ minWidth: "180px" }}>รหัสสินค้า</th>
-                  <th style={{ minWidth: "120px" }}>ชื่อลูกค้า</th>
-                  <th style={{ minWidth: "100px" }}>เบอร์โทร</th>
-                  <th style={{ minWidth: "80px" }}>ช่องทาง</th>
-                  <th style={{ minWidth: "110px" }}>สถานะจากระบบ</th>
-                  <th style={{ minWidth: "100px" }}>ดอกเบี้ยต่อเดือน</th>
-                  <th style={{ minWidth: "100px" }}>วันที่ชำระ</th>
-                  <th style={{ minWidth: "140px" }}>ยอดเงินที่ชำระ</th>
-                  <th style={{ minWidth: "100px" }}>กำหนดชำระ</th>
-                  <th style={{ minWidth: "100px" }}>ยอดค้างชำระ</th>
-                  <th style={{ minWidth: "120px" }}>สถานะจากแอดมิน</th>
-                  <th style={{ minWidth: "80px" }}>ปิดยอดแล้ว</th>
-                  <th style={{ minWidth: "150px" }}>หมายเหตุ</th>
-                  <th style={{ minWidth: "120px" }}>แอดมินที่ทำรายการ</th>
+                  <th className="col-id">Transaction ID</th>
+                  <th className="col-product">รหัสสินค้า</th>
+                  <th className="col-customer">ชื่อลูกค้า</th>
+                  <th className="col-phone">เบอร์โทร</th>
+                  <th className="col-channel">ช่องทาง</th>
+                  <th className="col-sys-status">สถานะจากระบบ</th>
+                  <th className="col-interest">ดอกเบี้ยต่อเดือน</th>
+                  <th className="col-pay-date">วันที่ชำระ</th>
+                  <th className="col-pay-amount">ยอดเงินที่ชำระ</th>
+                  <th className="col-due-date">กำหนดชำระ</th>
+                  <th className="col-overdue">ยอดค้างชำระ</th>
+                  <th className="col-admin-status">สถานะจากแอดมิน</th>
+                  <th className="col-closed">ปิดยอดแล้ว</th>
+                  <th className="col-note">หมายเหตุ</th>
+                  <th className="col-admin-name">แอดมินที่ทำรายการ</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={15} style={{ textAlign: "left", color: "#6b7280", padding: "30px" }}>
+                    <td colSpan={15} className="table-empty-row">
                       กำลังดึงข้อมูลการต่อดอก...
                     </td>
                   </tr>
                 ) : filteredTransactions.length === 0 ? (
                   <tr>
-                    <td colSpan={15} style={{ textAlign: "left", color: "#9ca3af", padding: "30px" }}>
+                    <td colSpan={15} className="table-empty-row no-match">
                       ไม่พบข้อมูลการต่อดอกที่ตรงเงื่อนไข
                     </td>
                   </tr>
@@ -490,7 +490,7 @@ export default function PawnPage() {
                               target="_blank" 
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()} 
-                              style={{ color: "#2563eb", textDecoration: "underline", fontWeight: 500 }}
+                              className="table-link-customer"
                             >
                               {x.customer_name}
                             </a>
@@ -503,22 +503,22 @@ export default function PawnPage() {
                         <td><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
                         <td>{pData?.interest_per_month ? Number(pData.interest_per_month).toLocaleString() : "0"} บ.</td>
                         <td>{pData?.payment_date || "-"}</td>
-                        <td style={{ color: "#2563eb", fontWeight: "bold" }}>
+                        <td className="table-txt-blue-bold">
                           {pData?.total_paid_amount ? Number(pData.total_paid_amount).toLocaleString() : "0"} บ.
                         </td>
                         <td>{pData?.next_due_date || "-"}</td>
                         <td>
-                          <div style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>
+                          <div className={overdueAmount > 0 ? "table-overdue-red" : "table-overdue-green"}>
                             {overdueAmount.toLocaleString()} บ.
                           </div>
-                          <div style={{ fontSize: "10px", color: "#6b7280", marginTop: "2px", fontStyle: "italic" }}>
+                          <div className="table-txt-small-italic">
                             ({durationText})
                           </div>
                         </td>
                         <td>{pData?.input_status || "-"}</td>
                         <td><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
-                        <td><span style={{ color: "#6b7280", fontSize: "12px" }}>{x.note || "-"}</span></td>
-                        <td><span style={{ color: "#4b5563", fontWeight: 500 }}>{adminUserText}</span></td>
+                        <td><span className="table-txt-muted">{x.note || "-"}</span></td>
+                        <td><span className="table-txt-admin">{adminUserText}</span></td>
                       </tr>
                     );
                   })
@@ -532,15 +532,15 @@ export default function PawnPage() {
         <div className="form-card">
           <h3>
             {formMode === "add" ? <PlusCircle size={18} /> : <SquarePen size={18} />}
-            <span style={{ marginLeft: "6px" }}>{formMode === "add" ? "สร้างรายการต่อดอก" : "บันทึกรายการต่อดอก"}</span>
+            <span className="form-title-text">{formMode === "add" ? "สร้างรายการต่อดอก" : "บันทึกรายการต่อดอก"}</span>
           </h3>
           
           <form onSubmit={handleFormSubmit}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, color: "#4b5563" }}>รายละเอียดการต่อดอก</span>
+            <div className="form-sub-header">
+              <span className="form-sub-title">รายละเอียดการต่อดอก</span>
               
               {formMode === "edit" && (
-                <label style={{ fontSize: "12px", color: "#2563eb", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+                <label className="form-edit-checkbox-label">
                   <input type="checkbox" checked={isPawnUnlocked} onChange={handlePawnUnlockChange} />
                   แก้ไขข้อมูล
                 </label>
@@ -555,7 +555,6 @@ export default function PawnPage() {
                 required
                 placeholder="กรอกรายละเอียดสินค้า"
                 disabled={formMode === "edit" && !isPawnUnlocked}
-                style={{ backgroundColor: formMode === "edit" && !isPawnUnlocked ? "#f3f4f6" : "#ffffff", cursor: formMode === "edit" && !isPawnUnlocked ? "not-allowed" : "text" }}
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
               />
@@ -569,7 +568,6 @@ export default function PawnPage() {
                 required
                 placeholder="ชื่อ-นามสกุล"
                 disabled={formMode === "edit" && !isPawnUnlocked}
-                style={{ backgroundColor: formMode === "edit" && !isPawnUnlocked ? "#f3f4f6" : "#ffffff", cursor: formMode === "edit" && !isPawnUnlocked ? "not-allowed" : "text" }}
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
               />
@@ -582,7 +580,6 @@ export default function PawnPage() {
                 id="chat_link"
                 placeholder="วางลิงก์แชท เช่น https://line.me/..."
                 disabled={formMode === "edit" && !isPawnUnlocked}
-                style={{ backgroundColor: formMode === "edit" && !isPawnUnlocked ? "#f3f4f6" : "#ffffff", cursor: formMode === "edit" && !isPawnUnlocked ? "not-allowed" : "text" }}
                 value={chatLink}
                 onChange={(e) => setChatLink(e.target.value)}
               />
@@ -595,7 +592,6 @@ export default function PawnPage() {
                 id="phone_number"
                 placeholder="0xxxxxxxxx"
                 disabled={formMode === "edit" && !isPawnUnlocked}
-                style={{ backgroundColor: formMode === "edit" && !isPawnUnlocked ? "#f3f4f6" : "#ffffff", cursor: formMode === "edit" && !isPawnUnlocked ? "not-allowed" : "text" }}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
@@ -606,7 +602,6 @@ export default function PawnPage() {
               <select
                 id="channel"
                 disabled={formMode === "edit" && !isPawnUnlocked}
-                style={{ backgroundColor: formMode === "edit" && !isPawnUnlocked ? "#f3f4f6" : "#ffffff", cursor: formMode === "edit" && !isPawnUnlocked ? "not-allowed" : "default" }}
                 value={channel}
                 onChange={(e) => setChannel(e.target.value)}
               >
@@ -626,7 +621,6 @@ export default function PawnPage() {
                 required
                 placeholder="0.00"
                 disabled={formMode === "edit" && !isPawnUnlocked}
-                style={{ backgroundColor: formMode === "edit" && !isPawnUnlocked ? "#f3f4f6" : "#ffffff", cursor: formMode === "edit" && !isPawnUnlocked ? "not-allowed" : "text" }}
                 value={interestPerMonth}
                 onChange={(e) => setInterestPerMonth(e.target.value)}
               />
@@ -634,7 +628,7 @@ export default function PawnPage() {
 
             {formMode === "add" && (
               <div className="form-group">
-                <label htmlFor="next_due_date_add" style={{ color: "#2563eb" }}>วันครบกำหนดชำระ</label>
+                <label htmlFor="next_due_date_add" className="label-blue">วันครบกำหนดชำระ</label>
                 <input
                   type="date"
                   id="next_due_date_add"
@@ -645,52 +639,45 @@ export default function PawnPage() {
               </div>
             )}
 
-            <hr style={{ border: 0, borderTop: "1px dashed #d1d5db", margin: "15px 0" }} />
+            <hr className="divider-dashed" />
 
             {formMode === "edit" && (
               <div>
                 <div className="form-group">
-                  <label style={{ color: "#2563eb" }}>วันครบกำหนดชำระ (รอบปัจจุบัน)</label>
+                  <label className="label-blue">วันครบกำหนดชำระ (รอบปัจจุบัน)</label>
                   <input
                     type="date"
                     disabled={!isPawnUnlocked}
-                    style={{ backgroundColor: !isPawnUnlocked ? "#f3f4f6" : "#ffffff", color: "#374151", cursor: !isPawnUnlocked ? "not-allowed" : "text" }}
                     value={currentDueDate}
                     onChange={(e) => setCurrentDueDate(e.target.value)}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label style={{ color: "#6b7280", fontWeight: 500 }}>ยอดค้างชำระ (รอบปัจจุบัน)</label>
+                  <label className="label-muted-bold">ยอดค้างชำระ (รอบปัจจุบัน)</label>
                   <input
                     type="text"
+                    className={`input-overdue-balance ${currentOverdueBalance > 0 ? "red" : "green"}`}
                     readOnly
-                    style={{ 
-                      backgroundColor: "#f3f4f6", 
-                      fontWeight: 600, 
-                      cursor: "not-allowed",
-                      color: currentOverdueBalance > 0 ? "#b91c1c" : "#10b981"
-                    }}
                     value={currentOverdueBalance.toLocaleString() + " บ."}
                   />
                 </div>
 
                 {isPawnUnlocked && (
-                  <div style={{ backgroundColor: "#fef2f2", borderLeft: "4px solid #ef4444", padding: "10px", marginBottom: "15px", borderRadius: "4px" }}>
-                    <span style={{ color: "#991b1b", fontSize: "13px", fontWeight: "bold" }}>
+                  <div className="alert-warning-box">
+                    <span>
                       ⚠️ หมายเหตุ: กรณีแก้ไขข้อมูลรายการต่อดอกเดิม จะไม่สามารถอัปเดตข้อมูลการรับชำระพร้อมกันได้ 
                     </span>
                   </div>
                 )}
 
-                <div style={{ background: isPawnUnlocked ? "#e5e7eb" : "#fafafa", padding: "12px", border: "1px solid #e5e7eb", borderRadius: "8px", marginBottom: "12px" }}>
+                <div className={`inner-payment-card ${isPawnUnlocked ? "unlocked" : ""}`}>
                   <div className="form-group">
                     <label htmlFor="payment_date">วันที่ชำระ</label>
                     <input
                       type="date"
                       id="payment_date"
                       disabled={isPawnUnlocked}
-                      style={{ cursor: isPawnUnlocked ? "not-allowed" : "default" }}
                       value={paymentDate}
                       onChange={(e) => setPaymentDate(e.target.value)}
                     />
@@ -704,7 +691,6 @@ export default function PawnPage() {
                       id="total_paid_amount"
                       placeholder="0.00"
                       disabled={isPawnUnlocked}
-                      style={{ cursor: isPawnUnlocked ? "not-allowed" : "text" }}
                       value={totalPaidAmount}
                       onChange={(e) => setTotalPaidAmount(e.target.value)}
                     />
@@ -715,7 +701,6 @@ export default function PawnPage() {
                     <select
                       id="closed"
                       disabled={isPawnUnlocked}
-                      style={{ cursor: isPawnUnlocked ? "not-allowed" : "default" }}
                       value={closed}
                       onChange={(e) => setClosed(e.target.value)}
                     >
@@ -726,16 +711,12 @@ export default function PawnPage() {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="next_due_date_edit" style={{ fontWeight: 600, color: "#2563eb" }}>วันครบกำหนดชำระครั้งถัดไป</label>
+                  <label htmlFor="next_due_date_edit" className="label-blue">วันครบกำหนดชำระครั้งถัดไป</label>
                   <input
                     type="date"
                     id="next_due_date_edit"
                     required={!isPawnUnlocked && closed !== "YES"}
                     disabled={isPawnUnlocked || closed === "YES"}
-                    style={{ 
-                      backgroundColor: isPawnUnlocked || closed === "YES" ? "#e5e7eb" : "#ffffff", 
-                      cursor: isPawnUnlocked || closed === "YES" ? "not-allowed" : "default" 
-                    }}
                     value={closed === "YES" ? "" : nextDueDateEdit}
                     onChange={(e) => setNextDueDateEdit(e.target.value)}
                   />
@@ -767,8 +748,7 @@ export default function PawnPage() {
 
             <button 
               type="submit" 
-              className={`btn ${isSubmitting ? "btn-default" : "btn-success"}`} 
-              style={{ width: "100%", justifyContent: "center" }}
+              className={`btn btn-block ${isSubmitting ? "btn-default" : "btn-success"}`} 
               disabled={isSubmitting}
             >
               {isSubmitting ? (
