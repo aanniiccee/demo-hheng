@@ -624,9 +624,9 @@ return (
 
       {/* --- RIGHT SIDE: ACTION FORM CARD --- */}
       <div className="form-card" style={{ width: "360px", padding: "20px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#ffffff", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-        <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
-          {formMode === "add" ? <PlusCircle size={18} /> : <BadgeDollarSign size={18} />}
-          <span>{formMode === "add" ? "สร้างรายการผ่อน" : "บันทึกชำระค่างวด"}</span>
+        <h3 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px", fontWeight: 600}}>
+          {formMode === "add" ? <PlusCircle size={20} /> : <BadgeDollarSign size={20} />}
+          <span>{formMode === "add" ? "สร้างรายการผ่อนใหม่" : "บันทึกชำระค่างวด"}</span>
         </h3>
 
         <form onSubmit={saveTransaction}>
@@ -635,23 +635,23 @@ return (
           {formMode === "add" && (
             <div id="contract_fields_zone">
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="product" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>รหัสสินค้า</label>
+                <label htmlFor="product" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>รหัสสินค้า</label>
                 <input type="text" id="product" required className="form-control" placeholder="กรอกรายละเอียดสินค้า" value={product} onChange={(e) => setProduct(e.target.value)} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="customer_name" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>ชื่อลูกค้า</label>
+                <label htmlFor="customer_name" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ชื่อลูกค้า</label>
                 <input type="text" id="customer_name" required className="form-control" placeholder="ชื่อ-นามสกุล" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="chat_link" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>ลิงก์แชทลูกค้า</label>
+                <label htmlFor="chat_link" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ลิงก์แชทลูกค้า</label>
                 <input type="text" id="chat_link" className="form-control" placeholder="วางลิงก์แชท เช่น https://line.me/..." value={chatLink} onChange={(e) => setChatLink(e.target.value)} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="phone_number" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>เบอร์โทรศัพท์</label>
+                <label htmlFor="phone_number" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>เบอร์โทรศัพท์</label>
                 <input type="text" id="phone_number" className="form-control" placeholder="0xxxxxxxxx" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="channel" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>ช่องทางติดต่อ</label>
+                <label htmlFor="channel" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ช่องทางติดต่อ</label>
                 <select id="channel" className="form-control" value={channel} onChange={(e) => setChannel(e.target.value)}>
                   <option value="LINE">LINE</option>
                   <option value="FB">FB</option>
@@ -660,16 +660,16 @@ return (
                 </select>
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="installment_amount" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>ยอดผ่อนต่องวด (บาท)</label>
+                <label htmlFor="installment_amount" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ยอดผ่อนต่องวด (บาท)</label>
                 <input type="number" step="0.01" id="installment_amount" required className="form-control" placeholder="0.00" value={installmentAmount} onChange={(e) => setInstallmentAmount(e.target.value)} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="total_periods" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>จำนวนงวดทั้งหมด</label>
+                <label htmlFor="total_periods" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>จำนวนงวดทั้งหมด</label>
                 <input type="number" id="total_periods" required className="form-control" placeholder="ระบุจำนวนงวด เช่น 6" min="1" value={totalPeriods} onChange={(e) => setTotalPeriods(e.target.value)} />
               </div>
 
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#2563eb", marginBottom: "4px" }}>วันนัดชำระงวดแรก (วัน / เดือน / ปี)</label>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", color: "#2563eb"}}>วันนัดชำระงวดแรก (วัน / เดือน / ปี)</label>
                 <div className="form-row-3" style={{ display: "flex", gap: "6px" }}>
                   <input type="number" id="monthly_due_day" required className="form-control" placeholder="วันที่" min="1" max="31" value={monthlyDueDay} onChange={(e) => setMonthlyDueDay(e.target.value)} style={{ flex: 1 }} />
                   <select id="start_month" required className="form-control" value={startMonth} onChange={(e) => setStartMonth(e.target.value)} style={{ flex: 1.2 }}>
@@ -719,15 +719,15 @@ return (
               </div>
 
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="chat_link_readonly" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>ลิงก์แชทลูกค้า</label>
+                <label htmlFor="chat_link_readonly" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ลิงก์แชทลูกค้า</label>
                 <input type="text" id="chat_link_readonly" className="form-control" readOnly value={chatLink} style={{ backgroundColor: "#f3f4f6", cursor: "not-allowed" }} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="payment_date" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>วันที่ชำระเงิน</label>
+                <label htmlFor="payment_date" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>วันที่ชำระเงิน</label>
                 <input type="date" id="payment_date" className="form-control" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
               </div>
               <div className="form-group" style={{ marginBottom: "12px" }}>
-                <label htmlFor="total_paid_amount" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>ยอดเงินที่ชำระ (บาท)</label>
+                <label htmlFor="total_paid_amount" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>ยอดเงินที่ชำระ (บาท)</label>
                 <input type="number" step="0.01" id="total_paid_amount" className="form-control" placeholder="0.00" value={totalPaidAmount} onChange={(e) => setTotalPaidAmount(e.target.value)} />
               </div>
             </div>
@@ -735,11 +735,11 @@ return (
 
           {/* --- ZONE 3: COMMON FIELDS (มีร่วมกันทั้งสองโหมด) --- */}
           <div className="form-group" style={{ marginBottom: "12px", marginTop: "10px" }}>
-            <label htmlFor="input_status" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>สถานะจากแอดมิน</label>
+            <label htmlFor="input_status" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>สถานะจากแอดมิน</label>
             <input type="text" id="input_status" className="form-control" placeholder="ระบุสถานะ..." value={inputStatus} onChange={(e) => setInputStatus(e.target.value)} />
           </div>
           <div className="form-group" style={{ marginBottom: "15px" }}>
-            <label htmlFor="note" style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "4px" }}>หมายเหตุ</label>
+            <label htmlFor="note" style={{ display: "block", fontSize: "13px", fontWeight: "600"}}>หมายเหตุ</label>
             <textarea id="note" rows={2} className="form-control" placeholder="ระบุหมายเหตุ..." value={note} onChange={(e) => setNote(e.target.value)}></textarea>
           </div>
 
