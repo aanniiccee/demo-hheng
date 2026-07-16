@@ -487,7 +487,7 @@ export default function InstallmentPage() {
                 <button className={`filter-btn ${filterStatus === "ALL" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ALL")}>ทั้งหมด</button>
                 <button className={`filter-btn ${filterStatus === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
                 <button className={`filter-btn ${filterStatus === "ครบกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("ครบกำหนด")}>ครบกำหนด</button>
-                <button className={`filter-btn ${filterStatus === "เกินกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("เกินกำหนด")}>เลยกำหนด</button>
+                <button className={`filter-btn ${filterStatus === "เกินกำหนด" ? "active" : ""}`} onClick={() => handleStatusFilterChange("เกินกำหนด")}>เกินกำหนด</button>
               </div>
             </div>
           </div>
