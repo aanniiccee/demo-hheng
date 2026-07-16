@@ -206,10 +206,12 @@
   .table-empty-row {
     text-align: left;
     color: #6b7280;
-    padding: 60px;
+    padding: 30px;
   }
   .table-empty-row.no-match {
+    text-align: left;
     color: #9ca3af;
+    padding: 30px;
   }
 
   .table-link-customer {
