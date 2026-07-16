@@ -3,6 +3,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+}
+
 /* 2. สไตล์ระดับ Global ของระบบ (คัดลอกจากโค้ดเดิมของคุณ) */
 @layer base {
   body {
