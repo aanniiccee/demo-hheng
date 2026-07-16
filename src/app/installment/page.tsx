@@ -550,13 +550,13 @@ return (
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={19} style={{ textAlign: "left", color: "#6b7280", padding: "30px" }}>
+                  <td colSpan={19}  className="table-empty-row">
                     กำลังดึงข้อมูลการผ่อนชำระ...
                   </td>
                 </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={19} style={{ textAlign: "left", color: "#9ca3af", padding: "30px" }}>
+                  <td colSpan={19} className="table-empty-row no-match">
                     ไม่พบข้อมูลการผ่อนชำระที่ตรงเงื่อนไข
                   </td>
                 </tr>
