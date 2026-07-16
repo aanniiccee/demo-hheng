@@ -536,7 +536,7 @@ return (
                     กำลังดึงข้อมูลการผ่อนชำระ...
                   </td>
                 </tr>
-              ) : getFilteredTransactions.length === 0 ? (
+              ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={19} style={{ textAlign: "left", color: "#9ca3af", padding: "30px" }}>
                     ไม่พบข้อมูลการผ่อนชำระที่ตรงเงื่อนไข
