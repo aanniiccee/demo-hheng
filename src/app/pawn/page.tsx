@@ -145,7 +145,7 @@ export default function PawnPage() {
     if (tx.current_status === "ชำระแล้ว") {
       statusText = "ชำระแล้ว";
       badgeClass = "closed-yes";
-      durationText = "ชำระดอกเบี้ยแล้ว";
+      durationText = "ชำระเสร็จสิ้นแล้ว";
     } else if (pData && pData.next_due_date) {
       const dueDate = new Date(pData.next_due_date);
       const todayObj = new Date(todayStr);
