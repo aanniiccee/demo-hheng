@@ -218,6 +218,10 @@
   .product-table th.col-total-periods { min-width: 100px; }
   .product-table th.col-current-period { min-width: 100px; }
   .product-table th.col-deal-date { min-width: 120px; }
+  .product-table th.col-amount { min-width: 150px; }
+  .product-table th.col-date { min-width: 150px; }
+  .product-table th.col-balance { min-width: 100px; }
+  .product-table th.col-paid { min-width: 130px; }
 
   .table-empty-row {
     text-align: left;
