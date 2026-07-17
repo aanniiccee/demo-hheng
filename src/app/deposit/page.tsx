@@ -327,7 +327,7 @@ export default function DepositPage() {
             <RefreshCw size={24} className={loading ? "animate-spin" : ""} /> รีเฟรช
           </button>
           <button type="button" onClick={clearForm} className="btn btn-primary">
-            <Plus size={24} /> สร้างรายการมัดจำใหม่
+            <Plus size={24} /> สร้างรายการมัดจำ
           </button>
         </div>
       </div>
