@@ -272,7 +272,8 @@ def update_pawn_transaction(transaction_id: str, data: PawnTransactionIn, token:
             sb.table('transaction_pawn').update({
                 "interest_per_month": data.interest_per_month,
                 "next_due_date": data.next_due_date,
-                "input_status": admin_input_status
+                "input_status": admin_input_status,
+                "updated_at": "now()"
             }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
 
             return {"success": True, "message": "อัปเดตข้อมูลต่อดอกเดิมสำเร็จ"}
@@ -321,7 +322,9 @@ def update_pawn_transaction(transaction_id: str, data: PawnTransactionIn, token:
             "next_due_date": data.next_due_date,
             "input_status": data.input_status,
             "client_id": current_client_id,
-            "total_paid_amount": 0.0
+            "total_paid_amount": 0.0,
+            "created_at": "now()",
+            "updated_at": "now()"
         }).execute()
 
         final_master_closed = "NO"
@@ -370,7 +373,8 @@ def update_pawn_transaction(transaction_id: str, data: PawnTransactionIn, token:
             "payment_date": data.payment_date if data.payment_date else None,
             "next_due_date": original_due_date,
             "input_status": admin_input_status,
-            "total_paid_amount": data.total_paid_amount
+            "total_paid_amount": data.total_paid_amount,
+            "updated_at": "now()"
         }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
 
         return {"success": True}
@@ -838,7 +842,8 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
             "remaining_balance": data.remaining_balance,
             "due_date": data.due_date,
             "payment_date": data.payment_date if is_payment_done else None,
-            "input_status": data.input_status  # 🆕 อัปเดตสถานะมัดจำล่าสุด
+            "input_status": data.input_status,  # อัปเดตสถานะมัดจำล่าสุด
+            "updated_at": "now()"
         }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
 
         return {"success": True}
