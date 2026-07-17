@@ -813,7 +813,7 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
     # ป้องกันบั๊กสตริงว่างจากหน้าบ้านดักจับปุ่มปิดงาน
     is_payment_done = data.payment_date and data.payment_date.strip() != "" and data.payment_date != "null" and data.payment_date != "undefined"
 
-    if data.closed == "YES" or is_payment_done:
+    if data.closed == "YES":
         new_status = "ชำระครบแล้ว"
         final_closed = "YES"
         # ป้องกันการเติมข้อความซ้ำซ้อนถ้าเคสถูกปิดไปแล้ว
@@ -844,7 +844,7 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
         sb.table('transaction_deposit').update({
             "deposit_amount": data.deposit_amount,
             "deposit_date": data.deposit_date,
-            "remaining_balance": 0.0 if final_closed == "YES" else data.remaining_balance,
+            "remaining_balance": data.remaining_balance,
             "due_date": data.due_date,
             "total_paid_amount": data.total_paid_amount,
             "payment_date": data.payment_date if is_payment_done else None,
