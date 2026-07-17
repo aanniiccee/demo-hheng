@@ -472,7 +472,13 @@ export default function DepositPage() {
                         <td>{dData?.deposit_amount ? Number(dData.deposit_amount).toLocaleString() : "0"} บ.</td>
                         <td>{dData?.deposit_date || "-"}</td>
                         <td>
-                          <div className={(dData?.remaining_balance && Number(dData.remaining_balance) > 0) ? "table-overdue-red" : "table-overdue-green"}>
+                          <div className={
+                            x.closed === "YES" 
+                            ? "table-overdue-closed" // หรือใช้คลาสสีเทา/เขียวเข้มที่คุณมี เช่น "table-txt-muted"
+                            : (dData?.remaining_balance && Number(dData.remaining_balance) > 0) 
+                              ? "table-overdue-red" 
+                              : "table-overdue-green"
+                          }>
                             {dData?.remaining_balance ? Number(dData.remaining_balance).toLocaleString() : "0"} บ.
                           </div>
                           <div className="table-txt-small-italic">
