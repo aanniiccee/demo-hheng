@@ -213,8 +213,8 @@ export default function DepositPage() {
     setRemainingBalance(String(dData.remaining_balance || 0));
     setDueDate(dData.due_date || "");
 
-    setPaymentDate(todayStr);
-    setTotalPaidAmount("");
+    setPaymentDate(dData.payment_date || "");
+    setTotalPaidAmount(dData.total_paid_amount !== undefined && dData.total_paid_amount !== null ? String(dData.total_paid_amount) : "");
     
     setClosed(tx.closed || "NO");
     setInputStatus(dData.input_status || "");
