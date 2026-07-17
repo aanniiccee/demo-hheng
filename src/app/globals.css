@@ -193,7 +193,7 @@
   .product-table th.col-phone { min-width: 100px; }
   .product-table th.col-channel { min-width: 80px; }
   .product-table th.col-sys-status { min-width: 130px; }
-  .product-table th.col-interest { min-width: 110px; }
+  .product-table th.col-interest { min-width: 130px; }
   .product-table th.col-pay-date { min-width: 100px; }
   .product-table th.col-pay-amount { min-width: 140px; }
   .product-table th.col-due-date { min-width: 110px; }
