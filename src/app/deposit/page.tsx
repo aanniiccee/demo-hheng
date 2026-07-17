@@ -428,7 +428,7 @@ export default function DepositPage() {
                         <td>{dData?.due_date || "-"}</td>
                         <td>{dData?.total_paid_amount ? Number(dData.total_paid_amount).toLocaleString() : "-"}</td>
                         <td>{dData?.payment_date || "-"}</td>
-                        <td>{pData?.input_status || "-"}</td>
+                        <td>{dData?.input_status || "-"}</td>
                         <td><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
                         <td><span className="table-txt-muted">{x.note || "-"}</span></td>
                         <td><span className="table-txt-admin">{adminUserText}</span></td>
