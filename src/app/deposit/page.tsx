@@ -382,7 +382,7 @@ export default function DepositPage() {
                 {loading ? (
                   <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูล...</td></tr>
                 ) : filteredTransactions.length === 0 ? (
-                  <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลการมัดจำ</td></tr>
+                  <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลการมัดจำที่ตรงเงื่อนไข</td></tr>
                 ) : (
                   filteredTransactions.map((x) => {
                     const depositList = x.transaction_deposit;
