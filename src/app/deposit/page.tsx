@@ -619,10 +619,14 @@ export default function DepositPage() {
             {/* โซนบันทึกการรับชำระเงิน */}
             {formMode === "edit" && (
               <>
-                <hr className="divider-dashed" />
                 <div className={`inner-payment-card ${isDepositUnlocked ? "disabled-zone" : "active-zone"}`}>
-                  <div className="form-sub-title text-green">บันทึกการชำระเงิน</div>
-                  {isDepositUnlocked && <small className="text-red d-block mb-2">*(โหมดแก้ไขข้อมูลหลัก: ห้ามบันทึกส่วนชำระเงิน)</small>}
+                  {isDepositUnlocked && (
+                   <div className="alert-warning-box">
+                    <span>
+                      ⚠️ หมายเหตุ: กรณีแก้ไขข้อมูลรายการมัดจำเดิม จะไม่สามารถอัปเดตข้อมูลการรับชำระพร้อมกันได้ 
+                    </span>
+                  </div>
+                )}
                   
                   <div className="form-group">
                     <label htmlFor="payment_date">วันที่ชำระ</label>
