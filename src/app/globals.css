@@ -257,6 +257,10 @@
     color: #b91c1c;
     font-weight: bold;
   }
+  .table-overdue-closed {
+    color: #6c757d; /* สีเทา */
+    font-weight: bold;
+  }
 
   .table-txt-small-italic {
     font-size: 10px;
