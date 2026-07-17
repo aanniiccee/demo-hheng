@@ -242,6 +242,10 @@ export default function DepositPage() {
       is_edit_deposit_master: isDepositUnlocked
     };
 
+    const safeDepositAmount = parseFloat(depositAmount) || 0;
+    const safeRemainingBalance = parseFloat(remainingBalance) || 0;
+    const safeTotalPaidAmount = parseFloat(totalPaidAmount) || 0;
+
     if (formMode === "add") {
       payload.deposit_amount = parseFloat(depositAmount || "0");
       payload.deposit_date = depositDate || null;
@@ -258,8 +262,14 @@ export default function DepositPage() {
         payload.payment_date = null;
         payload.total_paid_amount = 0;
       } else {
+        payload.deposit_amount = safeDepositAmount;
+        payload.deposit_date = depositDate || null;
+        payload.remaining_balance = safeRemainingBalance;
+        payload.due_date = dueDate || null;
+        
+        // บันทึกการรับชำระส่วนที่เหลือ
         payload.payment_date = paymentDate || null;
-        payload.total_paid_amount = parseFloat(totalPaidAmount || "0");
+        payload.total_paid_amount = safeTotalPaidAmount;
       }
     }
 
