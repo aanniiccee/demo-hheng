@@ -640,7 +640,7 @@ export default function DepositPage() {
                   </div>
                   
                   <div className="form-group">
-                    <label htmlFor="total_paid_amount">ยอดเงินที่ชำระ</label>
+                    <label htmlFor="total_paid_amount">ยอดเงินที่ชำระ (บาท)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -653,7 +653,7 @@ export default function DepositPage() {
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="closed">ต้องการปิดยอด/รับสินค้าเลยหรือไม่?</label>
+                    <label htmlFor="closed">ปิดยอดรายการมัดจำนี้เลยหรือไม่?</label>
                     <select
                       id="closed"
                       disabled={isDepositUnlocked}
