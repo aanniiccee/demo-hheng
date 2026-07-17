@@ -839,7 +839,7 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
         # 🌟 3. เพิ่ม input_status เข้าเงื่อนไขอัปเดตตารางย่อย transaction_deposit
         sb.table('transaction_deposit').update({
             "deposit_amount": data.deposit_amount,
-            "remaining_balance": data.remaining_balance,
+            "remaining_balance": 0.0 if final_closed == "YES" else data.remaining_balance,
             "due_date": data.due_date,
             "payment_date": data.payment_date if is_payment_done else None,
             "input_status": data.input_status,  # อัปเดตสถานะมัดจำล่าสุด
