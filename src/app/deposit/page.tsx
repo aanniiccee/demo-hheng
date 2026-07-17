@@ -131,7 +131,7 @@ export default function DepositPage() {
     const depositList = tx.transaction_deposit;
     const dData = Array.isArray(depositList) ? depositList[0] : depositList;
 
-    let statusText = "ยังไม่ถึงกำหนดชำระ";
+    let statusText = "ยังไม่ถึงกำหนด";
     let badgeClass = "st-normal";
     let durationText = "";
 
@@ -147,18 +147,18 @@ export default function DepositPage() {
       todayObj.setHours(0,0,0,0);
 
       if (targetDate.getTime() === todayObj.getTime()) {
-        statusText = "ครบกำหนดวันนี้";
+        statusText = "ครบกำหนด";
         badgeClass = "st-today";
-        durationText = "ต้องจ่ายงวดถัดแต่วันนี้";
+        durationText = "ครบกำหนดวันนี้";
       } else if (targetDate < todayObj) {
-        statusText = "เกินกำหนดชำระ";
+        statusText = "เกินกำหนด";
         badgeClass = "st-overdue";
         const timeDiff = todayObj.getTime() - targetDate.getTime();
         const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        durationText = `เลิกนัดมาแล้ว ${daysDiff} วัน`;
+        durationText = `ค้าง ${daysDiff} วัน`;
       } else {
         const diffDays = Math.ceil((targetDate.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
-        durationText = `เหลืออีก ${diffDays} วัน`;
+        durationText = `อีก ${diffDays} วัน`;
       }
     }
 
