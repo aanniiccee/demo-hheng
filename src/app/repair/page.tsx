@@ -402,16 +402,16 @@ export default function RepairPage() {
         <div className="form-card">
           <h3>
             {formMode === "add" ? <PlusCircle size={24} /> : <SquarePen size={24} />}
-            <span className="form-title-text">{formMode === "add" ? "สร้างรายการงานซ่อม" : "จัดการรายการงานซ่อม"}</span>
+            <span className="form-title-text">{formMode === "add" ? "สร้างรายการซ่อม" : "จัดการรายการซ่อม"}</span>
           </h3>
           
           <form onSubmit={handleFormSubmit}>
             <div className="form-sub-header">
-              <span className="form-sub-title">รายละเอียดข้อมูลลูกค้า</span>
+              <span className="form-sub-title">รายละเอียดการซ่อม</span>
             </div>
 
             <div className="form-group">
-              <label htmlFor="product">รหัสสินค้า / อาการซ่อม</label>
+              <label htmlFor="product">รหัสสินค้า</label>
               <input
                 type="text"
                 id="product"
@@ -472,7 +472,7 @@ export default function RepairPage() {
 
             <hr className="divider-dashed" />
             <div className="form-sub-header">
-              <span className="form-sub-title text-blue">บันทึกสถานะวันเวลา</span>
+              <span className="form-sub-title text-blue">บันทึกสถานะการซ่อม</span>
             </div>
 
             <div className="form-group">
