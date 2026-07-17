@@ -704,7 +704,7 @@ def payoff_entire_contract(tx_id: str, payload: dict, token: Optional[str] = Non
     return {"success": True, "message": "บันทึกยอดปิดสัญญาก่อนกำหนดสำเร็จเรียบร้อย"}
 
 
-# API หน้ามัดจำ
+# API มัดจำ
 class DepositTransactionIn(BaseModel):
     product: Optional[str] = ''             # รายละเอียดสินค้าที่มัดจำ
     product_id: Optional[str] = ''          
@@ -720,6 +720,7 @@ class DepositTransactionIn(BaseModel):
     created_by_line_id: Optional[str] = 'Unknown'
     created_by_name: Optional[str] = 'Unknown'
     chat_link: Optional[str] = None
+    input_status: Optional[str] = ''        # 🆕 เพิ่มฟิลด์รับสถานะมัดจำจากหน้าบ้าน
 
 @app.get('/api/deposit-transactions')
 def get_deposit_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
@@ -775,12 +776,14 @@ def add_deposit_transaction(data: DepositTransactionIn, token: Optional[str] = N
         "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None
     }
 
+    # 🌟 2. เพิ่ม input_status เข้าตาราง transaction_deposit ตอนสร้างรายการใหม่
     deposit_payload = {
         "transaction_id": new_tx_id,
         "deposit_amount": data.deposit_amount,
         "remaining_balance": data.remaining_balance,
         "due_date": data.due_date,
         "payment_date": None,
+        "input_status": data.input_status,  # 🆕 บันทึกสถานะมัดจำลงตารางย่อย
         "client_id": current_client_id
     }
 
@@ -829,12 +832,13 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
             "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None
         }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
 
-        # 2. อัปเดตตารางย่อย
+        # 🌟 3. เพิ่ม input_status เข้าเงื่อนไขอัปเดตตารางย่อย transaction_deposit
         sb.table('transaction_deposit').update({
             "deposit_amount": data.deposit_amount,
             "remaining_balance": data.remaining_balance,
             "due_date": data.due_date,
-            "payment_date": data.payment_date if is_payment_done else None
+            "payment_date": data.payment_date if is_payment_done else None,
+            "input_status": data.input_status  # 🆕 อัปเดตสถานะมัดจำล่าสุด
         }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
 
         return {"success": True}
