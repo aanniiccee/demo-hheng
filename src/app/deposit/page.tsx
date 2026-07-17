@@ -15,14 +15,14 @@ import {
   SquarePen
 } from "lucide-react";
 
-// 🌟 ปรับโครงสร้างข้อมูลมัดจำ (Deposit Detail) ให้ตรงกับโฟลวใหม่
+// 🌟 โครงสร้างข้อมูลมัดจำ (Deposit Detail)
 interface DepositDetail {
   deposit_amount: number;       // ยอดเงินมัดจำครั้งแรก
-  deposit_date?: string;        // วันที่ชำระเงินมัดจำ (เพิ่มใหม่)
+  deposit_date?: string;        // วันที่ชำระเงินมัดจำ
   remaining_balance: number;    // ยอดเงินสำหรับชำระครั้งถัดไป
   due_date?: string;            // วันครบกำหนดชำระครั้งถัดไป
   payment_date?: string;        // วันที่บันทึกชำระเงินงวดล่าสุด
-  total_paid_amount?: number;   // ยอดรวมที่ชำระเข้ามาล่าสุด (เพิ่มใหม่)
+  total_paid_amount?: number;   // ยอดรวมที่ชำระเข้ามาล่าสุด
   input_status?: string;
 }
 
@@ -56,7 +56,6 @@ export default function DepositPage() {
   // --- States Filters ---
   const [searchTerm, setSearchTerm] = useState("");
   const [closedFilter, setClosedFilter] = useState("NO"); 
-  const [excludePaidFilter, setExcludePaidFilter] = useState("YES"); 
   const [statusFilter, setStatusFilter] = useState("ALL"); 
 
   // --- States ควบคุมโหมดฟอร์ม ---
@@ -64,7 +63,7 @@ export default function DepositPage() {
   const [editTxId, setEditTxId] = useState("");
   const [isDepositUnlocked, setIsDepositUnlocked] = useState(false); 
 
-  // --- 🆕 States ใหม่/ปรับปรุง สำหรับผูก Input ฟอร์มตามเงื่อนไขของคุณ ---
+  // --- States สำหรับผูก Input ฟอร์ม ---
   const [product, setProduct] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [chatLink, setChatLink] = useState("");
@@ -127,7 +126,6 @@ export default function DepositPage() {
     }
   };
 
-  // --- คำนวณวันคงเหลือ / สถานะตามวัน due_date ของมัดจำ ---
   const calculateOverdueAndDuration = (tx: Transaction) => {
     const depositList = tx.transaction_deposit;
     const dData = Array.isArray(depositList) ? depositList[0] : depositList;
@@ -137,9 +135,9 @@ export default function DepositPage() {
     let durationText = "";
 
     if (tx.closed === "YES") {
-      statusText = "ชำระแล้ว";
+      statusText = "ปิดออเดอร์แล้ว";
       badgeClass = "closed-yes";
-      durationText = "ชำระเสร็จสิ้นแล้ว";
+      durationText = "รับสินค้า/เสร็จสิ้น";
     } else if (dData && dData.due_date) {
       const targetDate = new Date(dData.due_date);
       const todayObj = new Date(todayStr);
@@ -148,15 +146,15 @@ export default function DepositPage() {
       todayObj.setHours(0,0,0,0);
 
       if (targetDate.getTime() === todayObj.getTime()) {
-        statusText = "ครบกำหนด";
+        statusText = "ครบกำหนดวันนี้";
         badgeClass = "st-today";
-        durationText = "ครบกำหนดวันนี้";
+        durationText = "ต้องจ่ายงวดถัดแต่วันนี้";
       } else if (targetDate < todayObj) {
-        statusText = "เกินกำหนด";
+        statusText = "เกินกำหนดชำระ";
         badgeClass = "st-overdue";
         const timeDiff = todayObj.getTime() - targetDate.getTime();
         const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        durationText = `เกินกำหนดชำระ ${daysDiff} วัน`;
+        durationText = `เลิกนัดมาแล้ว ${daysDiff} วัน`;
       } else {
         const diffDays = Math.ceil((targetDate.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
         durationText = `เหลืออีก ${diffDays} วัน`;
@@ -197,7 +195,7 @@ export default function DepositPage() {
 
     setFormMode("edit");
     setEditTxId(tx.transaction_id);
-    setIsDepositUnlocked(false); // เริ่มต้นล็อคข้อมูลหลัก ให้บันทึกชำระเงินได้อย่างเดียว
+    setIsDepositUnlocked(false); 
 
     setProduct(tx.product || "");
     setCustomerName(tx.customer_name || "");
@@ -205,13 +203,11 @@ export default function DepositPage() {
     setPhoneNumber(tx.phone_number || "");
     setChannel(tx.channel || "LINE");
     
-    // โหลดข้อมูลมัดจำ 4 ฟิลด์หลัก เข้าสเตท
     setDepositAmount(String(dData.deposit_amount || 0));
     setDepositDate(dData.deposit_date || "");
     setRemainingBalance(String(dData.remaining_balance || 0));
     setDueDate(dData.due_date || "");
 
-    // เซ็ตฟิลด์สำหรับการชำระเงิน (เคลียร์เป็นค่าว่างหรือวันปัจจุบันเพื่อให้แอดมินบันทึกใหม่)
     setPaymentDate(todayStr);
     setTotalPaidAmount("");
     
@@ -224,9 +220,6 @@ export default function DepositPage() {
     setIsDepositUnlocked(e.target.checked);
   };
 
-  // ==========================================
-  // บันทึกข้อมูลและจัดการสิทธิ์การส่ง Payload ตามที่คุณกำหนด
-  // ==========================================
   const handleFormSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -249,7 +242,6 @@ export default function DepositPage() {
     };
 
     if (formMode === "add") {
-      // 1. โฟลวสร้างครั้งแรก: ส่งหมดทั้ง 4 ฟิลด์หลัก (ไม่ส่งฟิลด์รับชำระ)
       payload.deposit_amount = parseFloat(depositAmount || "0");
       payload.deposit_date = depositDate || null;
       payload.remaining_balance = parseFloat(remainingBalance || "0");
@@ -258,7 +250,6 @@ export default function DepositPage() {
       payload.total_paid_amount = 0;
     } else {
       if (isDepositUnlocked) {
-        // 2. โฟลวแก้ไขข้อมูลหลัก: แก้ไขได้ 4 ฟิลด์หลัก ห้ามส่ง payment_date กับ total_paid_amount ไปบันทึก
         payload.deposit_amount = parseFloat(depositAmount || "0");
         payload.deposit_date = depositDate || null;
         payload.remaining_balance = parseFloat(remainingBalance || "0");
@@ -266,7 +257,6 @@ export default function DepositPage() {
         payload.payment_date = null;
         payload.total_paid_amount = 0;
       } else {
-        // 3. โฟลวบันทึกการชำระ: ล็อคฟิลด์หลัก ส่งไปได้แค่ payment_date กับ total_paid_amount
         payload.payment_date = paymentDate || null;
         payload.total_paid_amount = parseFloat(totalPaidAmount || "0");
       }
@@ -303,7 +293,6 @@ export default function DepositPage() {
     }
   };
 
-  // --- Client Side Filter ---
   const filteredTransactions = allTransactions.filter(x => {
     if (closedFilter !== "ALL" && x.closed !== closedFilter) return false;
 
@@ -344,7 +333,6 @@ export default function DepositPage() {
       </div>
 
       <div className="main-layout">
-        {/* ฝั่งซ้าย: ตารางข้อมูลรายการ */}
         <div className="table-container">
           <div className="table-header-bar">
             <div className="search-wrapper">
@@ -425,30 +413,31 @@ export default function DepositPage() {
           </div>
         </div>
 
-        {/* ฝั่งขวา: ฟอร์มจัดการมัดจำ (สลับสถานะ input disabled ตามกฎ) */}
+        {/* ฝั่งขวา: ฟอร์มจัดการมัดจำ */}
         <div className="form-card">
           <h3>
             {formMode === "add" ? <PlusCircle size={24} /> : <SquarePen size={24} />}
-            <span className="form-title-text">{formMode === "add" ? "บันทึกยอดมัดจำครั้งแรก" : "จัดการรายการมัดจำ"}</span>
+            <span className="form-title-text">{formMode === "add" ? "สร้างรายการมัดจำ" : "จัดการรายการมัดจำ"}</span>
           </h3>
           
           <form onSubmit={handleFormSubmit}>
             <div className="form-sub-header">
-              <span className="form-sub-title">ข้อมูลลูกค้าและสินค้า</span>
+              <span className="form-sub-title">รายละเอียดการมัดจำ</span>
               {formMode === "edit" && (
                 <label className="form-edit-checkbox-label">
                   <input type="checkbox" checked={isDepositUnlocked} onChange={handleDepositUnlockChange} />
-                  ⚙️ แก้ไขข้อมูลมัดจำหลัก
+                  แก้ไขข้อมูล
                 </label>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="product">รหัสสินค้า / รายละเอียด</label>
+              <label htmlFor="product">รหัสสินค้า</label>
               <input
                 type="text"
                 id="product"
                 required
+                placeholder="กรอกรายละเอียดสินค้า"
                 disabled={formMode === "edit" && !isDepositUnlocked}
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
@@ -461,9 +450,23 @@ export default function DepositPage() {
                 type="text"
                 id="customer_name"
                 required
+                placeholder="ชื่อ-นามสกุล"
                 disabled={formMode === "edit" && !isDepositUnlocked}
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
+              />
+            </div>
+
+            {/* 🆕 เพิ่ม Input: chat_link */}
+            <div className="form-group">
+              <label htmlFor="chat_link">ลิงก์แชทลูกค้า</label>
+              <input
+                type="url"
+                id="chat_link"
+                placeholder="วางลิงก์แชท เช่น https://line.me/..."
+                disabled={formMode === "edit" && !isDepositUnlocked}
+                value={chatLink}
+                onChange={(e) => setChatLink(e.target.value)}
               />
             </div>
 
@@ -472,18 +475,35 @@ export default function DepositPage() {
               <input
                 type="text"
                 id="phone_number"
+                placeholder="0xxxxxxxxx"
                 disabled={formMode === "edit" && !isDepositUnlocked}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
 
-            <hr className="divider-dashed" />
-            <div className="form-sub-title text-blue">💰 ส่วนข้อมูลยอดมัดจำหลัก</div>
-
-            {/* โซน 4 ฟิลด์หลัก: deposit_amount, deposit_date, remaining_balance, due_date */}
+            {/* 🆕 เพิ่ม Input: channel */}
             <div className="form-group">
-              <label>ยอดเงินมัดจำครั้งแรก (deposit_amount)</label>
+              <label htmlFor="channel">ช่องทางติดต่อ</label>
+              <select
+                id="channel"
+                disabled={formMode === "edit" && !isDepositUnlocked}
+                value={channel}
+                onChange={(e) => setChannel(e.target.value)}
+              >
+                <option value="LINE">LINE</option>
+                <option value="FB">FB</option>
+                <option value="IG">IG</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+
+
+            <hr className="divider-dashed" />
+            <div className="form-sub-title text-blue">รายละเอียดการมัดจำ</div>
+
+            <div className="form-group">
+              <label>ยอดเงินมัดจำที่ชำระ</label>
               <input
                 type="number"
                 step="0.01"
@@ -495,7 +515,7 @@ export default function DepositPage() {
             </div>
 
             <div className="form-group">
-              <label>วันที่ชำระเงินมัดจำ (deposit_date)</label>
+              <label>วันที่ชำระเงินมัดจำ</label>
               <input
                 type="date"
                 required
@@ -506,7 +526,7 @@ export default function DepositPage() {
             </div>
 
             <div className="form-group">
-              <label>ยอดเงินสำหรับชำระครั้งถัดไป (remaining_balance)</label>
+              <label>ยอดชำระคงเหลือ</label>
               <input
                 type="number"
                 step="0.01"
@@ -518,7 +538,7 @@ export default function DepositPage() {
             </div>
 
             <div className="form-group">
-              <label>วันครบกำหนดชำระครั้งถัดไป (due_date)</label>
+              <label>วันครบกำหนดชำระ</label>
               <input
                 type="date"
                 required
@@ -528,16 +548,16 @@ export default function DepositPage() {
               />
             </div>
 
-            {/* โซนบันทึกการรับชำระเงิน (จะแสดงเฉพาะตอน Edit และห้ามแก้ไขถ้าติ๊ก 'แก้ไขข้อมูลหลัก') */}
+            {/* โซนบันทึกการรับชำระเงิน */}
             {formMode === "edit" && (
               <>
                 <hr className="divider-dashed" />
                 <div className={`inner-payment-card ${isDepositUnlocked ? "disabled-zone" : "active-zone"}`}>
-                  <div className="form-sub-title text-green">📥 บันทึกการชำระเงินงวดถัดไป</div>
+                  <div className="form-sub-title text-green">บันทึกการชำระเงิน</div>
                   {isDepositUnlocked && <small className="text-red d-block mb-2">*(โหมดแก้ไขข้อมูลหลัก: ห้ามบันทึกส่วนชำระเงิน)</small>}
                   
                   <div className="form-group">
-                    <label htmlFor="payment_date">วันที่ชำระเงิน (payment_date)</label>
+                    <label htmlFor="payment_date">วันที่ชำระ</label>
                     <input
                       type="date"
                       id="payment_date"
@@ -548,7 +568,7 @@ export default function DepositPage() {
                   </div>
                   
                   <div className="form-group">
-                    <label htmlFor="total_paid_amount">จำนวนเงินที่ชำระเข้ามา (total_paid_amount)</label>
+                    <label htmlFor="total_paid_amount">ยอดเงินที่ชำระ</label>
                     <input
                       type="number"
                       step="0.01"
@@ -569,7 +589,7 @@ export default function DepositPage() {
                       onChange={(e) => setClosed(e.target.value)}
                     >
                       <option value="NO">NO (ยังค้างชำระอยู่)</option>
-                      <option value="YES">YES (ชำระครบ/ปิดออเดอร์)</option>
+                      <option value="YES">YES (ชำระครบ)</option>
                     </select>
                   </div>
                 </div>
@@ -578,10 +598,23 @@ export default function DepositPage() {
 
             <hr className="divider-dashed" />
 
+            {/* 🆕 เพิ่ม Input: input_status */}
             <div className="form-group">
-              <label htmlFor="note">หมายเหตุเพิ่มเติม</label>
+              <label htmlFor="input_status">สถานะจากแอดมิน</label>
+              <input
+                type="text"
+                id="input_status"
+                placeholder="ระบุสถานะ..."
+                value={inputStatus}
+                onChange={(e) => setInputStatus(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="note">หมายเหตุ</label>
               <textarea
                 id="note"
+                placeholder="ระบุหมายเหตุ..."
                 rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
