@@ -50,7 +50,7 @@ export default function HomePage() {
           <span>ระบบมัดจำ</span>
         </Link>
 
-        <Link href={`/repair{getQueryString()}`} className="nav-button">
+        <Link href={`/repair${getQueryString()}`} className="nav-button">
           <Wrench size={20} />
           <span>ระบบงานซ่อม</span>
         </Link>
