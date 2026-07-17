@@ -364,15 +364,18 @@ export default function DepositPage() {
                   <th className="col-product">รหัสสินค้า</th>
                   <th className="col-customer">ชื่อลูกค้า</th>
                   <th className="col-phone">เบอร์โทร</th>
+                  <th className="col-channel">ช่องทาง</th>
                   <th className="col-sys-status">สถานะจากระบบ</th>
-                  <th className="col-amount">ยอดมัดจำแรก</th>
-                  <th className="col-date">วันที่มัดจำ</th>
-                  <th className="col-balance">ยอดค้างชำระถัดไป</th>
-                  <th className="col-due">วันครบกำหนด</th>
-                  <th className="col-pay-date">วันชำระล่าสุด</th>
-                  <th className="col-paid">ยอดชำระล่าสุด</th>
-                  <th className="col-closed">ปิดบัญชี</th>
+                  <th className="col-amount">ยอดเงินมัดจำที่ชำระ</th>
+                  <th className="col-date">วันที่ชำระเงินมัดจำ</th>
+                  <th className="col-balance">ยอดชำระครั้งถัดไป</th>
+                  <th className="col-due-date">วันครบกำหนดชำระครั้งถัดไป</th>
+                  <th className="col-paid">ยอดเงินที่ชำระ</th>
+                  <th className="col-pay-date">วันที่ชำระ</th>
+                  <th className="col-admin-status">สถานะจากแอดมิน</th>
+                  <th className="col-closed">ปิดยอดแล้ว</th>
                   <th className="col-note">หมายเหตุ</th>
+                  <th className="col-admin-name">แอดมินที่ทำรายการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -386,24 +389,49 @@ export default function DepositPage() {
                     const dData = Array.isArray(depositList) ? depositList[0] : depositList;
                     const { statusText, badgeClass, durationText } = calculateOverdueAndDuration(x);
 
+                    const adminUserText = x.updated_by_name && x.updated_by_name !== "Unknown" 
+                      ? x.updated_by_name 
+                      : (x.created_by_name || "-");
+
                     return (
                       <tr key={x.transaction_id} onClick={() => triggerEditMode(x)}>
                         <td><strong>{x.transaction_id}</strong></td>
                         <td><small>{x.product || "-"}</small></td>
-                        <td>{x.customer_name}</td>
-                        <td>{x.phone_number || "-"}</td>
                         <td>
-                          <span className={`status-badge ${badgeClass}`}>{statusText}</span>
-                          <div className="table-txt-small-italic">({durationText})</div>
+                          {x.chat_link ? (
+                            <a 
+                              href={x.chat_link} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()} 
+                              className="table-link-customer"
+                            >
+                              {x.customer_name}
+                            </a>
+                          ) : (
+                            x.customer_name
+                          )}
                         </td>
+                        <td>{x.phone_number || "-"}</td>
+                        <td><small>{x.channel}</small></td>
+                        <td><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
                         <td>{dData?.deposit_amount ? Number(dData.deposit_amount).toLocaleString() : "0"} บ.</td>
                         <td>{dData?.deposit_date || "-"}</td>
-                        <td className="table-txt-blue-bold">{dData?.remaining_balance ? Number(dData.remaining_balance).toLocaleString() : "0"} บ.</td>
+                        <td>
+                          <div className={(dData?.remaining_balance && Number(dData.remaining_balance) > 0) ? "table-overdue-red" : "table-overdue-green"}>
+                            {dData?.remaining_balance ? Number(dData.remaining_balance).toLocaleString() : "0"} บ.
+                          </div>
+                          <div className="table-txt-small-italic">
+                            ({durationText})
+                          </div>
+                        </td>
                         <td>{dData?.due_date || "-"}</td>
-                        <td>{dData?.payment_date || "-"}</td>
                         <td>{dData?.total_paid_amount ? Number(dData.total_paid_amount).toLocaleString() : "-"}</td>
+                        <td>{dData?.payment_date || "-"}</td>
+                        <td>{pData?.input_status || "-"}</td>
                         <td><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
-                        <td><small className="table-txt-muted">{x.note || "-"}</small></td>
+                        <td><span className="table-txt-muted">{x.note || "-"}</span></td>
+                        <td><span className="table-txt-admin">{adminUserText}</span></td>
                       </tr>
                     );
                   })
@@ -500,7 +528,7 @@ export default function DepositPage() {
 
 
             <hr className="divider-dashed" />
-            <div className="form-sub-title text-blue">รายละเอียดการมัดจำ</div>
+            {/* <div className="form-sub-title text-blue">รายละเอียดการมัดจำ</div> */}
 
             <div className="form-group">
               <label>ยอดเงินมัดจำที่ชำระ</label>
@@ -526,7 +554,7 @@ export default function DepositPage() {
             </div>
 
             <div className="form-group">
-              <label>ยอดชำระคงเหลือ</label>
+              <label>ยอดชำระครั้งถัดไป</label>
               <input
                 type="number"
                 step="0.01"
@@ -538,7 +566,7 @@ export default function DepositPage() {
             </div>
 
             <div className="form-group">
-              <label>วันครบกำหนดชำระ</label>
+              <label>วันครบกำหนดชำระครั้งถัดไป</label>
               <input
                 type="date"
                 required
