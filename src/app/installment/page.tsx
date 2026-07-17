@@ -599,100 +599,100 @@ return (
                     ? x.updated_by_name 
                     : (x.created_by_name || "-");
 
-                  return (
-  <tr 
-    key={x.transaction_id} 
-    onClick={() => openPaymentMode(x, pData)} 
-    style={{ borderBottom: "1px solid #e5e7eb", cursor: "pointer" }} 
-    className={editTxId === pData?.transaction_id ? "row-active" : ""}
-  >
-    {/* 1. ปุ่ม Void */}
-    <td style={{ textAlign: "center", padding: "8px" }} onClick={(e) => e.stopPropagation()}>
-      <button 
-        className="btn" 
-        style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 10px", fontSize: "11px", borderRadius: "6px" }} 
-        onClick={() => voidEntireContract(x.transaction_id)}
-      >
-        Void
-      </button>
-    </td>
-
-    {/* 2. Transaction ID */}
-    <td style={{ padding: "8px", fontWeight: "bold" }}>{x.transaction_id}</td>
-
-    {/* 3. Product */}
-    <td style={{ padding: "8px" }}><small>{x.product || "-"}</small></td>
-
-    {/* 4. Customer Name */}
-    <td style={{ padding: "8px" }}>
-      {x.chat_link ? (
-        <a 
-          href={x.chat_link} 
-          target="_blank" 
-          rel="noreferrer" 
-          style={{ color: "#2563eb", textDecoration: "underline", fontWeight: 500 }}
-          onClick={(e) => e.stopPropagation()}
+return (
+    <tr 
+      key={x.transaction_id} 
+      onClick={() => openPaymentMode(x, pData)} 
+      style={{ borderBottom: "1px solid #e5e7eb", cursor: "pointer" }} 
+      className={editTxId === pData?.transaction_id ? "row-active" : ""}
+    >
+      {/* 1. ปุ่ม Void */}
+      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+        <button 
+          className="btn" 
+          style={{ backgroundColor: "#dc2626", color: "white", padding: "6px 10px", fontSize: "11px", borderRadius: "6px" }} 
+          onClick={() => voidEntireContract(x.transaction_id)}
         >
-          {x.customer_name}
-        </a>
-      ) : (
-        <span>{x.customer_name}</span>
-      )}
-    </td>
+          Void
+        </button>
+      </td>
 
-    {/* 5. Phone Number */}
-    <td style={{ padding: "8px" }}>{x.phone_number || "-"}</td>
+      {/* 2. Transaction ID */}
+      <td><strong>{x.transaction_id}</strong></td>
 
-    {/* 6. Channel */}
-    <td style={{ padding: "8px" }}><small>{x.channel}</small></td>
+      {/* 3. Product */}
+      <td><small>{x.product || "-"}</small></td>
 
-    {/* 7. System Status */}
-    <td style={{ padding: "8px" }}><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
+      {/* 4. Customer Name */}
+      <td>
+        {x.chat_link ? (
+          <a 
+            href={x.chat_link} 
+            target="_blank" 
+            rel="noreferrer" 
+            className="table-link-customer"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {x.customer_name}
+          </a>
+        ) : (
+          x.customer_name
+        )}
+      </td>
 
-    {/* 8. ยอดต่องวด */}
-    <td style={{ padding: "8px" }}>{Number(amtPerPeriod).toLocaleString()} บ.</td>
+      {/* 5. Phone Number */}
+      <td>{x.phone_number || "-"}</td>
 
-    {/* 9. งวดทั้งหมด */}
-    <td style={{ padding: "8px" }}>{pData?.total_periods || "-"} งวด</td>
+      {/* 6. Channel */}
+      <td><small>{x.channel}</small></td>
 
-    {/* 10. งวดปัจจุบัน */}
-    <td style={{ padding: "8px" }}><strong>{pData?.current_period || "-"}</strong></td>
+      {/* 7. System Status */}
+      <td><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
 
-    {/* 11. ดิวทุกวันที่ */}
-    <td style={{ padding: "8px" }}>ทุกวันที่ {pData?.monthly_due_day || "-"}</td>
+      {/* 8. ยอดต่องวด */}
+      <td>{Number(amtPerPeriod).toLocaleString()} บ.</td>
 
-    {/* 12. วันที่จ่าย */}
-    <td style={{ padding: "8px" }}>{pDateText}</td>
+      {/* 9. งวดทั้งหมด */}
+      <td>{pData?.total_periods || "-"} งวด</td>
 
-    {/* 13. ยอดที่จ่ายแล้ว */}
-    <td style={{ padding: "8px", color: "#2563eb", fontWeight: "bold" }}>{paidAmountText} บ.</td>
+      {/* 10. งวดปัจจุบัน */}
+      <td><strong>{pData?.current_period || "-"}</strong></td>
 
-    {/* 14. วันครบกำหนด */}
-    <td style={{ padding: "8px" }}>{dueDateText}</td>
+      {/* 11. ดิวทุกวันที่ */}
+      <td>ทุกวันที่ {pData?.monthly_due_day || "-"}</td>
 
-    {/* 15. ยอดค้างชำระ (ปรับโครงสร้าง Tag + fontSize ข้างล่างให้ความสูงแถวเท่าหน้า Pawn เป๊ะ) */}
-    <td style={{ padding: "8px" }}>
-      <span style={{ color: overdueAmount > 0 ? "#b91c1c" : "#10b981", fontWeight: "bold" }}>
-        {overdueAmount.toLocaleString()} บ.
-      </span>
-      <div style={{ fontSize: "10px", color: "#6b7280", fontStyle: "italic" }}>
-        ({durationText})
-      </div>
-    </td>
+      {/* 12. วันที่จ่าย */}
+      <td>{pDateText}</td>
 
-    {/* 16. Status Admin */}
-    <td style={{ padding: "8px" }}>{inputStatusText}</td>
+      {/* 13. ยอดที่จ่ายแล้ว (สวมคลาส table-txt-blue-bold แบบ pawn) */}
+      <td className="table-txt-blue-bold">{paidAmountText} บ.</td>
 
-    {/* 17. ปิดเคส */}
-    <td style={{ padding: "8px" }}><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
+      {/* 14. วันครบกำหนด */}
+      <td>{dueDateText}</td>
 
-    {/* 18. หมายเหตุ */}
-    <td style={{ padding: "8px" }}><span style={{ color: "#6b7280", fontSize: "12px" }}>{x.note || "-"}</span></td>
+      {/* 15. ยอดค้างชำระ (เปลี่ยนโครงสร้าง div ซ้อน div และใช้คลาสตรงตามหน้า pawn เป๊ะ) */}
+      <td>
+        <div className={overdueAmount > 0 ? "table-overdue-red" : "table-overdue-green"}>
+          {overdueAmount.toLocaleString()} บ.
+        </div>
+        <div className="table-txt-small-italic">
+          ({durationText})
+        </div>
+      </td>
 
-    {/* 19. แอดมินผู้ดูแล */}
-    <td style={{ padding: "8px" }}><span style={{ color: "#4b5563", fontWeight: 500 }}>{adminUserText}</span></td>
-  </tr>
-);
+      {/* 16. Status Admin */}
+      <td>{inputStatusText}</td>
+
+      {/* 17. ปิดเคส */}
+      <td><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
+
+      {/* 18. หมายเหตุ (สวมคลาส table-txt-muted แบบ pawn) */}
+      <td><span className="table-txt-muted">{x.note || "-"}</span></td>
+
+      {/* 19. แอดมินผู้ดูแล (สวมคลาส table-txt-admin แบบ pawn) */}
+      <td><span className="table-txt-admin">{adminUserText}</span></td>
+    </tr>
+  );
                 })
               )}
             </tbody>
