@@ -380,7 +380,7 @@ export default function DepositPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูล...</td></tr>
+                  <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูลการมัดจำ...</td></tr>
                 ) : filteredTransactions.length === 0 ? (
                   <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลการมัดจำที่ตรงเงื่อนไข</td></tr>
                 ) : (
