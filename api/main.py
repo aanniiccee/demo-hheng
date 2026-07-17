@@ -715,10 +715,10 @@ class DepositTransactionIn(BaseModel):
     customer_name: str
     phone_number: Optional[str] = ''
     channel: str                            # ช่องทางที่ลูกค้าติดต่อมา
-    deposit_amount: float                   # 💰 ยอดเงินมัดจำก้อนแรก
+    deposit_amount: float = 0.0                  # 💰 ยอดเงินมัดจำก้อนแรก
     deposit_date: Optional[str] = None
-    remaining_balance: float                # 💵 ยอดคงเหลือที่ต้องชำระเพิ่ม
-    due_date: str                           # 📅 วันนัดชำระส่วนที่เหลือ
+    remaining_balance: float = 0.0                # 💵 ยอดคงเหลือที่ต้องชำระเพิ่ม
+    due_date: Optional[str] = None                           # 📅 วันนัดชำระส่วนที่เหลือ
     total_paid_amount: Optional[float] = 0.0
     payment_date: Optional[str] = None      # วันที่มาชำระยอดที่เหลือ (ถ้าจ่ายแล้วค่อยส่งมา)
     closed: str = 'NO'                      # YES หรือ NO
