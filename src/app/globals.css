@@ -69,6 +69,18 @@
   .btn-primary:hover { background-color: #1d4ed8; }
   .btn-success { background-color: #10b981; color: #ffffff; }
   .btn-success:hover { background-color: #059669; }
+  /* เพิ่มคลาสสีแดงตรงนี้ */
+  .btn-danger { background-color: #dc2626; color: #ffffff; }
+  .btn-danger:hover { background-color: #b91c1c; }
+  /* 🌟 คลาสจัดการปุ่มบันทึก & ปุ่มขยายเต็มหน้ากว้างความสูงเท่ากันหมด */
+  .btn-block {
+    width: 100%;
+    justify-content: center;
+    height: 40px;
+  }
+  .btn-submit {
+    margin-bottom: 10px;
+  }
 
   .main-layout {
     display: grid;
@@ -469,16 +481,6 @@
   .form-sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .form-sub-title { font-size: 13px; font-weight: 600; color: #4b5563; }
   .form-edit-checkbox-label { font-size: 12px; color: #2563eb; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-
-  /* 🌟 คลาสจัดการปุ่มบันทึก & ปุ่มขยายเต็มหน้ากว้างความสูงเท่ากันหมด */
-  .btn-block {
-    width: 100%;
-    justify-content: center;
-    height: 40px;
-  }
-  .btn-submit {
-    margin-bottom: 10px;
-  }
 }
 
 /* 4. สไตล์ส่วน Responsive เมื่อเปิดบนมือถือ */
