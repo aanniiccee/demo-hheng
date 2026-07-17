@@ -15,18 +15,20 @@ import {
   SquarePen
 } from "lucide-react";
 
-// 🌟 กำหนด Type โครงสร้างข้อมูลที่ส่งมาจาก FastAPI หลังบ้านสำหรับ Deposit
+// 🌟 ปรับโครงสร้างข้อมูลมัดจำ (Deposit Detail) ให้ตรงกับโฟลวใหม่
 interface DepositDetail {
-  interest_per_month: number;
-  payment_date?: string; // วันที่ทำรายการฝาก/ถอน/จ่ายดอกเบี้ยล่าสุด
-  next_due_date?: string; // วันที่ครบกำหนดรอบถัดไป
+  deposit_amount: number;       // ยอดเงินมัดจำครั้งแรก
+  deposit_date?: string;        // วันที่ชำระเงินมัดจำ (เพิ่มใหม่)
+  remaining_balance: number;    // ยอดเงินสำหรับชำระครั้งถัดไป
+  due_date?: string;            // วันครบกำหนดชำระครั้งถัดไป
+  payment_date?: string;        // วันที่บันทึกชำระเงินงวดล่าสุด
+  total_paid_amount?: number;   // ยอดรวมที่ชำระเข้ามาล่าสุด (เพิ่มใหม่)
   input_status?: string;
-  total_paid_amount: number; // ยอดรวมที่ชำระหรือทำรายการ
 }
 
 interface Transaction {
   transaction_id: string;
-  product: string; // ในบริบทนี้อาจเป็นประเภทบัญชีหรือรหัสออม
+  product: string; 
   customer_name: string;
   phone_number?: string;
   channel: string;
@@ -36,7 +38,7 @@ interface Transaction {
   chat_link?: string;
   updated_by_name?: string;
   created_by_name?: string;
-  transaction_deposit?: DepositDetail[] | DepositDetail; // เปลี่ยนจาก transaction_pawn
+  transaction_deposit?: DepositDetail[] | DepositDetail; 
 }
 
 export default function DepositPage() {
@@ -46,45 +48,45 @@ export default function DepositPage() {
   const token = searchParams.get("token") || "";
   const txIdFromUrl = searchParams.get("tx_id")?.trim() || "";
 
-  // --- States สำคัญสำหรับระบบข้อมูล ---
+  // --- States ข้อมูลรวม ---
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- States สำหรับการค้นหาและตัวกรอง (Filters) ---
+  // --- States Filters ---
   const [searchTerm, setSearchTerm] = useState("");
   const [closedFilter, setClosedFilter] = useState("NO"); 
   const [excludePaidFilter, setExcludePaidFilter] = useState("YES"); 
   const [statusFilter, setStatusFilter] = useState("ALL"); 
 
-  // --- States สำหรับการควบคุมฟอร์ม ---
+  // --- States ควบคุมโหมดฟอร์ม ---
   const [formMode, setFormMode] = useState<"add" | "edit">("add");
   const [editTxId, setEditTxId] = useState("");
-  const [isDepositUnlocked, setIsDepositUnlocked] = useState(false); // เปลี่ยนจาก isPawnUnlocked
-  const [originalPaymentDate, setOriginalPaymentDate] = useState("");
+  const [isDepositUnlocked, setIsDepositUnlocked] = useState(false); 
 
-  // --- States สำหรับผูกข้อมูล Input ในฟอร์ม (Form Bindings) ---
+  // --- 🆕 States ใหม่/ปรับปรุง สำหรับผูก Input ฟอร์มตามเงื่อนไขของคุณ ---
   const [product, setProduct] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [chatLink, setChatLink] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [channel, setChannel] = useState("LINE");
-  const [interestPerMonth, setInterestPerMonth] = useState("");
-  const [nextDueDateAdd, setNextDueDateAdd] = useState("");
-  const [currentDueDate, setCurrentDueDate] = useState("");
-  const [currentOverdueBalance, setCurrentOverdueBalance] = useState(0);
+  
+  // 4 ฟิลด์ข้อมูลหลักของมัดจำ
+  const [depositAmount, setDepositAmount] = useState("");
+  const [depositDate, setDepositDate] = useState("");
+  const [remainingBalance, setRemainingBalance] = useState("");
+  const [dueDate, setDueDate] = useState("");
+
+  // ฟิลด์สำหรับบันทึกการชำระเงินงวดถัดไป
   const [paymentDate, setPaymentDate] = useState("");
   const [totalPaidAmount, setTotalPaidAmount] = useState("");
+  
   const [closed, setClosed] = useState("NO");
-  const [nextDueDateEdit, setNextDueDateEdit] = useState("");
   const [inputStatus, setInputStatus] = useState("");
   const [note, setNote] = useState("");
 
   const todayStr = new Date().toISOString().split("T")[0];
 
-  // ==========================================
-  // 1. ระบบตรวจสอบ Session Admin & โหลดข้อมูลเริ่มต้น
-  // ==========================================
   useEffect(() => {
     const adminName = sessionStorage.getItem("admin_name");
     const adminLineId = sessionStorage.getItem("admin_line_id");
@@ -99,7 +101,6 @@ export default function DepositPage() {
     loadData();
   }, [token]);
 
-  // จัดการ Trigger คลิกเปิดฟอร์มแก้ข้อมูลออโต้หากมี tx_id พ่วงมาใน URL
   useEffect(() => {
     if (txIdFromUrl && allTransactions.length > 0) {
       const found = allTransactions.find(x => x.transaction_id === txIdFromUrl);
@@ -109,9 +110,6 @@ export default function DepositPage() {
     }
   }, [txIdFromUrl, allTransactions]);
 
-  // ==========================================
-  // 2. ฟังก์ชันโหลดข้อมูลหลักจาก API (FastAPI backend ของ Deposit)
-  // ==========================================
   const loadData = async () => {
     try {
       setLoading(true);
@@ -129,129 +127,105 @@ export default function DepositPage() {
     }
   };
 
-  // ==========================================
-  // 3. ฟังก์ชันคำนวณวันคงเหลือ / ยอดค้างชำระ (Business Logic ฝากเงิน/ปันผลดอกเบี้ย)
-  // ==========================================
+  // --- คำนวณวันคงเหลือ / สถานะตามวัน due_date ของมัดจำ ---
   const calculateOverdueAndDuration = (tx: Transaction) => {
     const depositList = tx.transaction_deposit;
     const dData = Array.isArray(depositList) ? depositList[0] : depositList;
 
-    let statusText = "ยังไม่ถึงกำหนด";
+    let statusText = "ยังไม่ถึงกำหนดชำระ";
     let badgeClass = "st-normal";
-    let overdueAmount = 0;
     let durationText = "";
 
-    if (tx.current_status === "ชำระแล้ว") {
+    if (tx.closed === "YES") {
       statusText = "ชำระแล้ว";
       badgeClass = "closed-yes";
-      durationText = "จัดการดอกเบี้ยแล้ว";
-    } else if (dData && dData.next_due_date) {
-      const dueDate = new Date(dData.next_due_date);
+      durationText = "ชำระเสร็จสิ้นแล้ว";
+    } else if (dData && dData.due_date) {
+      const targetDate = new Date(dData.due_date);
       const todayObj = new Date(todayStr);
 
-      dueDate.setHours(0,0,0,0);
+      targetDate.setHours(0,0,0,0);
       todayObj.setHours(0,0,0,0);
 
-      if (dueDate.getTime() === todayObj.getTime()) {
+      if (targetDate.getTime() === todayObj.getTime()) {
         statusText = "ครบกำหนด";
         badgeClass = "st-today";
         durationText = "ครบกำหนดวันนี้";
-      } else if (dueDate < todayObj) {
+      } else if (targetDate < todayObj) {
         statusText = "เกินกำหนด";
         badgeClass = "st-overdue";
-
-        let monthsDiff = (todayObj.getFullYear() - dueDate.getFullYear()) * 12 + (todayObj.getMonth() - dueDate.getMonth());
-        let checkDate = new Date(dueDate);
-        checkDate.setMonth(checkDate.getMonth() + monthsDiff);
-        
-        if (checkDate > todayObj) { 
-          monthsDiff--; 
-          checkDate = new Date(dueDate); 
-          checkDate.setMonth(checkDate.getMonth() + monthsDiff); 
-        }
-
-        const timeDiff = todayObj.getTime() - checkDate.getTime();
+        const timeDiff = todayObj.getTime() - targetDate.getTime();
         const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-        durationText = `ค้าง ${monthsDiff} ด. ${daysDiff} วัน`;
-
-        const chargeableMonths = daysDiff > 0 ? monthsDiff + 1 : Math.max(1, monthsDiff);
-        overdueAmount = chargeableMonths * (dData.interest_per_month || 0);
+        durationText = `เกินกำหนดชำระ ${daysDiff} วัน`;
       } else {
-        const diffDays = Math.ceil((dueDate.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
+        const diffDays = Math.ceil((targetDate.getTime() - todayObj.getTime()) / (1000 * 60 * 60 * 24));
         durationText = `เหลืออีก ${diffDays} วัน`;
       }
     }
 
-    return { statusText, badgeClass, overdueAmount, durationText };
+    return { statusText, badgeClass, durationText };
   };
 
-  // ==========================================
-  // 4. ระบบการเคลียร์และสลับเปิดฟอร์ม (Form Actions)
-  // ==========================================
   const clearForm = () => {
     setFormMode("add");
     setEditTxId("");
     setIsDepositUnlocked(false);
-    setOriginalPaymentDate("");
     
     setProduct("");
     setCustomerName("");
     setChatLink("");
     setPhoneNumber("");
     setChannel("LINE");
-    setInterestPerMonth("");
-    setNextDueDateAdd("");
+    
+    setDepositAmount("");
+    setDepositDate(todayStr);
+    setRemainingBalance("");
+    setDueDate("");
+    
+    setPaymentDate("");
+    setTotalPaidAmount("");
+    setClosed("NO");
     setInputStatus("");
     setNote("");
   };
 
   const triggerEditMode = (tx: Transaction) => {
     const depositList = tx.transaction_deposit;
-    const dData: DepositDetail = Array.isArray(depositList) ? depositList[0] : (depositList || { interest_per_month: 0, total_paid_amount: 0 });
-    const { overdueAmount } = calculateOverdueAndDuration(tx);
+    const dData: DepositDetail = Array.isArray(depositList) 
+      ? depositList[0] 
+      : (depositList || { deposit_amount: 0, remaining_balance: 0 });
 
     setFormMode("edit");
     setEditTxId(tx.transaction_id);
-    setIsDepositUnlocked(false);
+    setIsDepositUnlocked(false); // เริ่มต้นล็อคข้อมูลหลัก ให้บันทึกชำระเงินได้อย่างเดียว
 
     setProduct(tx.product || "");
     setCustomerName(tx.customer_name || "");
     setChatLink(tx.chat_link || "");
     setPhoneNumber(tx.phone_number || "");
     setChannel(tx.channel || "LINE");
-    setInterestPerMonth(String(dData.interest_per_month || 0));
     
-    setCurrentDueDate(dData.next_due_date || "");
-    setCurrentOverdueBalance(overdueAmount);
+    // โหลดข้อมูลมัดจำ 4 ฟิลด์หลัก เข้าสเตท
+    setDepositAmount(String(dData.deposit_amount || 0));
+    setDepositDate(dData.deposit_date || "");
+    setRemainingBalance(String(dData.remaining_balance || 0));
+    setDueDate(dData.due_date || "");
+
+    // เซ็ตฟิลด์สำหรับการชำระเงิน (เคลียร์เป็นค่าว่างหรือวันปัจจุบันเพื่อให้แอดมินบันทึกใหม่)
+    setPaymentDate(todayStr);
+    setTotalPaidAmount("");
     
-    const initialPayDate = dData.payment_date && dData.payment_date !== "-" ? dData.payment_date : todayStr;
-    setPaymentDate(initialPayDate);
-    setOriginalPaymentDate(initialPayDate);
-    
-    setTotalPaidAmount(String(dData.total_paid_amount || 0));
     setClosed(tx.closed || "NO");
-    setNextDueDateEdit("");
-    
     setInputStatus(dData.input_status || "");
     setNote(tx.note || "");
   };
 
   const handleDepositUnlockChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const isChecked = e.target.checked;
-    setIsDepositUnlocked(isChecked);
-
-    if (isChecked) {
-      setTotalPaidAmount("0");
-      setNextDueDateEdit("");
-      setClosed("NO");
-    } else {
-      setTotalPaidAmount("0");
-      setPaymentDate(originalPaymentDate);
-    }
+    setIsDepositUnlocked(e.target.checked);
   };
 
   // ==========================================
-  // 5. ระบบบันทึกและแก้ไขข้อมูลรายการ (Submit Handlers)
+  // บันทึกข้อมูลและจัดการสิทธิ์การส่ง Payload ตามที่คุณกำหนด
   // ==========================================
   const handleFormSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -260,44 +234,43 @@ export default function DepositPage() {
     const adminLineId = sessionStorage.getItem("admin_line_id") || "Unknown";
     const adminName = sessionStorage.getItem("admin_name") || "Unknown";
 
-    let targetDueDate = "";
-    let paymentDateValue = null;
-    let paidAmountValue = 0;
-    let closedValue = "NO";
-
-    if (formMode === "add") {
-      targetDueDate = nextDueDateAdd;
-    } else {
-      if (isDepositUnlocked) {
-        paymentDateValue = null;
-        paidAmountValue = 0;
-        closedValue = "NO";
-        targetDueDate = currentDueDate;
-      } else {
-        targetDueDate = nextDueDateEdit;
-        paymentDateValue = paymentDate ? paymentDate : null;
-        paidAmountValue = parseFloat(totalPaidAmount || "0");
-        closedValue = closed;
-      }
-    }
-
-    const payload = {
+    let payload: any = {
       product: product,
       customer_name: customerName,
       phone_number: phoneNumber,
       channel: channel,
-      interest_per_month: parseFloat(interestPerMonth || "0"),
-      payment_date: paymentDateValue,
-      next_due_date: targetDueDate,
+      closed: closed,
       input_status: inputStatus,
-      closed: closedValue,
-      total_paid_amount: paidAmountValue,
       note: note,
-      is_edit_deposit_master: isDepositUnlocked, // เปลี่ยนให้ตรงกับหลังบ้านของ Deposit
       created_by_line_id: adminLineId,
       created_by_name: adminName,
-      chat_link: chatLink
+      chat_link: chatLink,
+      is_edit_deposit_master: isDepositUnlocked
     };
+
+    if (formMode === "add") {
+      // 1. โฟลวสร้างครั้งแรก: ส่งหมดทั้ง 4 ฟิลด์หลัก (ไม่ส่งฟิลด์รับชำระ)
+      payload.deposit_amount = parseFloat(depositAmount || "0");
+      payload.deposit_date = depositDate || null;
+      payload.remaining_balance = parseFloat(remainingBalance || "0");
+      payload.due_date = dueDate || null;
+      payload.payment_date = null;
+      payload.total_paid_amount = 0;
+    } else {
+      if (isDepositUnlocked) {
+        // 2. โฟลวแก้ไขข้อมูลหลัก: แก้ไขได้ 4 ฟิลด์หลัก ห้ามส่ง payment_date กับ total_paid_amount ไปบันทึก
+        payload.deposit_amount = parseFloat(depositAmount || "0");
+        payload.deposit_date = depositDate || null;
+        payload.remaining_balance = parseFloat(remainingBalance || "0");
+        payload.due_date = dueDate || null;
+        payload.payment_date = null;
+        payload.total_paid_amount = 0;
+      } else {
+        // 3. โฟลวบันทึกการชำระ: ล็อคฟิลด์หลัก ส่งไปได้แค่ payment_date กับ total_paid_amount
+        payload.payment_date = paymentDate || null;
+        payload.total_paid_amount = parseFloat(totalPaidAmount || "0");
+      }
+    }
 
     let url = "/api/deposit-transactions";
     let method = "POST";
@@ -315,7 +288,7 @@ export default function DepositPage() {
       });
 
       if (response.ok) {
-        alert("บันทึกข้อมูลสำเร็จ!");
+        alert("บันทึกข้อมูลมัดจำสำเร็จ!");
         clearForm();
         await loadData();
       } else {
@@ -330,16 +303,12 @@ export default function DepositPage() {
     }
   };
 
-  // ==========================================
-  // 6. ระบบกรองข้อมูล (Filter Data Client-side)
-  // ==========================================
+  // --- Client Side Filter ---
   const filteredTransactions = allTransactions.filter(x => {
     if (closedFilter !== "ALL" && x.closed !== closedFilter) return false;
 
     const { statusText } = calculateOverdueAndDuration(x);
-
     if (statusFilter !== "ALL" && statusFilter !== statusText) return false;
-    if (excludePaidFilter === "YES" && statusText === "ชำระแล้ว") return false;
 
     const q = searchTerm.toLowerCase().trim();
     const name = (x.customer_name || "").toLowerCase();
@@ -348,21 +317,6 @@ export default function DepositPage() {
 
     return q === "" || name.includes(q) || txId.includes(q) || pDetail.includes(q);
   });
-
-  const changeClosedFilter = (val: string) => {
-    setClosedFilter(val);
-    if (val === "YES") {
-      setExcludePaidFilter("NO");
-      setStatusFilter("ALL");
-    }
-  };
-
-  const changeStatusFilter = (val: string) => {
-    setStatusFilter(val);
-    if (val !== "ALL" && val !== "ชำระแล้ว" && closedFilter === "YES") {
-      setClosedFilter("NO");
-    }
-  };
 
   const getHomeUrl = () => {
     const adminLineId = sessionStorage.getItem("admin_line_id") || "";
@@ -374,9 +328,8 @@ export default function DepositPage() {
 
   return (
     <div>
-      {/* ส่วนหัวระบบ */}
       <div className="header-container">
-        <h2>ระบบฝากเงินออมทรัพย์ (Deposit Transactions)</h2>
+        <h2>ระบบมัดจำสินค้า (Deposit Transactions)</h2>
         <div className="action-buttons">
           <Link href={getHomeUrl()} className="btn btn-default">
             <ArrowLeft size={24} /> กลับหน้าหลัก
@@ -385,13 +338,13 @@ export default function DepositPage() {
             <RefreshCw size={24} className={loading ? "animate-spin" : ""} /> รีเฟรช
           </button>
           <button type="button" onClick={clearForm} className="btn btn-primary">
-            <Plus size={24} /> สร้างรายการฝากออม
+            <Plus size={24} /> สร้างรายการมัดจำใหม่
           </button>
         </div>
       </div>
 
       <div className="main-layout">
-        {/* ฝั่งซ้าย: ตารางรายการข้อมูล */}
+        {/* ฝั่งซ้าย: ตารางข้อมูลรายการ */}
         <div className="table-container">
           <div className="table-header-bar">
             <div className="search-wrapper">
@@ -399,36 +352,18 @@ export default function DepositPage() {
               <input
                 type="text"
                 className="search-input"
-                placeholder="ชื่อลูกค้า ประเภทบัญชี หรือ Transaction ID..."
+                placeholder="ค้นหาชื่อลูกค้า, สินค้า หรือ ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
             <div>
-              <span className="filter-label">ปิดบัญชีแล้ว:</span>
+              <span className="filter-label">ปิดออเดอร์:</span>
               <div className="filter-group">
-                <button type="button" className={`filter-btn ${closedFilter === "ALL" ? "active" : ""}`} onClick={() => changeClosedFilter("ALL")}>ทั้งหมด</button>
-                <button type="button" className={`filter-btn ${closedFilter === "NO" ? "active" : ""}`} onClick={() => changeClosedFilter("NO")}>เปิดอยู่ (NO)</button>
-                <button type="button" className={`filter-btn ${closedFilter === "YES" ? "active" : ""}`} onClick={() => changeClosedFilter("YES")}>ปิดแล้ว (YES)</button>
-              </div>
-            </div>
-
-            <div>
-              <span className="filter-label">ซ่อนรายการที่จ่ายแล้ว:</span>
-              <div className="filter-group">
-                <button type="button" className={`filter-btn ${excludePaidFilter === "YES" ? "active" : ""}`} onClick={() => setExcludePaidFilter("YES")}>YES</button>
-                <button type="button" className={`filter-btn ${excludePaidFilter === "NO" ? "active" : ""}`} onClick={() => setExcludePaidFilter("NO")}>NO</button>
-              </div>
-            </div>
-
-            <div>
-              <span className="filter-label">สถานะจากระบบ:</span>
-              <div className="filter-group">
-                <button type="button" className={`filter-btn ${statusFilter === "ALL" ? "active" : ""}`} onClick={() => changeStatusFilter("ALL")}>ทั้งหมด</button>
-                <button type="button" className={`filter-btn ${statusFilter === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
-                <button type="button" className={`filter-btn ${statusFilter === "ครบกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("ครบกำหนด")}>ครบกำหนด</button>
-                <button type="button" className={`filter-btn ${statusFilter === "เกินกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("เกินกำหนด")}>เกินกำหนด</button>
+                <button type="button" className={`filter-btn ${closedFilter === "ALL" ? "active" : ""}`} onClick={() => setClosedFilter("ALL")}>ทั้งหมด</button>
+                <button type="button" className={`filter-btn ${closedFilter === "NO" ? "active" : ""}`} onClick={() => setClosedFilter("NO")}>เปิดอยู่</button>
+                <button type="button" className={`filter-btn ${closedFilter === "YES" ? "active" : ""}`} onClick={() => setClosedFilter("YES")}>ปิดแล้ว</button>
               </div>
             </div>
           </div>
@@ -438,85 +373,49 @@ export default function DepositPage() {
               <thead>
                 <tr>
                   <th className="col-id">Transaction ID</th>
-                  <th className="col-product">ประเภท/รหัสออม</th>
+                  <th className="col-product">รหัสสินค้า</th>
                   <th className="col-customer">ชื่อลูกค้า</th>
                   <th className="col-phone">เบอร์โทร</th>
-                  <th className="col-channel">ช่องทาง</th>
                   <th className="col-sys-status">สถานะจากระบบ</th>
-                  <th className="col-interest">ดอกเบี้ยปันผล/เดือน</th>
-                  <th className="col-pay-date">วันที่ทำรายการล่าสุด</th>
-                  <th className="col-pay-amount">ยอดเงินที่ทำรายการ</th>
-                  <th className="col-due-date">กำหนดรอบถัดไป</th>
-                  <th className="col-overdue">ยอดค้างจ่าย/สะสม</th>
-                  <th className="col-admin-status">สถานะจากแอดมิน</th>
+                  <th className="col-amount">ยอดมัดจำแรก</th>
+                  <th className="col-date">วันที่มัดจำ</th>
+                  <th className="col-balance">ยอดค้างชำระถัดไป</th>
+                  <th className="col-due">วันครบกำหนด</th>
+                  <th className="col-pay-date">วันชำระล่าสุด</th>
+                  <th className="col-paid">ยอดชำระล่าสุด</th>
                   <th className="col-closed">ปิดบัญชี</th>
                   <th className="col-note">หมายเหตุ</th>
-                  <th className="col-admin-name">แอดมินที่ทำรายการ</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr>
-                    <td colSpan={15} className="table-empty-row">
-                      กำลังดึงข้อมูลการฝากออมทรัพย์...
-                    </td>
-                  </tr>
+                  <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูล...</td></tr>
                 ) : filteredTransactions.length === 0 ? (
-                  <tr>
-                    <td colSpan={15} className="table-empty-row no-match">
-                      ไม่พบข้อมูลการฝากออมทรัพย์ที่ตรงเงื่อนไข
-                    </td>
-                  </tr>
+                  <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลการมัดจำ</td></tr>
                 ) : (
                   filteredTransactions.map((x) => {
                     const depositList = x.transaction_deposit;
                     const dData = Array.isArray(depositList) ? depositList[0] : depositList;
-                    const { statusText, badgeClass, overdueAmount, durationText } = calculateOverdueAndDuration(x);
-
-                    const adminUserText = x.updated_by_name && x.updated_by_name !== "Unknown" 
-                      ? x.updated_by_name 
-                      : (x.created_by_name || "-");
+                    const { statusText, badgeClass, durationText } = calculateOverdueAndDuration(x);
 
                     return (
                       <tr key={x.transaction_id} onClick={() => triggerEditMode(x)}>
                         <td><strong>{x.transaction_id}</strong></td>
                         <td><small>{x.product || "-"}</small></td>
-                        <td>
-                          {x.chat_link ? (
-                            <a 
-                              href={x.chat_link} 
-                              target="_blank" 
-                              rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()} 
-                              className="table-link-customer"
-                            >
-                              {x.customer_name}
-                            </a>
-                          ) : (
-                            x.customer_name
-                          )}
-                        </td>
+                        <td>{x.customer_name}</td>
                         <td>{x.phone_number || "-"}</td>
-                        <td><small>{x.channel}</small></td>
-                        <td><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
-                        <td>{dData?.interest_per_month ? Number(dData.interest_per_month).toLocaleString() : "0"} บ.</td>
-                        <td>{dData?.payment_date || "-"}</td>
-                        <td className="table-txt-blue-bold">
-                          {dData?.total_paid_amount ? Number(dData.total_paid_amount).toLocaleString() : "0"} บ.
-                        </td>
-                        <td>{dData?.next_due_date || "-"}</td>
                         <td>
-                          <div className={overdueAmount > 0 ? "table-overdue-red" : "table-overdue-green"}>
-                            {overdueAmount.toLocaleString()} บ.
-                          </div>
-                          <div className="table-txt-small-italic">
-                            ({durationText})
-                          </div>
+                          <span className={`status-badge ${badgeClass}`}>{statusText}</span>
+                          <div className="table-txt-small-italic">({durationText})</div>
                         </td>
-                        <td>{dData?.input_status || "-"}</td>
+                        <td>{dData?.deposit_amount ? Number(dData.deposit_amount).toLocaleString() : "0"} บ.</td>
+                        <td>{dData?.deposit_date || "-"}</td>
+                        <td className="table-txt-blue-bold">{dData?.remaining_balance ? Number(dData.remaining_balance).toLocaleString() : "0"} บ.</td>
+                        <td>{dData?.due_date || "-"}</td>
+                        <td>{dData?.payment_date || "-"}</td>
+                        <td>{dData?.total_paid_amount ? Number(dData.total_paid_amount).toLocaleString() : "-"}</td>
                         <td><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
-                        <td><span className="table-txt-muted">{x.note || "-"}</span></td>
-                        <td><span className="table-txt-admin">{adminUserText}</span></td>
+                        <td><small className="table-txt-muted">{x.note || "-"}</small></td>
                       </tr>
                     );
                   })
@@ -526,32 +425,30 @@ export default function DepositPage() {
           </div>
         </div>
 
-        {/* ฝั่งขวา: ฟอร์มสร้าง/แก้ไขข้อมูลแบบ Sticky */}
+        {/* ฝั่งขวา: ฟอร์มจัดการมัดจำ (สลับสถานะ input disabled ตามกฎ) */}
         <div className="form-card">
           <h3>
             {formMode === "add" ? <PlusCircle size={24} /> : <SquarePen size={24} />}
-            <span className="form-title-text">{formMode === "add" ? "สร้างรายการฝากออม" : "บันทึกรายการฝากออม"}</span>
+            <span className="form-title-text">{formMode === "add" ? "บันทึกยอดมัดจำครั้งแรก" : "จัดการรายการมัดจำ"}</span>
           </h3>
           
           <form onSubmit={handleFormSubmit}>
             <div className="form-sub-header">
-              <span className="form-sub-title">รายละเอียดการฝากออมทรัพย์</span>
-              
+              <span className="form-sub-title">ข้อมูลลูกค้าและสินค้า</span>
               {formMode === "edit" && (
                 <label className="form-edit-checkbox-label">
                   <input type="checkbox" checked={isDepositUnlocked} onChange={handleDepositUnlockChange} />
-                  แก้ไขข้อมูลหลัก
+                  ⚙️ แก้ไขข้อมูลมัดจำหลัก
                 </label>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="product">ประเภท/รหัสออม</label>
+              <label htmlFor="product">รหัสสินค้า / รายละเอียด</label>
               <input
                 type="text"
                 id="product"
                 required
-                placeholder="เช่น บัญชีออมทรัพย์พิเศษ, รหัสทองคำ"
                 disabled={formMode === "edit" && !isDepositUnlocked}
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
@@ -564,22 +461,9 @@ export default function DepositPage() {
                 type="text"
                 id="customer_name"
                 required
-                placeholder="ชื่อ-นามสกุล"
                 disabled={formMode === "edit" && !isDepositUnlocked}
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="chat_link">ลิงก์แชทลูกค้า</label>
-              <input
-                type="text"
-                id="chat_link"
-                placeholder="วางลิงก์แชท เช่น https://line.me/..."
-                disabled={formMode === "edit" && !isDepositUnlocked}
-                value={chatLink}
-                onChange={(e) => setChatLink(e.target.value)}
               />
             </div>
 
@@ -588,157 +472,117 @@ export default function DepositPage() {
               <input
                 type="text"
                 id="phone_number"
-                placeholder="0xxxxxxxxx"
                 disabled={formMode === "edit" && !isDepositUnlocked}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="channel">ช่องทางติดต่อ</label>
-              <select
-                id="channel"
-                disabled={formMode === "edit" && !isDepositUnlocked}
-                value={channel}
-                onChange={(e) => setChannel(e.target.value)}
-              >
-                <option value="LINE">LINE</option>
-                <option value="FB">FB</option>
-                <option value="IG">IG</option>
-                <option value="OTHER">Other</option>
-              </select>
-            </div>
+            <hr className="divider-dashed" />
+            <div className="form-sub-title text-blue">💰 ส่วนข้อมูลยอดมัดจำหลัก</div>
 
+            {/* โซน 4 ฟิลด์หลัก: deposit_amount, deposit_date, remaining_balance, due_date */}
             <div className="form-group">
-              <label htmlFor="interest_per_month">ดอกเบี้ยปันผลต่อเดือน (บาท)</label>
+              <label>ยอดเงินมัดจำครั้งแรก (deposit_amount)</label>
               <input
                 type="number"
                 step="0.01"
-                id="interest_per_month"
                 required
-                placeholder="0.00"
                 disabled={formMode === "edit" && !isDepositUnlocked}
-                value={interestPerMonth}
-                onChange={(e) => setInterestPerMonth(e.target.value)}
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
               />
             </div>
 
-            {formMode === "add" && (
-              <div className="form-group">
-                <label htmlFor="next_due_date_add" className="label-blue">วันครบกำหนดรอบถัดไป</label>
-                <input
-                  type="date"
-                  id="next_due_date_add"
-                  required
-                  value={nextDueDateAdd}
-                  onChange={(e) => setNextDueDateAdd(e.target.value)}
-                />
-              </div>
-            )}
+            <div className="form-group">
+              <label>วันที่ชำระเงินมัดจำ (deposit_date)</label>
+              <input
+                type="date"
+                required
+                disabled={formMode === "edit" && !isDepositUnlocked}
+                value={depositDate}
+                onChange={(e) => setDepositDate(e.target.value)}
+              />
+            </div>
 
-            <hr className="divider-dashed" />
+            <div className="form-group">
+              <label>ยอดเงินสำหรับชำระครั้งถัดไป (remaining_balance)</label>
+              <input
+                type="number"
+                step="0.01"
+                required
+                disabled={formMode === "edit" && !isDepositUnlocked}
+                value={remainingBalance}
+                onChange={(e) => setRemainingBalance(e.target.value)}
+              />
+            </div>
 
+            <div className="form-group">
+              <label>วันครบกำหนดชำระครั้งถัดไป (due_date)</label>
+              <input
+                type="date"
+                required
+                disabled={formMode === "edit" && !isDepositUnlocked}
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </div>
+
+            {/* โซนบันทึกการรับชำระเงิน (จะแสดงเฉพาะตอน Edit และห้ามแก้ไขถ้าติ๊ก 'แก้ไขข้อมูลหลัก') */}
             {formMode === "edit" && (
-              <div>
-                <div className="form-group">
-                  <label className="label-blue">วันครบกำหนดรอบ (ปัจจุบัน)</label>
-                  <input
-                    type="date"
-                    disabled={!isDepositUnlocked}
-                    value={currentDueDate}
-                    onChange={(e) => setCurrentDueDate(e.target.value)}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="label-muted-bold">ยอดปันผลสะสม (รอบปัจจุบัน)</label>
-                  <input
-                    type="text"
-                    className={`input-overdue-balance ${currentOverdueBalance > 0 ? "red" : "green"}`}
-                    readOnly
-                    value={currentOverdueBalance.toLocaleString() + " บ."}
-                  />
-                </div>
-
-                {isDepositUnlocked && (
-                  <div className="alert-warning-box">
-                    <span>
-                      ⚠️ หมายเหตุ: กรณีแก้ไขข้อมูลหลักบัญชีฝากเงินเดิม จะไม่สามารถอัปเดตข้อมูลธุรกรรมล่าสุดพร้อมกันได้ 
-                    </span>
-                  </div>
-                )}
-
-                <div className={`inner-payment-card ${isDepositUnlocked ? "unlocked" : ""}`}>
+              <>
+                <hr className="divider-dashed" />
+                <div className={`inner-payment-card ${isDepositUnlocked ? "disabled-zone" : "active-zone"}`}>
+                  <div className="form-sub-title text-green">📥 บันทึกการชำระเงินงวดถัดไป</div>
+                  {isDepositUnlocked && <small className="text-red d-block mb-2">*(โหมดแก้ไขข้อมูลหลัก: ห้ามบันทึกส่วนชำระเงิน)</small>}
+                  
                   <div className="form-group">
-                    <label htmlFor="payment_date">วันที่ทำธุรกรรม</label>
+                    <label htmlFor="payment_date">วันที่ชำระเงิน (payment_date)</label>
                     <input
                       type="date"
                       id="payment_date"
-                      disabled={isDepositUnlocked}
+                      disabled={isDepositUnlocked} 
                       value={paymentDate}
                       onChange={(e) => setPaymentDate(e.target.value)}
                     />
                   </div>
                   
                   <div className="form-group">
-                    <label htmlFor="total_paid_amount">จำนวนเงิน (บาท)</label>
+                    <label htmlFor="total_paid_amount">จำนวนเงินที่ชำระเข้ามา (total_paid_amount)</label>
                     <input
                       type="number"
                       step="0.01"
                       id="total_paid_amount"
                       placeholder="0.00"
-                      disabled={isDepositUnlocked}
+                      disabled={isDepositUnlocked} 
                       value={totalPaidAmount}
                       onChange={(e) => setTotalPaidAmount(e.target.value)}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="closed">ต้องการปิดบัญชีเงินฝากนี้เลยหรือไม่?</label>
+                    <label htmlFor="closed">ต้องการปิดยอด/รับสินค้าเลยหรือไม่?</label>
                     <select
                       id="closed"
                       disabled={isDepositUnlocked}
                       value={closed}
                       onChange={(e) => setClosed(e.target.value)}
                     >
-                      <option value="NO">NO (เปิดบัญชีอยู่ดำเนินรายการตามรอบถัดไป)</option>
-                      <option value="YES">YES (ปิดบัญชี/ถอนเงินคืนทั้งหมด)</option>
+                      <option value="NO">NO (ยังค้างชำระอยู่)</option>
+                      <option value="YES">YES (ชำระครบ/ปิดออเดอร์)</option>
                     </select>
                   </div>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="next_due_date_edit" className="label-blue">วันครบกำหนดรอบถัดไป</label>
-                  <input
-                    type="date"
-                    id="next_due_date_edit"
-                    required={!isDepositUnlocked && closed !== "YES"}
-                    disabled={isDepositUnlocked || closed === "YES"}
-                    value={closed === "YES" ? "" : nextDueDateEdit}
-                    onChange={(e) => setNextDueDateEdit(e.target.value)}
-                  />
-                </div>
-              </div>
+              </>
             )}
 
-            <div className="form-group">
-              <label htmlFor="input_status">สถานะจากแอดมิน</label>
-              <input
-                type="text"
-                id="input_status"
-                placeholder="ระบุสถานะ..."
-                value={inputStatus}
-                onChange={(e) => setInputStatus(e.target.value)}
-              />
-            </div>
+            <hr className="divider-dashed" />
 
             <div className="form-group">
-              <label htmlFor="note">หมายเหตุ</label>
+              <label htmlFor="note">หมายเหตุเพิ่มเติม</label>
               <textarea
                 id="note"
                 rows={2}
-                placeholder="ระบุหมายเหตุเพิ่มเติม..."
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
               ></textarea>
@@ -750,13 +594,9 @@ export default function DepositPage() {
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> กำลังบันทึกข้อมูล...
-                </>
+                <><Loader2 size={16} className="animate-spin" /> กำลังบันทึก...</>
               ) : (
-                <>
-                  <Save size={16} /> บันทึกข้อมูลการฝากออมทรัพย์
-                </>
+                <><Save size={16} /> บันทึกข้อมูลมัดจำ</>
               )}
             </button>
           </form>
