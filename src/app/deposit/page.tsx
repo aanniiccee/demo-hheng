@@ -56,6 +56,7 @@ export default function DepositPage() {
   // --- States Filters ---
   const [searchTerm, setSearchTerm] = useState("");
   const [closedFilter, setClosedFilter] = useState("NO"); 
+  const [excludePaidFilter, setExcludePaidFilter] = useState("YES"); 
   const [statusFilter, setStatusFilter] = useState("ALL"); 
 
   // --- States ควบคุมโหมดฟอร์ม ---
@@ -293,11 +294,16 @@ export default function DepositPage() {
     }
   };
 
+  // ==========================================
+  // 6. ระบบกรองข้อมูล (Filter Data Client-side)
+  // ==========================================
   const filteredTransactions = allTransactions.filter(x => {
     if (closedFilter !== "ALL" && x.closed !== closedFilter) return false;
 
     const { statusText } = calculateOverdueAndDuration(x);
+
     if (statusFilter !== "ALL" && statusFilter !== statusText) return false;
+    if (excludePaidFilter === "YES" && statusText === "ชำระแล้ว") return false;
 
     const q = searchTerm.toLowerCase().trim();
     const name = (x.customer_name || "").toLowerCase();
@@ -306,6 +312,22 @@ export default function DepositPage() {
 
     return q === "" || name.includes(q) || txId.includes(q) || pDetail.includes(q);
   });
+
+  // ฟังก์ชันสลับเงื่อนไขตัวกรองอัจฉริยะแบบโค้ดเก่า
+  const changeClosedFilter = (val: string) => {
+    setClosedFilter(val);
+    if (val === "YES") {
+      setExcludePaidFilter("NO");
+      setStatusFilter("ALL");
+    }
+  };
+
+  const changeStatusFilter = (val: string) => {
+    setStatusFilter(val);
+    if (val !== "ALL" && val !== "ชำระแล้ว" && closedFilter === "YES") {
+      setClosedFilter("NO");
+    }
+  };
 
   const getHomeUrl = () => {
     const adminLineId = sessionStorage.getItem("admin_line_id") || "";
@@ -318,7 +340,7 @@ export default function DepositPage() {
   return (
     <div>
       <div className="header-container">
-        <h2>ระบบมัดจำสินค้า (Deposit Transactions)</h2>
+        <h2>ระบบมัดจำ (Deposit Transactions)</h2>
         <div className="action-buttons">
           <Link href={getHomeUrl()} className="btn btn-default">
             <ArrowLeft size={24} /> กลับหน้าหลัก
@@ -347,11 +369,29 @@ export default function DepositPage() {
             </div>
 
             <div>
-              <span className="filter-label">ปิดออเดอร์:</span>
+              <span className="filter-label">ปิดยอดแล้ว:</span>
               <div className="filter-group">
-                <button type="button" className={`filter-btn ${closedFilter === "ALL" ? "active" : ""}`} onClick={() => setClosedFilter("ALL")}>ทั้งหมด</button>
-                <button type="button" className={`filter-btn ${closedFilter === "NO" ? "active" : ""}`} onClick={() => setClosedFilter("NO")}>เปิดอยู่</button>
-                <button type="button" className={`filter-btn ${closedFilter === "YES" ? "active" : ""}`} onClick={() => setClosedFilter("YES")}>ปิดแล้ว</button>
+                <button type="button" className={`filter-btn ${closedFilter === "ALL" ? "active" : ""}`} onClick={() => changeClosedFilter("ALL")}>ทั้งหมด</button>
+                <button type="button" className={`filter-btn ${closedFilter === "NO" ? "active" : ""}`} onClick={() => changeClosedFilter("NO")}>เปิดอยู่ (NO)</button>
+                <button type="button" className={`filter-btn ${closedFilter === "YES" ? "active" : ""}`} onClick={() => changeClosedFilter("YES")}>ปิดแล้ว (YES)</button>
+              </div>
+            </div>
+
+            <div>
+              <span className="filter-label">ซ่อนรายการที่ชำระแล้ว:</span>
+              <div className="filter-group">
+                <button type="button" className={`filter-btn ${excludePaidFilter === "YES" ? "active" : ""}`} onClick={() => setExcludePaidFilter("YES")}>YES</button>
+                <button type="button" className={`filter-btn ${excludePaidFilter === "NO" ? "active" : ""}`} onClick={() => setExcludePaidFilter("NO")}>NO</button>
+              </div>
+            </div>
+
+            <div>
+              <span className="filter-label">สถานะจากระบบ:</span>
+              <div className="filter-group">
+                <button type="button" className={`filter-btn ${statusFilter === "ALL" ? "active" : ""}`} onClick={() => changeStatusFilter("ALL")}>ทั้งหมด</button>
+                <button type="button" className={`filter-btn ${statusFilter === "ยังไม่ถึงกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("ยังไม่ถึงกำหนด")}>ยังไม่ถึงกำหนด</button>
+                <button type="button" className={`filter-btn ${statusFilter === "ครบกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("ครบกำหนด")}>ครบกำหนด</button>
+                <button type="button" className={`filter-btn ${statusFilter === "เกินกำหนด" ? "active" : ""}`} onClick={() => changeStatusFilter("เกินกำหนด")}>เกินกำหนด</button>
               </div>
             </div>
           </div>
