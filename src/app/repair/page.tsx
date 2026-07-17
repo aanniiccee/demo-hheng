@@ -287,7 +287,7 @@ export default function RepairPage() {
             <RefreshCw size={24} className={loading ? "animate-spin" : ""} /> รีเฟรช
           </button>
           <button type="button" onClick={clearForm} className="btn btn-primary">
-            <Plus size={24} /> สร้างรายการงานซ่อม
+            <Plus size={24} /> สร้างรายการซ่อม
           </button>
         </div>
       </div>
