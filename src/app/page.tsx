@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Repeat, CreditCard } from "lucide-react";
+import { Repeat, CreditCard, BanknoteArrowUp } from "lucide-react";
 
 export default function HomePage() {
   const searchParams = useSearchParams();
