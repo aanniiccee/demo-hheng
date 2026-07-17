@@ -856,6 +856,150 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
     except Exception as e:
         raise HTTPException(500, f"Database error: {str(e)}")
 
+# API งานซ่อม
+class RepairTransactionIn(BaseModel):
+    product: Optional[str] = ''             # รหัสสินค้า / อาการซ่อม
+    product_id: Optional[str] = ''          
+    customer_name: str                      # ชื่อลูกค้า
+    phone_number: Optional[str] = ''        # เบอร์โทรศัพท์
+    channel: str                            # ช่องทางติดต่อ (LINE, FB, IG, etc.)
+    
+    # 📅 ฟิลด์วันที่สำหรับงานซ่อม (ไม่มีเรื่องเงิน)
+    received_date: Optional[str] = None     # วันที่รับสินค้า
+    repaired_date: Optional[str] = None     # วันที่ซ่อมเสร็จ
+    delivery_date: Optional[str] = None     # วันจัดส่ง/วันนัดรับของ
+    
+    closed: str = 'NO'                      # YES หรือ NO (ปิดเคสแล้ว)
+    note: Optional[str] = ''                # หมายเหตุ
+    input_status: Optional[str] = ''        # สถานะงานซ่อมจากแอดมิน (เช่น รออะไหล่, กำลังซ่อม)
+    
+    created_by_line_id: Optional[str] = 'Unknown'
+    created_by_name: Optional[str] = 'Unknown'
+    chat_link: Optional[str] = None
+
+@app.get('/api/repair-transactions')
+def get_repair_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: return []
+
+    # ดึงข้อมูลจากตารางหลัก โดยเชื่อมกับตารางย่อย transaction_repair
+    r = sb.table('transaction_master')\
+        .select('*, transaction_repair(*)')\
+        .eq('transaction_type', 'REPAIR')\
+        .eq('client_id', c['client_id'])\
+        .execute()
+    return r.data
+
+
+@app.post('/api/repair-transactions')
+def add_repair_transaction(data: RepairTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: raise HTTPException(500, "Supabase client not initialized")
+
+    current_client_id = c['client_id']
+
+    # --- รันเลข ID อัตโนมัติสำหรับงานซ่อม: RP_[client_id]_[เลขรัน] ---
+    last_t = sb.table('transaction_master')\
+        .select('transaction_id')\
+        .like('transaction_id', f'RP_{current_client_id}_%')\
+        .eq('client_id', current_client_id)\
+        .order('transaction_id', desc=True)\
+        .limit(1)\
+        .execute()
+
+    next_num = 1
+    if last_t.data:
+        last_id = last_t.data[0]['transaction_id']
+        match = re.search(rf'RP_{current_client_id}_(\d+)', last_id)
+        if match:
+            next_num = int(match.group(1)) + 1
+
+    new_tx_id = f"RP_{current_client_id}_{next_num}"
+
+    # 1. ข้อมูลสำหรับตารางหลัก (Master Table)
+    master_payload = {
+        "transaction_id": new_tx_id,
+        "transaction_type": "REPAIR",
+        "product": data.product,         
+        "product_id": data.product_id if data.product_id and data.product_id.strip() != "" else None, 
+        "customer_name": data.customer_name,
+        "phone_number": data.phone_number,
+        "channel": data.channel,
+        "current_status": "PENDING", 
+        "closed": "NO",
+        "note": data.note,
+        "client_id": current_client_id,
+        "created_by_line_id": data.created_by_line_id,
+        "created_by_name": data.created_by_name,
+        "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None
+    }
+
+    # 2. ข้อมูลสำหรับตารางย่อยงานซ่อม (Repair Detail Table)
+    repair_payload = {
+        "transaction_id": new_tx_id,
+        "received_date": data.received_date,
+        "repaired_date": data.repaired_date,
+        "delivery_date": data.delivery_date,
+        "input_status": data.input_status,
+        "client_id": current_client_id
+    }
+
+    try:
+        sb.table('transaction_master').insert(master_payload).execute()
+        sb.table('transaction_repair').insert(repair_payload).execute()
+        return {"success": True, "transaction_id": new_tx_id}
+    except Exception as e:
+        raise HTTPException(500, f"Database error: {str(e)}")
+
+
+@app.put('/api/repair-transactions/{transaction_id}')
+def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: raise HTTPException(500, "Supabase client not initialized")
+
+    current_client_id = c['client_id']
+    current_note = data.note or ""
+
+    # จัดการ Logic สถานะปิดเคส/เปิดเคส
+    if data.closed == "YES":
+        new_status = "ปิดเคสแล้ว"
+        final_closed = "YES"
+        if "[ระบบ]" not in current_note:
+            current_note = "[ระบบ] ส่งมอบสินค้าและปิดเคสเรียบร้อย. " + current_note
+    else:
+        new_status = "PENDING"
+        final_closed = "NO"
+
+    try:
+        # 1. อัปเดตตารางหลัก (Master)
+        sb.table('transaction_master').update({
+            "product": data.product,
+            "product_id": data.product_id if data.product_id and data.product_id.strip() != "" else None, 
+            "customer_name": data.customer_name,
+            "phone_number": data.phone_number,
+            "channel": data.channel,
+            "current_status": new_status,
+            "closed": final_closed,
+            "note": current_note, 
+            "updated_at": "now()",
+            "updated_by_line_id": data.created_by_line_id,
+            "updated_by_name": data.created_by_name,
+            "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None
+        }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
+
+        # 2. อัปเดตตารางย่อยงานซ่อม (Repair Detail)
+        sb.table('transaction_repair').update({
+            "received_date": data.received_date,
+            "repaired_date": data.repaired_date,
+            "delivery_date": data.delivery_date,
+            "input_status": data.input_status,
+            "updated_at": "now()"
+        }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
+
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(500, f"Database error: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
 
