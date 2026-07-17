@@ -368,8 +368,8 @@ export default function DepositPage() {
                   <th className="col-sys-status">สถานะจากระบบ</th>
                   <th className="col-amount">ยอดเงินมัดจำที่ชำระ</th>
                   <th className="col-date">วันที่ชำระเงินมัดจำ</th>
-                  <th className="col-balance">ยอดชำระครั้งถัดไป</th>
-                  <th className="col-due-date">วันครบกำหนดชำระครั้งถัดไป</th>
+                  <th className="col-balance">ยอดคงเหลือ</th>
+                  <th className="col-due-date">กำหนดชำระ</th>
                   <th className="col-paid">ยอดเงินที่ชำระ</th>
                   <th className="col-pay-date">วันที่ชำระ</th>
                   <th className="col-admin-status">สถานะจากแอดมิน</th>
