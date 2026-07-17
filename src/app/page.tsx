@@ -43,6 +43,12 @@ export default function HomePage() {
           <CreditCard size={20} />
           <span>ระบบผ่อนสินค้า</span>
         </Link>
+
+        {/* ปุ่มระบบมัดจำ */}
+        <Link href={`/deposit${getQueryString()}`} className="nav-button">
+          <BanknoteArrowUp size={20} />
+          <span>ระบบมัดจำ</span>
+        </Link>
       </div>
 
       {/* 🌟 ลบโค้ดแท็ก <style jsx> เดิมตรงนี้ออกไปเรียบร้อยแล้ว */}
