@@ -129,7 +129,10 @@ export default function DepositPage() {
 
   const calculateOverdueAndDuration = (tx: Transaction) => {
     const depositList = tx.transaction_deposit;
-    const dData = Array.isArray(depositList) ? depositList[0] : depositList;
+    // ป้องกันกรณี depositList เป็น null หรือ undefined
+    const dData: DepositDetail | undefined = Array.isArray(depositList) 
+      ? depositList[0] 
+      : (depositList || undefined);
 
     let statusText = "ยังไม่ถึงกำหนด";
     let badgeClass = "st-normal";
@@ -140,8 +143,9 @@ export default function DepositPage() {
       badgeClass = "closed-yes";
       durationText = "รับสินค้า/เสร็จสิ้น";
     } else if (dData && dData.due_date) {
+      // ใช้การดึงวันที่แบบ Local Time ป้องกันเรื่อง Timezone คลาดเคลื่อน
       const targetDate = new Date(dData.due_date);
-      const todayObj = new Date(todayStr);
+      const todayObj = new Date();
 
       targetDate.setHours(0,0,0,0);
       todayObj.setHours(0,0,0,0);
@@ -430,9 +434,9 @@ export default function DepositPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูลการมัดจำ...</td></tr>
+                  <tr><td colSpan={16} className="table-empty-row">กำลังดึงข้อมูลการมัดจำ...</td></tr>
                 ) : filteredTransactions.length === 0 ? (
-                  <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลการมัดจำที่ตรงเงื่อนไข</td></tr>
+                  <tr><td colSpan={16} className="table-empty-row no-match">ไม่พบข้อมูลการมัดจำที่ตรงเงื่อนไข</td></tr>
                 ) : (
                   filteredTransactions.map((x) => {
                     const depositList = x.transaction_deposit;
