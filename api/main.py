@@ -9,13 +9,13 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi.responses import RedirectResponse
+# from fastapi.staticfiles import StaticFiles
+# from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from supabase import create_client
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
@@ -91,122 +91,122 @@ def validate_token(
 
 
 # ฟังก์ชันส่วนกลางสำหรับสร้างหน้าแจ้งเตือนสีแดง (เพื่อลดความซ้ำซ้อนของโค้ด)
-def generate_unauthorized_html(status_code: int, admin_line_id: Optional[str], current_page: str, token: Optional[str]):
-    display_id = admin_line_id if admin_line_id else "ไม่พบข้อมูล LINE ID"
+# def generate_unauthorized_html(status_code: int, admin_line_id: Optional[str], current_page: str, token: Optional[str]):
+#     display_id = admin_line_id if admin_line_id else "ไม่พบข้อมูล LINE ID"
     
-    # รักษาค่า token ดั้งเดิมเอาไว้ตอนกดล็อกอินใหม่อีกครั้ง
-    token_param = f"&token={token}" if token else ""
-    redirect_link = f"/liff-router?goto={current_page}{token_param}"
+#     # รักษาค่า token ดั้งเดิมเอาไว้ตอนกดล็อกอินใหม่อีกครั้ง
+#     token_param = f"&token={token}" if token else ""
+#     redirect_link = f"/liff-router?goto={current_page}{token_param}"
     
-    return f"""
-    <div style="font-family: sans-serif; text-align: center; padding: 50px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; max-width: 500px; margin: 100px auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <h1 style="color: #dc2626; font-size: 24px; margin-bottom: 10px;">🔒 {status_code} คุณไม่มีสิทธิ์เข้าถึงระบบนี้</h1>
-        <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">กรุณาติดต่อผู้ดูแลระบบ และแจ้ง Line User ID ด้านล่างนี้เพื่อทำการเปิดสิทธิ์การเข้าถึงครับ</p>
-        <div style="background-color: #ffffff; padding: 12px; border: 1px dashed #f87171; border-radius: 8px; margin-top: 20px; font-family: monospace; font-size: 15px; color: #b91c1c; font-weight: bold; word-break: break-all;">
-            {display_id}
-        </div>
-        <a href="{redirect_link}" style="display: inline-block; margin-top: 25px; background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 14px;">ล็อกอินผ่าน LINE เพื่ออัปเดตสิทธิ์</a>
-    </div>
-    """
+#     return f"""
+#     <div style="font-family: sans-serif; text-align: center; padding: 50px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; max-width: 500px; margin: 100px auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+#         <h1 style="color: #dc2626; font-size: 24px; margin-bottom: 10px;">🔒 {status_code} คุณไม่มีสิทธิ์เข้าถึงระบบนี้</h1>
+#         <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">กรุณาติดต่อผู้ดูแลระบบ และแจ้ง Line User ID ด้านล่างนี้เพื่อทำการเปิดสิทธิ์การเข้าถึงครับ</p>
+#         <div style="background-color: #ffffff; padding: 12px; border: 1px dashed #f87171; border-radius: 8px; margin-top: 20px; font-family: monospace; font-size: 15px; color: #b91c1c; font-weight: bold; word-break: break-all;">
+#             {display_id}
+#         </div>
+#         <a href="{redirect_link}" style="display: inline-block; margin-top: 25px; background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 14px;">ล็อกอินผ่าน LINE เพื่ออัปเดตสิทธิ์</a>
+#     </div>
+#     """
 
 
-@app.get("/", response_class=HTMLResponse)
-def home(
-    request: Request,
-    token: Optional[str] = None,
-    admin_line_id: Optional[str] = None,
-):
-    print("========== HOME ==========")
-    print("URL:", request.url)
-    print("token:", repr(token))
-    print("admin_line_id:", repr(admin_line_id))
+# @app.get("/", response_class=HTMLResponse)
+# def home(
+#     request: Request,
+#     token: Optional[str] = None,
+#     admin_line_id: Optional[str] = None,
+# ):
+#     print("========== HOME ==========")
+#     print("URL:", request.url)
+#     print("token:", repr(token))
+#     print("admin_line_id:", repr(admin_line_id))
 
-    try:
-        validate_token(token, admin_line_id)
-        return templates.TemplateResponse(
-            request, "home.html", context={"token": token}
-        )
-    except HTTPException as e:
-        print("========== ERROR ==========", e.status_code, e.detail)
+#     try:
+#         validate_token(token, admin_line_id)
+#         return templates.TemplateResponse(
+#             request, "home.html", context={"token": token}
+#         )
+#     except HTTPException as e:
+#         print("========== ERROR ==========", e.status_code, e.detail)
         
-        # 🌟 ถ้าไม่มี admin_line_id แปลว่ายังไม่ได้ผ่านหน้าล็อกอิน LINE -> ดีดไปหน้า Router เลย (พร้อมพ่วง token เดิมไปด้วย)
-        if not admin_line_id:
-            token_param = f"?token={token}" if token else ""
-            return RedirectResponse(url=f"/liff-router?goto=/{token_param}")
+#         # 🌟 ถ้าไม่มี admin_line_id แปลว่ายังไม่ได้ผ่านหน้าล็อกอิน LINE -> ดีดไปหน้า Router เลย (พร้อมพ่วง token เดิมไปด้วย)
+#         if not admin_line_id:
+#             token_param = f"?token={token}" if token else ""
+#             return RedirectResponse(url=f"/liff-router?goto=/{token_param}")
 
-        # ถ้าล็อกอิน LINE แล้ว แต่ตรวจสิทธิ์ไม่ผ่าน ให้โชว์หน้าแดงนิ่ง ๆ ห้ามรีไดเรกต์วนลูป
-        return HTMLResponse(
-            content=generate_unauthorized_html(e.status_code, admin_line_id, "/", token),
-            status_code=e.status_code,
-        )
-
-
-@app.get("/liff-router", response_class=HTMLResponse)
-def liff_router(request: Request):
-    return templates.TemplateResponse(request, "liff-router.html")
+#         # ถ้าล็อกอิน LINE แล้ว แต่ตรวจสิทธิ์ไม่ผ่าน ให้โชว์หน้าแดงนิ่ง ๆ ห้ามรีไดเรกต์วนลูป
+#         return HTMLResponse(
+#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/", token),
+#             status_code=e.status_code,
+#         )
 
 
-@app.get("/pawn", response_class=HTMLResponse)
-def pawn_page(
-    request: Request,
-    token: Optional[str] = None,
-    admin_line_id: Optional[str] = None,
-):
-    try:
-        validate_token(token, admin_line_id)
-        return templates.TemplateResponse(
-            request, "pawn.html", context={"token": token}
-        )
-    except HTTPException as e:
-        if not admin_line_id:
-            token_param = f"?token={token}" if token else ""
-            return RedirectResponse(url=f"/liff-router?goto=/pawn{token_param}")
-        return HTMLResponse(
-            content=generate_unauthorized_html(e.status_code, admin_line_id, "/pawn", token),
-            status_code=e.status_code,
-        )
+# @app.get("/liff-router", response_class=HTMLResponse)
+# def liff_router(request: Request):
+#     return templates.TemplateResponse(request, "liff-router.html")
 
 
-@app.get("/test", response_class=HTMLResponse)
-def test_page(
-    request: Request,
-    token: Optional[str] = None,
-    admin_line_id: Optional[str] = None,
-):
-    try:
-        validate_token(token, admin_line_id)
-        return templates.TemplateResponse(
-            request, "test.html", context={"token": token}
-        )
-    except HTTPException as e:
-        if not admin_line_id:
-            token_param = f"?token={token}" if token else ""
-            return RedirectResponse(url=f"/liff-router?goto=/test{token_param}")
-        return HTMLResponse(
-            content=generate_unauthorized_html(e.status_code, admin_line_id, "/test", token),
-            status_code=e.status_code,
-        )
+# @app.get("/pawn", response_class=HTMLResponse)
+# def pawn_page(
+#     request: Request,
+#     token: Optional[str] = None,
+#     admin_line_id: Optional[str] = None,
+# ):
+#     try:
+#         validate_token(token, admin_line_id)
+#         return templates.TemplateResponse(
+#             request, "pawn.html", context={"token": token}
+#         )
+#     except HTTPException as e:
+#         if not admin_line_id:
+#             token_param = f"?token={token}" if token else ""
+#             return RedirectResponse(url=f"/liff-router?goto=/pawn{token_param}")
+#         return HTMLResponse(
+#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/pawn", token),
+#             status_code=e.status_code,
+#         )
 
 
-@app.get("/installment", response_class=HTMLResponse)
-def installment_page(
-    request: Request,
-    token: Optional[str] = None,
-    admin_line_id: Optional[str] = None,
-):
-    try:
-        validate_token(token, admin_line_id)
-        return templates.TemplateResponse(
-            request, "installment.html", context={"token": token}
-        )
-    except HTTPException as e:
-        if not admin_line_id:
-            token_param = f"?token={token}" if token else ""
-            return RedirectResponse(url=f"/liff-router?goto=/installment{token_param}")
-        return HTMLResponse(
-            content=generate_unauthorized_html(e.status_code, admin_line_id, "/installment", token),
-            status_code=e.status_code,
-        )
+# @app.get("/test", response_class=HTMLResponse)
+# def test_page(
+#     request: Request,
+#     token: Optional[str] = None,
+#     admin_line_id: Optional[str] = None,
+# ):
+#     try:
+#         validate_token(token, admin_line_id)
+#         return templates.TemplateResponse(
+#             request, "test.html", context={"token": token}
+#         )
+#     except HTTPException as e:
+#         if not admin_line_id:
+#             token_param = f"?token={token}" if token else ""
+#             return RedirectResponse(url=f"/liff-router?goto=/test{token_param}")
+#         return HTMLResponse(
+#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/test", token),
+#             status_code=e.status_code,
+#         )
+
+
+# @app.get("/installment", response_class=HTMLResponse)
+# def installment_page(
+#     request: Request,
+#     token: Optional[str] = None,
+#     admin_line_id: Optional[str] = None,
+# ):
+#     try:
+#         validate_token(token, admin_line_id)
+#         return templates.TemplateResponse(
+#             request, "installment.html", context={"token": token}
+#         )
+#     except HTTPException as e:
+#         if not admin_line_id:
+#             token_param = f"?token={token}" if token else ""
+#             return RedirectResponse(url=f"/liff-router?goto=/installment{token_param}")
+#         return HTMLResponse(
+#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/installment", token),
+#             status_code=e.status_code,
+#         )
 
 
 @app.get("/api/config/liff-id")
