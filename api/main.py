@@ -716,8 +716,10 @@ class DepositTransactionIn(BaseModel):
     phone_number: Optional[str] = ''
     channel: str                            # ช่องทางที่ลูกค้าติดต่อมา
     deposit_amount: float                   # 💰 ยอดเงินมัดจำก้อนแรก
+    deposit_date: Optional[str] = None
     remaining_balance: float                # 💵 ยอดคงเหลือที่ต้องชำระเพิ่ม
     due_date: str                           # 📅 วันนัดชำระส่วนที่เหลือ
+    total_paid_amount: Optional[float] = 0.0
     payment_date: Optional[str] = None      # วันที่มาชำระยอดที่เหลือ (ถ้าจ่ายแล้วค่อยส่งมา)
     closed: str = 'NO'                      # YES หรือ NO
     note: Optional[str] = ''
@@ -784,8 +786,10 @@ def add_deposit_transaction(data: DepositTransactionIn, token: Optional[str] = N
     deposit_payload = {
         "transaction_id": new_tx_id,
         "deposit_amount": data.deposit_amount,
+        "deposit_date": data.deposit_date,
         "remaining_balance": data.remaining_balance,
         "due_date": data.due_date,
+        "total_paid_amount": 0.0,
         "payment_date": None,
         "input_status": data.input_status,  # 🆕 บันทึกสถานะมัดจำลงตารางย่อย
         "client_id": current_client_id
@@ -839,8 +843,10 @@ def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, 
         # 🌟 3. เพิ่ม input_status เข้าเงื่อนไขอัปเดตตารางย่อย transaction_deposit
         sb.table('transaction_deposit').update({
             "deposit_amount": data.deposit_amount,
+            "deposit_date": data.deposit_date,
             "remaining_balance": 0.0 if final_closed == "YES" else data.remaining_balance,
             "due_date": data.due_date,
+            "total_paid_amount": data.total_paid_amount,
             "payment_date": data.payment_date if is_payment_done else None,
             "input_status": data.input_status,  # อัปเดตสถานะมัดจำล่าสุด
             "updated_at": "now()"
