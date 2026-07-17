@@ -10,12 +10,8 @@ from typing import Optional
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
-# from fastapi.staticfiles import StaticFiles
-# from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from supabase import create_client
-
-# BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
@@ -88,125 +84,6 @@ def validate_token(
         raise HTTPException(403, "Unauthorized LINE User ID")
 
     return r.data[0]
-
-
-# ฟังก์ชันส่วนกลางสำหรับสร้างหน้าแจ้งเตือนสีแดง (เพื่อลดความซ้ำซ้อนของโค้ด)
-# def generate_unauthorized_html(status_code: int, admin_line_id: Optional[str], current_page: str, token: Optional[str]):
-#     display_id = admin_line_id if admin_line_id else "ไม่พบข้อมูล LINE ID"
-    
-#     # รักษาค่า token ดั้งเดิมเอาไว้ตอนกดล็อกอินใหม่อีกครั้ง
-#     token_param = f"&token={token}" if token else ""
-#     redirect_link = f"/liff-router?goto={current_page}{token_param}"
-    
-#     return f"""
-#     <div style="font-family: sans-serif; text-align: center; padding: 50px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; max-width: 500px; margin: 100px auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-#         <h1 style="color: #dc2626; font-size: 24px; margin-bottom: 10px;">🔒 {status_code} คุณไม่มีสิทธิ์เข้าถึงระบบนี้</h1>
-#         <p style="color: #4b5563; font-size: 16px; line-height: 1.6;">กรุณาติดต่อผู้ดูแลระบบ และแจ้ง Line User ID ด้านล่างนี้เพื่อทำการเปิดสิทธิ์การเข้าถึงครับ</p>
-#         <div style="background-color: #ffffff; padding: 12px; border: 1px dashed #f87171; border-radius: 8px; margin-top: 20px; font-family: monospace; font-size: 15px; color: #b91c1c; font-weight: bold; word-break: break-all;">
-#             {display_id}
-#         </div>
-#         <a href="{redirect_link}" style="display: inline-block; margin-top: 25px; background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-size: 14px;">ล็อกอินผ่าน LINE เพื่ออัปเดตสิทธิ์</a>
-#     </div>
-#     """
-
-
-# @app.get("/", response_class=HTMLResponse)
-# def home(
-#     request: Request,
-#     token: Optional[str] = None,
-#     admin_line_id: Optional[str] = None,
-# ):
-#     print("========== HOME ==========")
-#     print("URL:", request.url)
-#     print("token:", repr(token))
-#     print("admin_line_id:", repr(admin_line_id))
-
-#     try:
-#         validate_token(token, admin_line_id)
-#         return templates.TemplateResponse(
-#             request, "home.html", context={"token": token}
-#         )
-#     except HTTPException as e:
-#         print("========== ERROR ==========", e.status_code, e.detail)
-        
-#         # 🌟 ถ้าไม่มี admin_line_id แปลว่ายังไม่ได้ผ่านหน้าล็อกอิน LINE -> ดีดไปหน้า Router เลย (พร้อมพ่วง token เดิมไปด้วย)
-#         if not admin_line_id:
-#             token_param = f"?token={token}" if token else ""
-#             return RedirectResponse(url=f"/liff-router?goto=/{token_param}")
-
-#         # ถ้าล็อกอิน LINE แล้ว แต่ตรวจสิทธิ์ไม่ผ่าน ให้โชว์หน้าแดงนิ่ง ๆ ห้ามรีไดเรกต์วนลูป
-#         return HTMLResponse(
-#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/", token),
-#             status_code=e.status_code,
-#         )
-
-
-# @app.get("/liff-router", response_class=HTMLResponse)
-# def liff_router(request: Request):
-#     return templates.TemplateResponse(request, "liff-router.html")
-
-
-# @app.get("/pawn", response_class=HTMLResponse)
-# def pawn_page(
-#     request: Request,
-#     token: Optional[str] = None,
-#     admin_line_id: Optional[str] = None,
-# ):
-#     try:
-#         validate_token(token, admin_line_id)
-#         return templates.TemplateResponse(
-#             request, "pawn.html", context={"token": token}
-#         )
-#     except HTTPException as e:
-#         if not admin_line_id:
-#             token_param = f"?token={token}" if token else ""
-#             return RedirectResponse(url=f"/liff-router?goto=/pawn{token_param}")
-#         return HTMLResponse(
-#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/pawn", token),
-#             status_code=e.status_code,
-#         )
-
-
-# @app.get("/test", response_class=HTMLResponse)
-# def test_page(
-#     request: Request,
-#     token: Optional[str] = None,
-#     admin_line_id: Optional[str] = None,
-# ):
-#     try:
-#         validate_token(token, admin_line_id)
-#         return templates.TemplateResponse(
-#             request, "test.html", context={"token": token}
-#         )
-#     except HTTPException as e:
-#         if not admin_line_id:
-#             token_param = f"?token={token}" if token else ""
-#             return RedirectResponse(url=f"/liff-router?goto=/test{token_param}")
-#         return HTMLResponse(
-#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/test", token),
-#             status_code=e.status_code,
-#         )
-
-
-# @app.get("/installment", response_class=HTMLResponse)
-# def installment_page(
-#     request: Request,
-#     token: Optional[str] = None,
-#     admin_line_id: Optional[str] = None,
-# ):
-#     try:
-#         validate_token(token, admin_line_id)
-#         return templates.TemplateResponse(
-#             request, "installment.html", context={"token": token}
-#         )
-#     except HTTPException as e:
-#         if not admin_line_id:
-#             token_param = f"?token={token}" if token else ""
-#             return RedirectResponse(url=f"/liff-router?goto=/installment{token_param}")
-#         return HTMLResponse(
-#             content=generate_unauthorized_html(e.status_code, admin_line_id, "/installment", token),
-#             status_code=e.status_code,
-#         )
 
 
 @app.get("/api/config/liff-id")
@@ -825,6 +702,144 @@ def payoff_entire_contract(tx_id: str, payload: dict, token: Optional[str] = Non
         .execute()
 
     return {"success": True, "message": "บันทึกยอดปิดสัญญาก่อนกำหนดสำเร็จเรียบร้อย"}
+
+
+# API หน้ามัดจำ
+class DepositTransactionIn(BaseModel):
+    product: Optional[str] = ''             # รายละเอียดสินค้าที่มัดจำ
+    product_id: Optional[str] = ''          
+    customer_name: str
+    phone_number: Optional[str] = ''
+    channel: str                            # ช่องทางที่ลูกค้าติดต่อมา
+    deposit_amount: float                   # 💰 ยอดเงินมัดจำก้อนแรก
+    remaining_balance: float                # 💵 ยอดคงเหลือที่ต้องชำระเพิ่ม
+    due_date: str                           # 📅 วันนัดชำระส่วนที่เหลือ
+    payment_date: Optional[str] = None      # วันที่มาชำระยอดที่เหลือ (ถ้าจ่ายแล้วค่อยส่งมา)
+    closed: str = 'NO'                      # YES หรือ NO
+    note: Optional[str] = ''
+    created_by_line_id: Optional[str] = 'Unknown'
+    created_by_name: Optional[str] = 'Unknown'
+    chat_link: Optional[str] = None
+
+@app.get('/api/deposit-transactions')
+def get_deposit_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: return []
+
+    r = sb.table('transaction_master')\
+        .select('*, transaction_deposit(*)')\
+        .eq('transaction_type', 'DEPOSIT')\
+        .eq('client_id', c['client_id'])\
+        .execute()
+    return r.data
+
+@app.post('/api/deposit-transactions')
+def add_deposit_transaction(data: DepositTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: raise HTTPException(500, "Supabase client not initialized")
+
+    current_client_id = c['client_id']
+
+    # --- รันเลข ID อัตโนมัติ: DP_[client_id]_[เลขรัน] ---
+    last_t = sb.table('transaction_master')\
+        .select('transaction_id')\
+        .like('transaction_id', f'DP_{current_client_id}_%')\
+        .eq('client_id', current_client_id)\
+        .order('transaction_id', desc=True)\
+        .limit(1)\
+        .execute()
+
+    next_num = 1
+    if last_t.data:
+        last_id = last_t.data[0]['transaction_id']
+        match = re.search(rf'DP_{current_client_id}_(\d+)', last_id)
+        if match:
+            next_num = int(match.group(1)) + 1
+
+    new_tx_id = f"DP_{current_client_id}_{next_num}"
+
+    master_payload = {
+        "transaction_id": new_tx_id,
+        "transaction_type": "DEPOSIT",
+        "product": data.product,         
+        "product_id": data.product_id if data.product_id and data.product_id.strip() != "" else None, 
+        "customer_name": data.customer_name,
+        "phone_number": data.phone_number,
+        "channel": data.channel,
+        "current_status": "PENDING", 
+        "closed": "NO",
+        "note": data.note,
+        "client_id": current_client_id,
+        "created_by_line_id": data.created_by_line_id,
+        "created_by_name": data.created_by_name,
+        "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None
+    }
+
+    deposit_payload = {
+        "transaction_id": new_tx_id,
+        "deposit_amount": data.deposit_amount,
+        "remaining_balance": data.remaining_balance,
+        "due_date": data.due_date,
+        "payment_date": None,
+        "client_id": current_client_id
+    }
+
+    try:
+        sb.table('transaction_master').insert(master_payload).execute()
+        sb.table('transaction_deposit').insert(deposit_payload).execute()
+        return {"success": True, "transaction_id": new_tx_id}
+    except Exception as e:
+        raise HTTPException(500, f"Database error: {str(e)}")
+
+@app.put('/api/deposit-transactions/{transaction_id}')
+def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: raise HTTPException(500, "Supabase client not initialized")
+
+    current_client_id = c['client_id']
+    current_note = data.note or ""
+
+    # ป้องกันบั๊กสตริงว่างจากหน้าบ้านดักจับปุ่มปิดงาน
+    is_payment_done = data.payment_date and data.payment_date.strip() != "" and data.payment_date != "null" and data.payment_date != "undefined"
+
+    if data.closed == "YES" or is_payment_done:
+        new_status = "ชำระครบแล้ว"
+        final_closed = "YES"
+        # ป้องกันการเติมข้อความซ้ำซ้อนถ้าเคสถูกปิดไปแล้ว
+        if "[ระบบ]" not in current_note:
+            current_note = "[ระบบ] รับชำระส่วนที่เหลือเรียบร้อย ปิดเคสทันที. " + current_note
+    else:
+        new_status = "PENDING"
+        final_closed = "NO"
+
+    try:
+        # 1. อัปเดตตารางหลัก
+        sb.table('transaction_master').update({
+            "product": data.product,
+            "product_id": data.product_id if data.product_id and data.product_id.strip() != "" else None, 
+            "customer_name": data.customer_name,
+            "phone_number": data.phone_number,
+            "channel": data.channel,
+            "current_status": new_status,
+            "closed": final_closed,
+            "note": current_note, 
+            "updated_at": "now()",
+            "updated_by_line_id": data.created_by_line_id,
+            "updated_by_name": data.created_by_name,
+            "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None
+        }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
+
+        # 2. อัปเดตตารางย่อย
+        sb.table('transaction_deposit').update({
+            "deposit_amount": data.deposit_amount,
+            "remaining_balance": data.remaining_balance,
+            "due_date": data.due_date,
+            "payment_date": data.payment_date if is_payment_done else None
+        }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
+
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(500, f"Database error: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
