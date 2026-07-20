@@ -1027,13 +1027,14 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
     c = validate_token(token, admin_line_id)
     if not sb: return []
 
-    # ดึงข้อมูล Master ที่เป็นประเภท TRACKING พร้อมพ่วงข้อมูลพัสดุย่อยจาก transaction_tracking
+    # แก้ไข: ลบเว้นวรรคหลัง comma ออกทั้งหมดเพื่อให้เซิร์ฟเวอร์อ่านได้ถูกต้อง
     r = sb.table('transaction_master')\
-        .select('*, transaction_tracking(*, thailand_post(last_status, status_detail, status_update_at))')\
+        .select('*,transaction_tracking(*,thailand_post(last_status,status_detail,status_update_at))')\
         .eq('transaction_type', 'TRACKING')\
         .eq('client_id', c['client_id'])\
         .order('created_at', desc=True)\
         .execute()
+        
     return r.data
 
 
