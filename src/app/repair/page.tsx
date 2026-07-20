@@ -295,7 +295,7 @@ export default function RepairPage() {
               <input
                 type="text"
                 className="search-input"
-                placeholder="ค้นหาชื่อลูกค้า, สินค้า หรือ ID..."
+                placeholder="ชื่อลูกค้า สินค้า หรือ Transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
