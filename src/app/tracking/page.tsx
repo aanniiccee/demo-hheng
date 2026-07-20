@@ -342,7 +342,7 @@ export default function TrackingPage() {
                   <th className="col-customer">ชื่อลูกค้า</th>
                   <th className="col-phone">เบอร์โทร</th>
                   <th className="col-channel">ช่องทาง</th>
-                  <th className="col-tracknum">Tracking Number</th>
+                  <th className="col-tracknum">หมายเลขติดตามพัสดุ</th>
                   <th className="col-date">วันที่จัดส่ง</th>
                   <th className="col-date">คาดว่าจะได้รับ</th>
                   <th className="col-admin-status">สถานะพัสดุ</th>
@@ -353,9 +353,9 @@ export default function TrackingPage() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูลพัสดุ...</td></tr>
+                  <tr><td colSpan={13} className="table-empty-row">กำลังดึงข้อมูลติดตามพัสดุ...</td></tr>
                 ) : filteredTransactions.length === 0 ? (
-                  <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลแทร็คกิ้งที่ตรงเงื่อนไข</td></tr>
+                  <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลติดตามพัสดุที่ตรงเงื่อนไข</td></tr>
                 ) : (
                   filteredTransactions.map((x) => {
                     const trackingList = x.transaction_tracking;
@@ -418,7 +418,7 @@ export default function TrackingPage() {
         <div className="form-card">
           <h3>
             {formMode === "add" ? <PlusCircle size={24} /> : <SquarePen size={24} />}
-            <span className="form-title-text">{formMode === "add" ? "สร้างรายการติดตาม" : "แก้ไขรายการติดตาม"}</span>
+            <span className="form-title-text">{formMode === "add" ? "สร้างรายการติดตามพัสดุ" : "แก้ไขรายการติดตามพัสดุ"}</span>
           </h3>
           
           <form onSubmit={handleFormSubmit}>
@@ -504,7 +504,7 @@ export default function TrackingPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="tracking_number">Tracking Number</label>
+              <label htmlFor="tracking_number">หมายเลขติดตามพัสดุ</label>
               <input
                 type="text"
                 id="tracking_number"
@@ -552,7 +552,7 @@ export default function TrackingPage() {
                 value={isDelivered}
                 onChange={(e) => setIsDelivered(e.target.value)}
               >
-                <option value="NO">NO (ยังไม่ได้รับ/อยู่ระหว่างการจัดส่ง)</option>
+                <option value="NO">NO (อยู่ระหว่างการจัดส่ง)</option>
                 <option value="YES">YES (ได้รับพัสดุเรียบร้อยแล้ว)</option>
               </select>
             </div>
