@@ -148,7 +148,7 @@ export default function TrackingPage() {
         tracking_number: "",
         shipping_date: "",
         expected_date: "",
-        thailand_post: null
+        last_status: "รอดำเนินการเข้ารับ"
       });
 
     setFormMode("edit");
