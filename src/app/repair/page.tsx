@@ -360,6 +360,39 @@ export default function RepairPage() {
                       ? x.updated_by_name 
                       : (x.created_by_name || "-");
 
+                    const renderDayCount = (targetDateStr: string | undefined, type: "received" | "repaired" | "delivery") => {
+                    if (!targetDateStr || x.closed === "YES") return null;
+                      
+                    const targetDate = new Date(targetDateStr);
+                    const todayObj = new Date(todayStr);
+                      targetDate.setHours(0, 0, 0, 0);
+                      todayObj.setHours(0, 0, 0, 0);
+
+                    const diffTime = todayObj.getTime() - targetDate.getTime();
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (type === "received") {
+                      // นับจากวันรับเข้า: แสดงจำนวนวันที่ผ่านไปแล้วจนถึงปัจจุบัน
+                    return <div className="table-txt-small-italic text-amber-600">รับเข้าแล้ว {diffDays} วัน</div>;
+                    }
+
+                    if (type === "repaired") {
+                      // นับจากวันซ่อมเสร็จ: แสดงจำนวนวันที่ซ่อมเสร็จค้างไว้
+                    return <div className="table-txt-small-italic text-blue-600">ซ่อมเสร็จแล้ว {diffDays} วัน</div>;
+                    }
+
+                    if (type === "delivery") {
+                      // นับจากวันที่จัดส่งจริง: ดูว่าส่งไปแล้วกี่วัน หรือเพิ่งส่งวันนี้
+                      if (diffDays === 0) {
+                        return <div className="table-txt-small-italic text-emerald-600">จัดส่งวันนี้</div>;
+                        } else if (diffDays > 0) {
+                        return <div className="table-txt-small-italic text-slate-500">จัดส่งแล้ว {diffDays} วัน</div>;
+                        }
+                      
+                      return null; // เผื่อกรณีข้อมูลผิดพลาดเป็นอนาคต จะได้ไม่แสดงผลแปลกๆ
+                    }
+                };
+
                     return (
                       <tr key={x.transaction_id} onClick={() => triggerEditMode(x)}>
                         <td><strong>{x.transaction_id}</strong></td>
@@ -382,9 +415,18 @@ export default function RepairPage() {
                         <td>{x.phone_number || "-"}</td>
                         <td><small>{x.channel}</small></td>
                         <td><span className={`status-badge ${badgeClass}`}>{statusText}</span></td>
-                        <td>{rData?.received_date || "-"}</td>
-                        <td>{rData?.repaired_date || "-"}</td>
-                        <td>{rData?.delivery_date || "-"}</td>
+                        <td>
+                          <div>{rData?.received_date || "-"}</div>
+                          {renderDayCount(rData?.received_date, "received")}
+                        </td>
+                        <td>
+                          <div>{rData?.repaired_date || "-"}</div>
+                          {renderDayCount(rData?.repaired_date, "repaired")}
+                        </td>
+                        <td>
+                          <div>{rData?.delivery_date || "-"}</div>
+                          {renderDayCount(rData?.delivery_date, "delivery")}
+                        </td>
                         <td>{rData?.input_status || "-"}</td>
                         <td><span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>{x.closed}</span></td>
                         <td><span className="table-txt-muted">{x.note || "-"}</span></td>
@@ -416,7 +458,7 @@ export default function RepairPage() {
                 type="text"
                 id="product"
                 required
-                placeholder="กรอกรหัสสินค้า หรืออาการที่ต้องซ่อม"
+                placeholder="กรอกรายละเอียดสินค้า"
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
               />
@@ -522,7 +564,7 @@ export default function RepairPage() {
               <input
                 type="text"
                 id="input_status"
-                placeholder="เช่น รออะไหล่, ซ่อมเสร็จแล้ว"
+                placeholder="ระบุสถานะ..."
                 value={inputStatus}
                 onChange={(e) => setInputStatus(e.target.value)}
               />
@@ -532,7 +574,7 @@ export default function RepairPage() {
               <label htmlFor="note">หมายเหตุ</label>
               <textarea
                 id="note"
-                placeholder="ระบุหมายเหตุเพิ่มเติม..."
+                placeholder="ระบุหมายเหตุ..."
                 rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
