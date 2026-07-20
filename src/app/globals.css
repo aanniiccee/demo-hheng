@@ -222,6 +222,8 @@
   .product-table th.col-date { min-width: 150px; }
   .product-table th.col-balance { min-width: 100px; }
   .product-table th.col-paid { min-width: 130px; }
+  .product-table th.col-type { min-width: 130px; }
+  .product-table th.col-tracknum { min-width: 150px; }
 
   .table-empty-row {
     text-align: left;
