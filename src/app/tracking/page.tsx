@@ -261,7 +261,7 @@ export default function TrackingPage() {
     const name = (x.customer_name || "").toLowerCase();
     const txId = (x.transaction_id || "").toLowerCase();
     const pDetail = (x.product || "").toLowerCase();
-    const trackNumFromTracking = (tData && 'tracking_number' in tData ? tData.tracking_number : "")?.toLowerCase() || "";
+    const trackNumFromTracking = (tData && typeof tData === 'object' && 'tracking_number' in tData ? tData.tracking_number : "")?.toLowerCase() || "";
 
     return q === "" || 
       name.includes(q) || 
@@ -388,7 +388,7 @@ export default function TrackingPage() {
                         </td>
                         <td>{x.phone_number || "-"}</td>
                         <td><small>{x.channel}</small></td>
-                        <td><strong className="text-blue-600">{tData.tracking_number || "-"}</strong></td>
+                        <td><strong className="text-blue-600">{tData?.tracking_number || "-"}</strong></td>
                         <td>{tData?.shipping_date || "-"}</td>
                         <td>{tData?.expected_date || "-"}</td>
                         <td>
