@@ -147,6 +147,7 @@ export default function TrackingPage() {
     ? trackingList[0] 
     : (trackingList || {
         direction: 'INBOUND',
+        tracking_number: "",
         shipping_date: "",
         expected_date: "",
         thailand_post: null
@@ -161,7 +162,7 @@ export default function TrackingPage() {
     setChatLink(tx.chat_link || "");
     setPhoneNumber(tx.phone_number || "");
     setChannel(tx.channel || "LINE");
-    setTrackingNumber(tx.tracking_number || "");
+    setTrackingNumber(tData.tracking_number || "");
     
     setShippingDate(tData.shipping_date || "");
     setExpectedDate(tData.expected_date || "");
@@ -262,14 +263,12 @@ export default function TrackingPage() {
     const name = (x.customer_name || "").toLowerCase();
     const txId = (x.transaction_id || "").toLowerCase();
     const pDetail = (x.product || "").toLowerCase();
-    const trackNumFromX = (x.tracking_number || "").toLowerCase();
-    const trackNumFromTracking = (tData?.tracking_number || "").toLowerCase();
+    const trackNumFromTracking = (tData && 'tracking_number' in tData ? tData.tracking_number : "")?.toLowerCase() || "";
 
     return q === "" || 
       name.includes(q) || 
       txId.includes(q) || 
       pDetail.includes(q) || 
-      trackNumFromX.includes(q) ||
       trackNumFromTracking.includes(q);
   });
 
