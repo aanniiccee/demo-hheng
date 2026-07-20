@@ -21,11 +21,9 @@ interface TrackingDetail {
   shipping_date?: string;          // วันที่จัดส่ง
   expected_date?: string;          // วันที่คาดว่าจะได้รับ
   tracking_number?: string;
-  thailand_post?: {
-    last_status: string;
-    status_detail?: string;
-    status_update_at?: string;
-  } | null;
+  last_status?: string;
+  status_detail?: string;
+  status_update_at?: string;
 }
 
 interface TrackingTransaction {
@@ -40,7 +38,7 @@ interface TrackingTransaction {
   note?: string;
   updated_by_name?: string;
   created_by_name?: string;
-  transaction_tracking?: TrackingDetail[] | TrackingDetail; 
+  thailand_post_view?: TrackingDetail[] | TrackingDetail;
 }
 
 export default function TrackingPage() {
@@ -166,7 +164,7 @@ export default function TrackingPage() {
     
     setShippingDate(tData.shipping_date || "");
     setExpectedDate(tData.expected_date || "");
-    setThailandPostStatus(tData.thailand_post?.last_status || "รอดำเนินการเข้ารับ");
+    setThailandPostStatus(tData.last_status || "รอดำเนินการเข้ารับ");
     setIsDelivered(tx.closed || "NO");
     setNote(tx.note || "");
   };
@@ -249,7 +247,7 @@ export default function TrackingPage() {
 
 // --- ระบบกรองข้อมูล (Filter Data Client-side) ที่ถูกต้อง ---
   const filteredTransactions = allTransactions.filter(x => {
-    const trackingList = x.transaction_tracking;
+    const trackingList = x.thailand_post_view;
     const tData = Array.isArray(trackingList) ? trackingList[0] : trackingList;
     const currentDirection = tData?.direction || "INBOUND";
 
@@ -358,7 +356,7 @@ export default function TrackingPage() {
                   <tr><td colSpan={13} className="table-empty-row no-match">ไม่พบข้อมูลติดตามพัสดุที่ตรงเงื่อนไข</td></tr>
                 ) : (
                   filteredTransactions.map((x) => {
-                    const trackingList = x.transaction_tracking;
+                    const trackingList = x.thailand_post_view;
                     const tData = Array.isArray(trackingList) ? trackingList[0] : trackingList;
                     
                     const directionText = tData?.direction === "INBOUND" ? "📥 รับเข้า" : "📤 ส่งออก";
