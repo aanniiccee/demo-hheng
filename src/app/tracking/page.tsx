@@ -346,7 +346,7 @@ export default function TrackingPage() {
                   <th className="col-date">วันที่จัดส่ง</th>
                   <th className="col-date">คาดว่าจะได้รับ</th>
                   <th className="col-admin-status">สถานะพัสดุ</th>
-                  <th className="col-closed">ยืนยันรับสินค้าแล้ว</th>
+                  <th className="col-trackclosed">ยืนยันรับสินค้าแล้ว</th>
                   <th className="col-note">หมายเหตุ</th>
                   <th className="col-admin-name">ผู้ทำรายการ</th>
                 </tr>
