@@ -1000,6 +1000,158 @@ def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, to
     except Exception as e:
         raise HTTPException(500, f"Database error: {str(e)}")
 
+# API Tracking
+# --- 1. Pydantic Schema สำหรับข้อมูลพัสดุขาเข้า ---
+class TrackingTransactionIn(BaseModel):
+    product: Optional[str] = ''              # รายละเอียดสินค้า / รหัสสินค้า
+    customer_name: str                       # ชื่อลูกค้า
+    phone_number: Optional[str] = ''         # เบอร์โทรศัพท์
+    channel: str                             # ช่องทางติดต่อ (LINE, FB, IG, etc.)
+    chat_link: Optional[str] = None          # ลิงก์แชทลูกค้า
+    tracking_number: str                     # เลขพัสดุไปรษณีย์ไทย
+    is_delivered: str = 'NO'                 # ยืนยันรับแล้ว (YES หรือ NO)
+    note: Optional[str] = ''                 # หมายเหตุ
+    
+    # 📦 ฟิลด์เฉพาะของระบบติดตามพัสดุ (ส่งต่อไปยังตารางย่อย)
+    direction: str = 'INBOUND'               # INBOUND หรือ OUTBOUND
+    shipping_date: Optional[str] = None      # วันที่จัดส่ง (YYYY-MM-DD)
+    expected_date: Optional[str] = None      # วันที่คาดว่าจะได้รับ (YYYY-MM-DD)
+    
+    created_by_line_id: Optional[str] = 'Unknown'
+    created_by_name: Optional[str] = 'Unknown'
+
+
+# --- 2. GET: ดึงข้อมูลรายการติดตามพัสดุทั้งหมด ---
+@app.get('/api/tracking-transactions')
+def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: return []
+
+    # ดึงข้อมูล Master ที่เป็นประเภท TRACKING พร้อมพ่วงข้อมูลพัสดุย่อยจาก transaction_tracking
+    r = sb.table('transaction_master')\
+        .select('*, transaction_tracking(*, thailand_post(last_status, status_detail, status_update_at))')\
+        .eq('transaction_type', 'TRACKING')\
+        .eq('client_id', c['client_id'])\
+        .order('created_at', desc=True)\
+        .execute()
+    return r.data
+
+
+# --- 3. POST: สร้างรายการติดตามพัสดุใหม่ ---
+@app.post('/api/tracking-transactions')
+def add_tracking_transaction(data: TrackingTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: raise HTTPException(500, "Supabase client not initialized")
+
+    current_client_id = c['client_id']
+    trimmed_tracking = data.tracking_number.strip() if data.tracking_number else ""
+
+    # 🔄 รันเลข ID อัตโนมัติสำหรับระบบพัสดุ: TK_[client_id]_[เลขรัน]
+    last_t = sb.table('transaction_master')\
+        .select('transaction_id')\
+        .like('transaction_id', f'TK_{current_client_id}_%')\
+        .eq('client_id', current_client_id)\
+        .order('transaction_id', desc=True)\
+        .limit(1)\
+        .execute()
+
+    next_num = 1
+    if last_t.data:
+        last_id = last_t.data[0]['transaction_id']
+        match = re.search(rf'TK_{current_client_id}_(\d+)', last_id)
+        if match:
+            next_num = int(match.group(1)) + 1
+
+    new_tx_id = f"TK_{current_client_id}_{next_num}"
+
+    # A. ข้อมูลลงตารางหลัก (Master Table)
+    master_payload = {
+        "transaction_id": new_tx_id,
+        "transaction_type": "TRACKING",
+        "product": data.product,         
+        "customer_name": data.customer_name,
+        "phone_number": data.phone_number,
+        "channel": data.channel,
+        "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None,
+        "current_status": "PENDING",  # สถานะ Flow หลัก
+        "closed": data.is_delivered,   # ผูก closed เข้ากับสถานะการรับของ (YES/NO)
+        "is_delivered": data.is_delivered,
+        "note": data.note,
+        "client_id": current_client_id,
+        "created_by_line_id": data.created_by_line_id,
+        "created_by_name": data.created_by_name
+    }
+
+    # B. ข้อมูลลงตารางย่อย (Tracking Detail Table)
+    tracking_payload = {
+        "transaction_id": new_tx_id,
+        "tracking_number": trimmed_tracking,
+        "direction": data.direction if data.direction in ["INBOUND", "OUTBOUND"] else "INBOUND",
+        "shipping_date": data.shipping_date if data.shipping_date and data.shipping_date.strip() != "" else None,
+        "expected_date": data.expected_date if data.expected_date and data.expected_date.strip() != "" else None,
+        "client_id": current_client_id
+    }
+
+    try:
+        # บันทึกลงฐานข้อมูลทั้ง 2 ตาราง
+        sb.table('transaction_master').insert(master_payload).execute()
+        sb.table('transaction_tracking').insert(tracking_payload).execute()
+        
+        return {"success": True, "transaction_id": new_tx_id}
+    except Exception as e:
+        raise HTTPException(500, f"Database error: {str(e)}")
+
+
+# --- 4. PUT: อัปเดต/แก้ไขข้อมูลรายการติดตามพัสดุ ---
+@app.put('/api/tracking-transactions/{transaction_id}')
+def update_tracking_transaction(transaction_id: str, data: TrackingTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+    c = validate_token(token, admin_line_id)
+    if not sb: raise HTTPException(500, "Supabase client not initialized")
+
+    current_client_id = c['client_id']
+    current_note = data.note or ""
+    trimmed_tracking = data.tracking_number.strip() if data.tracking_number else ""
+
+    # จัดการ Logic ข้อความระบบเมื่อกดยืนยันรับของเรียบร้อยแล้ว (ปิดเคส)
+    if data.is_delivered == "YES":
+        new_status = "จัดส่งสำเร็จ"
+        final_closed = "YES"
+        if "[ระบบ]" not in current_note:
+            current_note = "[ระบบ] ลูกค้ายืนยันได้รับพัสดุเรียบร้อยแล้ว. " + current_note
+    else:
+        new_status = "PENDING"
+        final_closed = "NO"
+
+    try:
+        # A. อัปเดตข้อมูลตารางหลัก (Master Table)
+        sb.table('transaction_master').update({
+            "product": data.product,
+            "customer_name": data.customer_name,
+            "phone_number": data.phone_number,
+            "channel": data.channel,
+            "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None,
+            "current_status": new_status,
+            "closed": final_closed,
+            "is_delivered": data.is_delivered,
+            "note": current_note, 
+            "updated_at": "now()",
+            "updated_by_line_id": data.created_by_line_id,
+            "updated_by_name": data.created_by_name
+        }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
+
+        # B. อัปเดตข้อมูลตารางย่อย (Tracking Detail Table)
+        sb.table('transaction_tracking').update({
+            "tracking_number": trimmed_tracking,
+            "direction": data.direction,
+            "shipping_date": data.shipping_date if data.shipping_date and data.shipping_date.strip() != "" else None,
+            "expected_date": data.expected_date if data.expected_date and data.expected_date.strip() != "" else None,
+            "updated_at": "now()"
+        }).eq('transaction_id', transaction_id).eq('client_id', current_client_id).execute()
+
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(500, f"Database error: {str(e)}")
+
 if __name__ == "__main__":
     import uvicorn
 
