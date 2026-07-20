@@ -343,7 +343,7 @@ export default function TrackingPage() {
                   <th className="col-tracknum">หมายเลขติดตามพัสดุ</th>
                   <th className="col-date">วันที่จัดส่ง</th>
                   <th className="col-date">คาดว่าจะได้รับ</th>
-                  <th className="col-admin-status">สถานะพัสดุ</th>
+                  <th className="col-tracknum">สถานะพัสดุ</th>
                   <th className="col-trackclosed">ยืนยันรับสินค้าแล้ว</th>
                   <th className="col-note">หมายเหตุ</th>
                   <th className="col-admin-name">ผู้ทำรายการ</th>
@@ -392,9 +392,16 @@ export default function TrackingPage() {
                         <td>{tData?.shipping_date || "-"}</td>
                         <td>{tData?.expected_date || "-"}</td>
                         <td>
-                          <span className="status-badge st-normal">
-                            {tData?.last_status || "รอดำเนินการเข้ารับ"}
-                          </span>
+                          {(() => {
+                          const currentStatus = tData?.last_status || "รอดำเนินการเข้ารับ";
+
+                          const statusColorClass = currentStatus === "นำจ่ายสำเร็จ" ? "st-normal" : "st-overdue";
+                          return (
+                            <span className={`status-badge ${statusColorClass}`}>
+                              {currentStatus}
+                              </span>
+                            );
+                          })()}
                         </td>
                         <td>
                           <span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>
