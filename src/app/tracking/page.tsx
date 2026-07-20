@@ -316,8 +316,8 @@ export default function TrackingPage() {
               <span className="filter-label">ประเภทรายการ:</span>
               <div className="filter-group">
                 <button type="button" className={`filter-btn ${directionFilter === "ALL" ? "active" : ""}`} onClick={() => setDirectionFilter("ALL")}>ทั้งหมด</button>
-                <button type="button" className={`filter-btn ${directionFilter === "INBOUND" ? "active" : ""}`} onClick={() => setDirectionFilter("INBOUND")}>รับเข้า (INBOUND)</button>
-                <button type="button" className={`filter-btn ${directionFilter === "OUTBOUND" ? "active" : ""}`} onClick={() => setDirectionFilter("OUTBOUND")}>ส่งออก (OUTBOUND)</button>
+                <button type="button" className={`filter-btn ${directionFilter === "INBOUND" ? "active" : ""}`} onClick={() => setDirectionFilter("INBOUND")}>รับเข้า</button>
+                <button type="button" className={`filter-btn ${directionFilter === "OUTBOUND" ? "active" : ""}`} onClick={() => setDirectionFilter("OUTBOUND")}>ส่งออก</button>
               </div>
             </div>
 
