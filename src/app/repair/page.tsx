@@ -78,6 +78,12 @@ export default function RepairPage() {
   const todayStr = new Date().toISOString().split("T")[0];
 
   useEffect(() => {
+    if (closedFilter === "YES") {
+      setStatusFilter("ALL");
+    }
+  }, [closedFilter]);
+
+  useEffect(() => {
     const adminName = sessionStorage.getItem("admin_name");
     const adminLineId = sessionStorage.getItem("admin_line_id");
 
