@@ -140,7 +140,7 @@ export default function TrackingPage() {
   };
 
   const triggerEditMode = (tx: TrackingTransaction) => {
-    const trackingList = tx.transaction_tracking;
+    const trackingList = tx.thailand_post_view;
     const tData: TrackingDetail = Array.isArray(trackingList) 
     ? trackingList[0] 
     : (trackingList || {
