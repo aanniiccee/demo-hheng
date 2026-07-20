@@ -432,7 +432,7 @@ export default function TrackingPage() {
                 type="text"
                 id="product"
                 required
-                placeholder="กรอกรายละเอียด/รหัสสินค้า"
+                placeholder="กรอกรายละเอียดสินค้า"
                 value={product}
                 onChange={(e) => setProduct(e.target.value)}
               />
@@ -444,7 +444,7 @@ export default function TrackingPage() {
                 type="text"
                 id="customer_name"
                 required
-                placeholder="ชื่อ-นามสกุลลูกค้า"
+                placeholder="ชื่อ-นามสกุล"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
               />
@@ -455,7 +455,7 @@ export default function TrackingPage() {
               <input
                 type="url"
                 id="chat_link"
-                placeholder="https://line.me/..."
+                placeholder="วางลิงก์แชท เช่น https://line.me/..."
                 value={chatLink}
                 onChange={(e) => setChatLink(e.target.value)}
               />
