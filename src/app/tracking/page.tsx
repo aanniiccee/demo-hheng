@@ -390,7 +390,7 @@ export default function TrackingPage() {
                         </td>
                         <td>{x.phone_number || "-"}</td>
                         <td><small>{x.channel}</small></td>
-                        <td><strong className="text-blue-600">{x.tracking_number || "-"}</strong></td>
+                        <td><strong className="text-blue-600">{tData.tracking_number || "-"}</strong></td>
                         <td>{tData?.shipping_date || "-"}</td>
                         <td>{tData?.expected_date || "-"}</td>
                         <td>
