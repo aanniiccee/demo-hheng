@@ -20,7 +20,11 @@ interface TrackingDetail {
   direction: "INBOUND" | "OUTBOUND"; // รับเข้า หรือ ส่งออก
   shipping_date?: string;          // วันที่จัดส่ง
   expected_date?: string;          // วันที่คาดว่าจะได้รับ
-  thailand_post_status?: string;   // ดึงอัตโนมัติจาก thailand_post.last_status (แก้ไขไม่ได้)
+  thailand_post?: {
+    last_status: string;
+    status_detail?: string;
+    status_update_at?: string;
+  } | null;
 }
 
 interface TrackingTransaction {
@@ -144,7 +148,7 @@ export default function TrackingPage() {
         direction: 'INBOUND',
         shipping_date: null,
         expected_date: null,
-        thailand_post_status: 'รอดำเนินการเข้ารับ'
+        thailand_post: null
       });
 
     setFormMode("edit");
@@ -160,7 +164,7 @@ export default function TrackingPage() {
     
     setShippingDate(tData.shipping_date || "");
     setExpectedDate(tData.expected_date || "");
-    setThailandPostStatus(tData.thailand_post_status || "รอดำเนินการเข้ารับ");
+    setThailandPostStatus(tData.thailand_post?.last_status || "รอดำเนินการเข้ารับ");
     setIsDelivered(tx.is_delivered || "NO");
     setNote(tx.note || "");
   };
@@ -241,7 +245,7 @@ export default function TrackingPage() {
     }
   };
 
-  // --- ระบบกรองข้อมูล (Filter Data Client-side) ---
+// --- ระบบกรองข้อมูล (Filter Data Client-side) ที่ถูกต้อง ---
   const filteredTransactions = allTransactions.filter(x => {
     const trackingList = x.transaction_tracking;
     const tData = Array.isArray(trackingList) ? trackingList[0] : trackingList;
@@ -257,9 +261,15 @@ export default function TrackingPage() {
     const name = (x.customer_name || "").toLowerCase();
     const txId = (x.transaction_id || "").toLowerCase();
     const pDetail = (x.product || "").toLowerCase();
-    const trackNum = (x.tracking_number || "").toLowerCase();
+    const trackNumFromX = (x.tracking_number || "").toLowerCase();
+    const trackNumFromTracking = (tData?.tracking_number || "").toLowerCase();
 
-    return q === "" || name.includes(q) || txId.includes(q) || pDetail.includes(q) || trackNum.includes(q);
+    return q === "" || 
+      name.includes(q) || 
+      txId.includes(q) || 
+      pDetail.includes(q) || 
+      trackNumFromX.includes(q) ||
+      trackNumFromTracking.includes(q);
   });
 
   const getHomeUrl = () => {
@@ -295,7 +305,7 @@ export default function TrackingPage() {
               <input
                 type="text"
                 className="search-input"
-                placeholder="ชื่อลูกค้า, tracking หรือ ID..."
+                placeholder="ชื่อลูกค้า สินค้า เลขพัสดุ หรือ Transaction ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -385,7 +395,7 @@ export default function TrackingPage() {
                         <td>{tData?.expected_date || "-"}</td>
                         <td>
                           <span className="status-badge st-normal">
-                            {tData?.thailand_post_status || "รอดำเนินการเข้ารับ"}
+                            {tData?.thailand_post?.last_status || "รอดำเนินการเข้ารับ"}
                           </span>
                         </td>
                         <td>
@@ -414,18 +424,6 @@ export default function TrackingPage() {
           <form onSubmit={handleFormSubmit}>
             <div className="form-sub-header">
               <span className="form-sub-title">ข้อมูลปลายทางและสินค้า</span>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="direction">ประเภทการขนส่ง</label>
-              <select
-                id="direction"
-                value={direction}
-                onChange={(e) => setDirection(e.target.value as "INBOUND" | "OUTBOUND")}
-              >
-                <option value="INBOUND">📥 รับเข้า (Inbound)</option>
-                <option value="OUTBOUND">📤 ส่งออก (Outbound)</option>
-              </select>
             </div>
 
             <div className="form-group">
@@ -494,6 +492,18 @@ export default function TrackingPage() {
             </div>
 
             <div className="form-group">
+              <label htmlFor="direction">ประเภทการจัดส่ง</label>
+              <select
+                id="direction"
+                value={direction}
+                onChange={(e) => setDirection(e.target.value as "INBOUND" | "OUTBOUND")}
+              >
+                <option value="INBOUND">📥 รับเข้า (Inbound)</option>
+                <option value="OUTBOUND">📤 ส่งออก (Outbound)</option>
+              </select>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="tracking_number">Tracking Number</label>
               <input
                 type="text"
@@ -525,7 +535,7 @@ export default function TrackingPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="thailand_post_status">สถานะพัสดุ (ดึงอัตโนมัติ)</label>
+              <label htmlFor="thailand_post_status">สถานะพัสดุ</label>
               <input
                 type="text"
                 id="thailand_post_status"
@@ -536,13 +546,13 @@ export default function TrackingPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="is_delivered">ยืนยันรับสินค้าเรียบร้อย?</label>
+              <label htmlFor="is_delivered">ยืนยันรับสินค้า?</label>
               <select
                 id="is_delivered"
                 value={isDelivered}
                 onChange={(e) => setIsDelivered(e.target.value)}
               >
-                <option value="NO">NO (ยังไม่ได้รับ/อยู่ระหว่างจัดส่ง)</option>
+                <option value="NO">NO (ยังไม่ได้รับ/อยู่ระหว่างการจัดส่ง)</option>
                 <option value="YES">YES (ได้รับพัสดุเรียบร้อยแล้ว)</option>
               </select>
             </div>
@@ -550,10 +560,10 @@ export default function TrackingPage() {
             <hr className="divider-dashed" />
 
             <div className="form-group">
-              <label htmlFor="note">หมายเหตุการติดตาม</label>
+              <label htmlFor="note">หมายเหตุ</label>
               <textarea
                 id="note"
-                placeholder="ระบุหมายเหตุเพิ่มเติมเกี่ยวกับพัสดุชิ้นนี้..."
+                placeholder="ระบุหมายเหตุ..."
                 rows={2}
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
@@ -566,9 +576,9 @@ export default function TrackingPage() {
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <><Loader2 size={16} className="animate-spin" /> กำลังบันทึกแทร็คกิ้ง...</>
+                <><Loader2 size={16} className="animate-spin" /> กำลังบันทึกข้อมูลติดตามพัสดุ...</>
               ) : (
-                <><Save size={16} /> บันทึกข้อมูลระบบติดตาม</>
+                <><Save size={16} /> บันทึกข้อมูลติดตามพัสดุ</>
               )}
             </button>
           </form>
