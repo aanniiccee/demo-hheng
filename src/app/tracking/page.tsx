@@ -337,16 +337,16 @@ export default function TrackingPage() {
               <thead>
                 <tr>
                   <th className="col-id">Transaction ID</th>
-                  <th>ประเภท</th>
+                  <th className="col-type">ประเภท</th>
                   <th className="col-product">รหัสสินค้า</th>
                   <th className="col-customer">ชื่อลูกค้า</th>
-                  <th>เบอร์โทร</th>
-                  <th>ช่องทาง</th>
-                  <th>Tracking Number</th>
+                  <th className="col-phone">เบอร์โทร</th>
+                  <th className="col-channel">ช่องทาง</th>
+                  <th className="col-tracknum">Tracking Number</th>
                   <th className="col-date">วันที่จัดส่ง</th>
                   <th className="col-date">คาดว่าจะได้รับ</th>
                   <th className="col-admin-status">สถานะพัสดุ</th>
-                  <th className="col-closed">ยืนยันรับแล้ว</th>
+                  <th className="col-closed">ยืนยันรับสินค้าแล้ว</th>
                   <th className="col-note">หมายเหตุ</th>
                   <th className="col-admin-name">ผู้ทำรายการ</th>
                 </tr>
