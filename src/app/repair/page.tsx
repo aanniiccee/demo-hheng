@@ -119,40 +119,29 @@ export default function RepairPage() {
 
   // คำนวณสถานะจากระบบตามวันนัดรับของ หรือสถานะปิดเคส
   const calculateSystemStatus = (tx: RepairTransaction) => {
-    const repairList = tx.transaction_repair;
-    const rData: RepairDetail | undefined = Array.isArray(repairList) 
-      ? repairList[0] 
-      : (repairList || undefined);
+  const repairList = tx.transaction_repair;
+  const rData: RepairDetail | undefined = Array.isArray(repairList) 
+    ? repairList[0] 
+    : (repairList || undefined);
 
-    let statusText = "รอดำเนินการ";
-    let badgeClass = "st-normal";
+  let statusText = "รอดำเนินการ"; // ค่าเริ่มต้นสำหรับเคสที่เพิ่งรับเข้ามา (มีแค่ received_date)
+  let badgeClass = "st-normal";
 
-    if (tx.closed === "YES") {
-      statusText = "ปิดเคสแล้ว";
-      badgeClass = "closed-yes";
-    } else if (rData && rData.delivery_date) {
-      const targetDate = new Date(rData.delivery_date);
-      const todayObj = new Date();
+  if (tx.closed === "YES") {
+    // 1. ถ้าปิดเคสแล้ว ไม่ว่ากรณีใดๆ ถือว่าจบงาน
+    statusText = "ปิดเคสแล้ว";
+    badgeClass = "closed-yes";
+  } else if (rData && rData.delivery_date) {
+    // 2. ถ้ายังไม่ปิดเคส แต่ใส่ delivery_date แปลว่าส่งของไปแล้ว แต่อยู่ระหว่างเดินทาง/รอแอดมินตามผล
+    statusText = "จัดส่งแล้ว";
+    badgeClass = "st-overdue"; // ใช้ class ที่เด่นเพื่อให้รู้ว่าต้องตามต่อ
+  } else if (rData && rData.repaired_date) {
+    // 3. ถ้ายังไม่ส่ง แต่ซ่อมเสร็จแล้ว
+    statusText = "ซ่อมเสร็จแล้ว";
+    badgeClass = "st-today";
+  }
 
-      targetDate.setHours(0,0,0,0);
-      todayObj.setHours(0,0,0,0);
-
-      if (targetDate.getTime() === todayObj.getTime()) {
-        statusText = "ถึงกำหนดรับวันนี้";
-        badgeClass = "st-today";
-      } else if (targetDate < todayObj) {
-        statusText = "เลยกำหนดนัดรับ";
-        badgeClass = "st-overdue";
-      } else {
-        statusText = "รอนัดรับสินค้า";
-        badgeClass = "st-normal";
-      }
-    } else if (rData && rData.repaired_date) {
-      statusText = "ซ่อมเสร็จแล้ว";
-      badgeClass = "st-today";
-    }
-
-    return { statusText, badgeClass };
+  return { statusText, badgeClass };
   };
 
   const clearForm = () => {
@@ -321,7 +310,7 @@ export default function RepairPage() {
                 <button type="button" className={`filter-btn ${statusFilter === "ALL" ? "active" : ""}`} onClick={() => setStatusFilter("ALL")}>ทั้งหมด</button>
                 <button type="button" className={`filter-btn ${statusFilter === "รอดำเนินการ" ? "active" : ""}`} onClick={() => setStatusFilter("รอดำเนินการ")}>รอดำเนินการ</button>
                 <button type="button" className={`filter-btn ${statusFilter === "ซ่อมเสร็จแล้ว" ? "active" : ""}`} onClick={() => setStatusFilter("ซ่อมเสร็จแล้ว")}>ซ่อมเสร็จแล้ว</button>
-                <button type="button" className={`filter-btn ${statusFilter === "ถึงกำหนดรับวันนี้" ? "active" : ""}`} onClick={() => setStatusFilter("ถึงกำหนดรับวันนี้")}>ถึงกำหนดรับวันนี้</button>
+                <button type="button" className={`filter-btn ${statusFilter === "จัดส่งแล้ว" ? "active" : ""}`} onClick={() => setStatusFilter("จัดส่งแล้ว")}>จัดส่งแล้ว</button>
               </div>
             </div>
           </div>
