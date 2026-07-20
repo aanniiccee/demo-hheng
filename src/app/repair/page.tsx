@@ -382,14 +382,8 @@ export default function RepairPage() {
                     }
 
                     if (type === "delivery") {
-                      // นับจากวันที่จัดส่งจริง: ดูว่าส่งไปแล้วกี่วัน หรือเพิ่งส่งวันนี้
-                      if (diffDays === 0) {
-                        return <div className="table-txt-small-italic text-emerald-600">จัดส่งวันนี้</div>;
-                        } else if (diffDays > 0) {
-                        return <div className={`table-txt-small-italic ${diffDays >= 3 ? "text-rose-600 font-semibold" : "text-amber-600"}`}>จัดส่งแล้ว {diffDays} วัน</div>;
-                        }
-                      
-                      return null; // เผื่อกรณีข้อมูลผิดพลาดเป็นอนาคต จะได้ไม่แสดงผลแปลกๆ
+                      // นับจากวันที่จัดส่งจริง: ดูว่าส่งไปแล้วกี่วัน
+                      return <div className={`table-txt-small-italic ${diffDays >= 3 ? "text-rose-600 font-semibold" : "text-amber-600"}`}>จัดส่งแล้ว {diffDays} วัน</div>;
                     }
                 };
 
