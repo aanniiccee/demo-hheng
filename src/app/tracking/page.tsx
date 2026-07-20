@@ -139,8 +139,13 @@ export default function TrackingPage() {
   const triggerEditMode = (tx: TrackingTransaction) => {
     const trackingList = tx.transaction_tracking;
     const tData: TrackingDetail = Array.isArray(trackingList) 
-      ? trackingList[0] 
-      : (trackingList || {});
+    ? trackingList[0] 
+    : (trackingList || {
+        direction: 'INBOUND',
+        shipping_date: null,
+        expected_date: null,
+        thailand_post_status: 'รอดำเนินการเข้ารับ'
+      });
 
     setFormMode("edit");
     setEditTxId(tx.transaction_id);
