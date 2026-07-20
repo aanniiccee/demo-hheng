@@ -1029,7 +1029,7 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
 
     # แก้ไข: ลบเว้นวรรคหลัง comma ออกทั้งหมดเพื่อให้เซิร์ฟเวอร์อ่านได้ถูกต้อง
     r = sb.table('transaction_master')\
-        .select('*,transaction_tracking(*,thailand_post(last_status,status_detail,status_update_at))')\
+        .select('*,thailand_post_view(*)')\
         .eq('transaction_type', 'TRACKING')\
         .eq('client_id', c['client_id'])\
         .order('created_at', desc=True)\
