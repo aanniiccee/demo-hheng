@@ -20,6 +20,7 @@ interface TrackingDetail {
   direction: "INBOUND" | "OUTBOUND"; // รับเข้า หรือ ส่งออก
   shipping_date?: string;          // วันที่จัดส่ง
   expected_date?: string;          // วันที่คาดว่าจะได้รับ
+  tracking_number?: string;
   thailand_post?: {
     last_status: string;
     status_detail?: string;
@@ -146,8 +147,8 @@ export default function TrackingPage() {
     ? trackingList[0] 
     : (trackingList || {
         direction: 'INBOUND',
-        shipping_date: null,
-        expected_date: null,
+        shipping_date: "",
+        expected_date: "",
         thailand_post: null
       });
 
