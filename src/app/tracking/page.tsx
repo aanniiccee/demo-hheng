@@ -393,7 +393,7 @@ export default function TrackingPage() {
                         <td>{tData?.expected_date || "-"}</td>
                         <td>
                           <span className="status-badge st-normal">
-                            {tData?.thailand_post?.last_status || "รอดำเนินการเข้ารับ"}
+                            {tData?.last_status || "รอดำเนินการเข้ารับ"}
                           </span>
                         </td>
                         <td>
