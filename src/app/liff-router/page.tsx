@@ -81,8 +81,8 @@ export default function LiffRouter() {
   }
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontFamily: "sans-serif", fontSize: "1.5rem", fontWeight: "bold" }}>
-      กำลังตรวจสอบสิทธิ์การเข้าถึงระบบ HHeng...
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh", fontFamily: "sans-serif", fontWeight: "bold" }}>
+      กำลังตรวจสอบสิทธิ์การเข้าถึงระบบ...
     </div>
   );
 }
