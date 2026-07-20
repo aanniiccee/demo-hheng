@@ -36,7 +36,7 @@ interface TrackingTransaction {
   channel: string;
   chat_link?: string;
   tracking_number: string;
-  is_delivered: "NO" | "YES";       // ยืนยันรับแล้ว (YES/NO)
+  closed: "NO" | "YES";       // ยืนยันรับแล้ว (YES/NO)
   note?: string;
   updated_by_name?: string;
   created_by_name?: string;
@@ -167,7 +167,7 @@ export default function TrackingPage() {
     setShippingDate(tData.shipping_date || "");
     setExpectedDate(tData.expected_date || "");
     setThailandPostStatus(tData.thailand_post?.last_status || "รอดำเนินการเข้ารับ");
-    setIsDelivered(tx.is_delivered || "NO");
+    setIsDelivered(tx.closed || "NO");
     setNote(tx.note || "");
   };
 
@@ -257,7 +257,7 @@ export default function TrackingPage() {
     if (directionFilter !== "ALL" && currentDirection !== directionFilter) return false;
 
     // กรองการยืนยันการรับ
-    if (deliveredFilter !== "ALL" && x.is_delivered !== deliveredFilter) return false;
+    if (deliveredFilter !== "ALL" && x.closed !== deliveredFilter) return false;
 
     const q = searchTerm.toLowerCase().trim();
     const name = (x.customer_name || "").toLowerCase();
@@ -399,8 +399,8 @@ export default function TrackingPage() {
                           </span>
                         </td>
                         <td>
-                          <span className={`status-badge ${x.is_delivered === "YES" ? "closed-yes" : ""}`}>
-                            {x.is_delivered}
+                          <span className={`status-badge ${x.closed === "YES" ? "closed-yes" : ""}`}>
+                            {x.closed}
                           </span>
                         </td>
                         <td><span className="table-txt-muted">{x.note || "-"}</span></td>
