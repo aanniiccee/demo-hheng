@@ -1075,7 +1075,6 @@ def add_tracking_transaction(data: TrackingTransactionIn, token: Optional[str] =
         "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None,
         "current_status": "PENDING",  # สถานะ Flow หลัก
         "closed": data.is_delivered,   # ผูก closed เข้ากับสถานะการรับของ (YES/NO)
-        "is_delivered": data.is_delivered,
         "note": data.note,
         "client_id": current_client_id,
         "created_by_line_id": data.created_by_line_id,
@@ -1132,7 +1131,6 @@ def update_tracking_transaction(transaction_id: str, data: TrackingTransactionIn
             "chat_link": data.chat_link if data.chat_link and data.chat_link.strip() != "" else None,
             "current_status": new_status,
             "closed": final_closed,
-            "is_delivered": data.is_delivered,
             "note": current_note, 
             "updated_at": "now()",
             "updated_by_line_id": data.created_by_line_id,
