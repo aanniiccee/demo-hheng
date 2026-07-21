@@ -153,22 +153,18 @@ def get_pawn_transactions(token: Optional[str] = None, admin_line_id: Optional[s
 @app.post('/api/pawn-transactions')
 def add_pawn_transaction(payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True, 
-        "transaction_id": "PW_DEMO_9999_1",
-        "message": "[Demo Mode] บันทึกข้อมูลจำนำสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถเพิ่มข้อมูลจำนำได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 2. แก้ไข / ต่อดอก / ปิดสัญญาจำนำ (PUT) -> Mock
-# -------------------------------------------------------------
 @app.put('/api/pawn-transactions/{transaction_id}')
 def update_pawn_transaction(transaction_id: str, payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True,
-        "message": "[Demo Mode] อัปเดตข้อมูลจำนำสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถแก้ไขข้อมูลจำนำได้ในโหมดนี้"
+    )
 
 class InstallmentTransactionIn(BaseModel):
     product: Optional[str] = ''
@@ -223,54 +219,37 @@ def get_installment_transactions(token: Optional[str] = None, admin_line_id: Opt
         .execute()
     return r.data
     
-# -------------------------------------------------------------
-# 1. สร้างสัญญาผ่อนชำระ (POST) -> Mock
-# -------------------------------------------------------------
 @app.post('/api/installment-transactions')
 def create_installment_transactions(data: InstallmentTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    # Mock Response สั่งสำเร็จหลอกๆ ตามจำนวนงวดที่ส่งมา
-    return {
-        "success": True, 
-        "created_count": data.total_periods,
-        "message": "[Demo Mode] บันทึกข้อมูลจำลองสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถสร้างสัญญาผ่อนชำระได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 2. บันทึกรับชำระเงินรายงวด (PUT) -> Mock
-# -------------------------------------------------------------
 @app.put('/api/installment-transactions/{tx_id}')
 def update_installment_payment(tx_id: str, payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    # Mock Response ตอบกลับโครงสร้างเดิม
-    return {
-        "success": True, 
-        "message": "[Demo Mode] บันทึกค่างวดสำเร็จ", 
-        "contract_closed": "NO"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถบันทึกค่างวดได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 3. ยกเลิกสัญญาทั้งชุด (POST /void) -> Mock
-# -------------------------------------------------------------
 @app.post('/api/installment-transactions/{tx_id}/void')
 def void_entire_contract(tx_id: str, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True, 
-        "message": "[Demo Mode] ยกเลิกสัญญาทั้งชุดเรียบร้อยแล้ว"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถยกเลิกสัญญาได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 4. ปิดยอดสัญญาก่อนกำหนด (POST /payoff) -> Mock
-# -------------------------------------------------------------
 @app.post('/api/installment-transactions/{tx_id}/payoff')
 def payoff_entire_contract(tx_id: str, payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True, 
-        "message": "[Demo Mode] บันทึกยอดปิดสัญญาก่อนกำหนดสำเร็จเรียบร้อย"
-    }
-
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถปิดยอดสัญญาก่อนกำหนดได้ในโหมดนี้"
+    )
 
 # API มัดจำ
 class DepositTransactionIn(BaseModel):
@@ -304,28 +283,21 @@ def get_deposit_transactions(token: Optional[str] = None, admin_line_id: Optiona
         .execute()
     return r.data
 
-# -------------------------------------------------------------
-# 1. สร้างรายการออม/มัดจำ (POST) -> Mock
-# -------------------------------------------------------------
 @app.post('/api/deposit-transactions')
 def add_deposit_transaction(data: DepositTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True, 
-        "transaction_id": "DP_DEMO_9999",
-        "message": "[Demo Mode] บันทึกข้อมูลมัดจำสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถบันทึกข้อมูลมัดจำได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 2. แก้ไข / รับชำระ / ปิดเคสมัดจำ (PUT) -> Mock
-# -------------------------------------------------------------
 @app.put('/api/deposit-transactions/{transaction_id}')
 def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True,
-        "message": "[Demo Mode] อัปเดตข้อมูลมัดจำสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถอัปเดตข้อมูลมัดจำได้ในโหมดนี้"
+    )
 
 # API งานซ่อม
 class RepairTransactionIn(BaseModel):
@@ -362,28 +334,21 @@ def get_repair_transactions(token: Optional[str] = None, admin_line_id: Optional
     return r.data
 
 
-# -------------------------------------------------------------
-# 1. สร้างรายการงานซ่อม (POST) -> Mock
-# -------------------------------------------------------------
 @app.post('/api/repair-transactions')
 def add_repair_transaction(data: RepairTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True, 
-        "transaction_id": "RP_DEMO_9999",
-        "message": "[Demo Mode] บันทึกข้อมูลงานซ่อมสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถบันทึกงานซ่อมได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 2. แก้ไข / อัปเดตสถานะ / ปิดเคสงานซ่อม (PUT) -> Mock
-# -------------------------------------------------------------
 @app.put('/api/repair-transactions/{transaction_id}')
 def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True,
-        "message": "[Demo Mode] อัปเดตข้อมูลงานซ่อมสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถอัปเดตงานซ่อมได้ในโหมดนี้"
+    )
 
 # API Tracking
 # --- 1. Pydantic Schema สำหรับข้อมูลพัสดุขาเข้า ---
@@ -422,28 +387,21 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
         
     return r.data
 
-# -------------------------------------------------------------
-# 1. สร้างรายการติดตามพัสดุ (POST) -> Mock
-# -------------------------------------------------------------
 @app.post('/api/tracking-transactions')
 def add_tracking_transaction(data: TrackingTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True, 
-        "transaction_id": "TK_DEMO_9999",
-        "message": "[Demo Mode] บันทึกข้อมูลพัสดุสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถบันทึกข้อมูลพัสดุได้ในโหมดนี้"
+    )
 
-# -------------------------------------------------------------
-# 2. แก้ไข / อัปเดตสถานะจัดส่ง (PUT) -> Mock
-# -------------------------------------------------------------
 @app.put('/api/tracking-transactions/{transaction_id}')
 def update_tracking_transaction(transaction_id: str, data: TrackingTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return {
-        "success": True,
-        "message": "[Demo Mode] อัปเดตสถานะพัสดุสำเร็จ"
-    }
+    raise HTTPException(
+        status_code=400, 
+        detail="[Demo Mode] ระบบทดลองใช้งาน: ไม่สามารถอัปเดตพัสดุได้ในโหมดนี้"
+    )
 
 if __name__ == "__main__":
     import uvicorn
