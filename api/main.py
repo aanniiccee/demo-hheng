@@ -444,7 +444,8 @@ TRANSACTION_TRACKING = [
         "shipping_date": "2026-07-20",
         "expected_date": "2026-07-22",
         "thailand_post_status": "นำจ่ายสำเร็จ",
-        "client_id": "1",
+        "is_delivered": "NO",
+        "client_id": 1,  # แก้จาก "1" เป็น 1
         "created_at": "2026-07-20 05:50:02.096949+00",
         "updated_at": "2026-07-20 05:56:15.099386+00",
     },
@@ -455,7 +456,8 @@ TRANSACTION_TRACKING = [
         "shipping_date": "2026-07-10",
         "expected_date": "2026-07-12",
         "thailand_post_status": "ส่งมอบสำเร็จ",
-        "client_id": "1",
+        "is_delivered": "YES",
+        "client_id": 1,  # แก้จาก "1" เป็น 1
         "created_at": "2026-07-10 03:00:00.000000+00",
         "updated_at": "2026-07-12 08:30:00.000000+00",
     },
@@ -760,7 +762,7 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
     return _get_joined_transactions("TRACKING", TRANSACTION_TRACKING)
 
 @app.post('/api/tracking-transactions')
-def add_tracking_transaction(data: TrackingTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+def add_tracking_transaction(payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
     raise HTTPException(
         status_code=400, 
@@ -768,7 +770,7 @@ def add_tracking_transaction(data: TrackingTransactionIn, token: Optional[str] =
     )
 
 @app.put('/api/tracking-transactions/{transaction_id}')
-def update_tracking_transaction(transaction_id: str, data: TrackingTransactionIn, token: Optional[str] = None, admin_line_id: Optional[str] = None):
+def update_tracking_transaction(transaction_id: str, payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
     raise HTTPException(
         status_code=400, 
