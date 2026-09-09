@@ -9,7 +9,7 @@ from typing import Optional
 
 import requests
 from dotenv import load_dotenv
-from fastapi import Body, FastAPI, Header, HTTPException, Request
+from fastapi import Body, FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
@@ -17,15 +17,25 @@ load_dotenv()
 
 app = FastAPI()
 
+# กำหนด Security Token ที่ยอมรับ
+EXPECTED_TOKEN = "c925e1c7-5663-4ffa-8add-8c019d5a73f9"
 
-# --- ฟังก์ชันยืนยันตัวตนด้วย LINE ID Token จริง ---
-def validate_token(
+
+# --- ฟังก์ชันยืนยัน Security Token & LINE Token ---
+def verify_access_and_token(
+    token: Optional[str] = Query(None),
     authorization: Optional[str] = Header(None),
     admin_line_id: Optional[str] = None
 ):
+    # 1. ตรวจสอบ Security Token ก่อนเป็นอันดับแรก
+    if token != EXPECTED_TOKEN:
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized: Security Token ไม่ถูกต้องหรือไม่มีสิทธิ์เข้าถึง"
+        )
+
+    # 2. ตรวจสอบ LINE ID Token (ถ้ามี)
     liff_channel_id = os.environ.get("LINE_CHANNEL_ID")
-    
-    # หากมีการส่ง Bearer Token มา ตรวจสอบกับ LINE API จริง
     if authorization and authorization.startswith("Bearer "):
         id_token = authorization.split(" ")[1]
         try:
@@ -44,12 +54,14 @@ def validate_token(
         except Exception:
             pass
             
-    # Mock fallback กรณีทำ Demo/Testing (คืนค่า client_id=1)
     return {"client_id": 1, "line_user_id": admin_line_id or "U_DEMO_USER"}
 
 
 @app.get("/api/config/liff-id")
-def get_liff_config():
+def get_liff_config(token: Optional[str] = Query(None)):
+    if token != EXPECTED_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
     liff_id = os.environ.get("LIFF_ID")
     if not liff_id:
         raise HTTPException(status_code=500, detail="LIFF_ID is not configured in .env")
@@ -78,8 +90,12 @@ class PawnTransactionIn(BaseModel):
 
 
 @app.get('/api/pawn-transactions/{tx_id}')
-def get_single_pawn_transaction(tx_id: str, authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_single_pawn_transaction(
+    tx_id: str, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     decoded_tx_id = urllib.parse.unquote(tx_id)
     return [{
         "transaction_id": decoded_tx_id,
@@ -115,8 +131,11 @@ def get_single_pawn_transaction(tx_id: str, authorization: Optional[str] = Heade
 
 
 @app.get('/api/pawn-transactions')
-def get_pawn_transactions(authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_pawn_transactions(
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     return [
         {
             "transaction_id": "PW-202603-001",
@@ -184,12 +203,23 @@ def get_pawn_transactions(authorization: Optional[str] = Header(None)):
 
 
 @app.post('/api/pawn-transactions')
-def add_pawn_transaction(payload: dict = Body(...), authorization: Optional[str] = Header(None)):
+def add_pawn_transaction(
+    payload: dict = Body(...), 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถเพิ่มข้อมูลจำนำได้ในโหมดทดลอง")
 
 
 @app.put('/api/pawn-transactions/{transaction_id}')
-def update_pawn_transaction(transaction_id: str, payload: dict = Body(...), authorization: Optional[str] = Header(None)):
+def update_pawn_transaction(
+    transaction_id: str, 
+    payload: dict = Body(...), 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถแก้ไขข้อมูลจำนำได้ในโหมดทดลอง")
 
 
@@ -217,8 +247,12 @@ class InstallmentTransactionIn(BaseModel):
 
 
 @app.get('/api/installment-transactions/{tx_id}')
-def get_single_installment_transaction(tx_id: str, authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_single_installment_transaction(
+    tx_id: str, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     return {
         "transaction_id": tx_id,
         "transaction_type": "INSTALLMENT",
@@ -256,8 +290,11 @@ def get_single_installment_transaction(tx_id: str, authorization: Optional[str] 
 
 
 @app.get('/api/installment-transactions')
-def get_installment_transactions(authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_installment_transactions(
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     return [
         {
             "transaction_id": "INS-202601-001",
@@ -297,12 +334,23 @@ def get_installment_transactions(authorization: Optional[str] = Header(None)):
 
 
 @app.post('/api/installment-transactions')
-def create_installment_transactions(data: InstallmentTransactionIn, authorization: Optional[str] = Header(None)):
+def create_installment_transactions(
+    data: InstallmentTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถสร้างสัญญาผ่อนชำระได้ในโหมดทดลอง")
 
 
 @app.put('/api/installment-transactions/{tx_id}')
-def update_installment_payment(tx_id: str, payload: dict = Body(...), authorization: Optional[str] = Header(None)):
+def update_installment_payment(
+    tx_id: str, 
+    payload: dict = Body(...), 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถบันทึกค่างวดได้ในโหมดทดลอง")
 
 
@@ -330,8 +378,11 @@ class DepositTransactionIn(BaseModel):
 
 
 @app.get('/api/deposit-transactions')
-def get_deposit_transactions(authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_deposit_transactions(
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     return [
         {
             "transaction_id": "DEP-202603-001",
@@ -370,12 +421,23 @@ def get_deposit_transactions(authorization: Optional[str] = Header(None)):
 
 
 @app.post('/api/deposit-transactions')
-def add_deposit_transaction(data: DepositTransactionIn, authorization: Optional[str] = Header(None)):
+def add_deposit_transaction(
+    data: DepositTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถบันทึกข้อมูลมัดจำได้ในโหมดทดลอง")
 
 
 @app.put('/api/deposit-transactions/{transaction_id}')
-def update_deposit_transaction(transaction_id: str, data: DepositTransactionIn, authorization: Optional[str] = Header(None)):
+def update_deposit_transaction(
+    transaction_id: str, 
+    data: DepositTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถอัปเดตข้อมูลมัดจำได้ในโหมดทดลอง")
 
 
@@ -400,8 +462,11 @@ class RepairTransactionIn(BaseModel):
 
 
 @app.get('/api/repair-transactions')
-def get_repair_transactions(authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_repair_transactions(
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     return [
         {
             "transaction_id": "REP-202603-001",
@@ -437,12 +502,23 @@ def get_repair_transactions(authorization: Optional[str] = Header(None)):
 
 
 @app.post('/api/repair-transactions')
-def add_repair_transaction(data: RepairTransactionIn, authorization: Optional[str] = Header(None)):
+def add_repair_transaction(
+    data: RepairTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถบันทึกงานซ่อมได้ในโหมดทดลอง")
 
 
 @app.put('/api/repair-transactions/{transaction_id}')
-def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, authorization: Optional[str] = Header(None)):
+def update_repair_transaction(
+    transaction_id: str, 
+    data: RepairTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถอัปเดตงานซ่อมได้ในโหมดทดลอง")
 
 
@@ -464,8 +540,11 @@ class TrackingTransactionIn(BaseModel):
 
 
 @app.get('/api/tracking-transactions')
-def get_tracking_transactions(authorization: Optional[str] = Header(None)):
-    user = validate_token(authorization)
+def get_tracking_transactions(
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    user = verify_access_and_token(token, authorization)
     return [
         {
             "transaction_id": "TRK-202603-001",
@@ -502,12 +581,23 @@ def get_tracking_transactions(authorization: Optional[str] = Header(None)):
 
 
 @app.post('/api/tracking-transactions')
-def add_tracking_transaction(data: TrackingTransactionIn, authorization: Optional[str] = Header(None)):
+def add_tracking_transaction(
+    data: TrackingTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถบันทึกข้อมูลพัสดุได้ในโหมดทดลอง")
 
 
 @app.put('/api/tracking-transactions/{transaction_id}')
-def update_tracking_transaction(transaction_id: str, data: TrackingTransactionIn, authorization: Optional[str] = Header(None)):
+def update_tracking_transaction(
+    transaction_id: str, 
+    data: TrackingTransactionIn, 
+    token: Optional[str] = Query(None), 
+    authorization: Optional[str] = Header(None)
+):
+    verify_access_and_token(token, authorization)
     raise HTTPException(status_code=400, detail="[Demo Mode] ไม่สามารถอัปเดตพัสดุได้ในโหมดทดลอง")
 
 
