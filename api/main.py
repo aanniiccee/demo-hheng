@@ -440,7 +440,7 @@ TRANSACTION_TRACKING = [
     {
         "transaction_id": "TK_1_1",
         "tracking_number": "EF123456789TH",
-        "direction": "OUTBOUND",
+        "direction": "INBOUND",
         "shipping_date": "2026-07-20",
         "expected_date": "2026-07-22",
         "thailand_post_status": "นำจ่ายสำเร็จ",
