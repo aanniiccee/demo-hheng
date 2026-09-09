@@ -3,7 +3,7 @@ import os
 import re
 import urllib.parse
 from calendar import monthrange
-from datetime import date, timedelta
+from datetime import date
 from typing import Optional, List, Dict, Any
 
 from dotenv import load_dotenv
@@ -19,255 +19,374 @@ router = APIRouter(prefix="/api")
 # 1. MOCK DATA (จำลองข้อมูลในหน่วยความจำ)
 # ==============================================================================
 
-# คำนวณวันที่อ้างอิงจากวันนี้เพื่อให้ Filter สถานะระบบ (ยังไม่ถึง/ครบกำหนด/เกินกำหนด) ทำงานได้เป๊ะเสมอ
-today = date.today()
-yesterday = (today - timedelta(days=5)).isoformat()  # เกินกำหนด (OVERDUE)
-today_str = today.isoformat()                        # ครบกำหนดวันนี้ (DUE)
-next_week = (today + timedelta(days=7)).isoformat()   # ยังไม่ถึงกำหนด (PENDING)
-
 # ==============================================================================
-# MOCK DATA ชุดครอบคลุมทุก Filter
+# 1. PAWN (ระบบต่อดอก)
 # ==============================================================================
-
-MOCK_PAWN_TRANSACTIONS = [
+MOCK_PAWN_DATA = [
     {
-        "transaction_id": "PAWN-2026-001",
-        "client_id": 1,
+        "transaction_id": "PAWN-001",
         "transaction_type": "PAWN",
-        "customer_name": "1. สุชาติ (เปิดอยู่ - เกินกำหนด)",
+        "customer_name": "สุชาติ (เปิดอยู่ - เกินกำหนด)",
         "phone_number": "0811111111",
         "channel": "LINE",
         "current_status": "ACTIVE",
-        "note": "ตั๋วนี้เกินกำหนดชำระแล้ว",
-        "created_at": "2026-01-01T10:00:00Z",
-        "products": {"product_detail": "iPhone 15 Pro Max 256GB"},
-        "transaction_pawn": [
-            {
-                "id": "pawn-sub-001",
-                "interest_per_month": 500.0,
-                "payment_date": None,
-                "next_due_date": yesterday,  # เกินกำหนด
-                "total_paid_amount": 0.0,
-                "input_status": "ค้างชำระ",
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "iPhone 15 Pro Max",
+        "transaction_pawn": {
+            "interest_per_month": 500.0,
+            "payment_date": None,
+            "next_due_date": "2026-09-01",  # เกินกำหนด
+            "input_status": "ค้างชำระ",
+            "total_paid_amount": 0.0
+        }
     },
     {
-        "transaction_id": "PAWN-2026-002",
-        "client_id": 1,
+        "transaction_id": "PAWN-002",
         "transaction_type": "PAWN",
-        "customer_name": "2. วิภา (เปิดอยู่ - ครบกำหนดวันนี้)",
+        "customer_name": "วิภา (เปิดอยู่ - ครบกำหนดวันนี้)",
         "phone_number": "0822222222",
         "channel": "FB",
         "current_status": "ACTIVE",
-        "note": "ต้องชำระดอกเบี้ยวันนี้",
-        "created_at": "2026-01-10T11:00:00Z",
-        "products": {"product_detail": "iPad Air 5 M1 Wi-Fi 64GB"},
-        "transaction_pawn": [
-            {
-                "id": "pawn-sub-002",
-                "interest_per_month": 300.0,
-                "payment_date": None,
-                "next_due_date": today_str,  # ครบกำหนดวันนี้
-                "total_paid_amount": 0.0,
-                "input_status": "ถึงกำหนดชำระ",
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "iPad Air 5",
+        "transaction_pawn": {
+            "interest_per_month": 300.0,
+            "payment_date": None,
+            "next_due_date": "2026-09-09",  # ครบกำหนดวันนี้
+            "input_status": "ถึงกำหนดชำระ",
+            "total_paid_amount": 0.0
+        }
     },
     {
-        "transaction_id": "PAWN-2026-003",
-        "client_id": 1,
+        "transaction_id": "PAWN-003",
         "transaction_type": "PAWN",
-        "customer_name": "3. สมชาย (เปิดอยู่ - ยังไม่ถึงกำหนด)",
+        "customer_name": "สมชาย (เปิดอยู่ - ยังไม่ถึงกำหนด)",
         "phone_number": "0833333333",
         "channel": "LINE",
         "current_status": "ACTIVE",
-        "note": "สถานะปกติ ชำระสัปดาห์หน้า",
-        "created_at": "2026-02-01T09:30:00Z",
-        "products": {"product_detail": "MacBook Air M2"},
-        "transaction_pawn": [
-            {
-                "id": "pawn-sub-003",
-                "interest_per_month": 800.0,
-                "payment_date": None,
-                "next_due_date": next_week,  # ยังไม่ถึงกำหนด
-                "total_paid_amount": 0.0,
-                "input_status": "ปกติ",
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "MacBook Air M2",
+        "transaction_pawn": {
+            "interest_per_month": 800.0,
+            "payment_date": None,
+            "next_due_date": "2026-09-20",  # ยังไม่ถึงกำหนด
+            "input_status": "ปกติ",
+            "total_paid_amount": 0.0
+        }
     },
     {
-        "transaction_id": "PAWN-2026-004",
-        "client_id": 1,
+        "transaction_id": "PAWN-004",
         "transaction_type": "PAWN",
-        "customer_name": "4. นภา (ปิดแล้ว - ไถ่ถอนเรียบร้อย)",
+        "customer_name": "นภา (ปิดแล้ว - ชำระ/ไถ่ถอนแล้ว)",
         "phone_number": "0844444444",
-        "channel": "หน้าร้าน",
+        "channel": "OTHER",
         "current_status": "CLOSED",
-        "note": "ปิดสัญญาและไถ่ถอนของคืนแล้ว",
-        "created_at": "2026-01-05T14:00:00Z",
-        "products": {"product_detail": "Apple Watch Series 9"},
-        "transaction_pawn": [
-            {
-                "id": "pawn-sub-004",
-                "interest_per_month": 250.0,
-                "payment_date": today_str,
-                "next_due_date": next_week,
-                "total_paid_amount": 5250.0,
-                "input_status": "ไถ่ถอนแล้ว",
-                "closed": "YES"
-            }
-        ]
+        "closed": "YES",
+        "client_id": 1,
+        "product": "Apple Watch S9",
+        "transaction_pawn": {
+            "interest_per_month": 250.0,
+            "payment_date": "2026-09-09",
+            "next_due_date": "2026-09-20",
+            "input_status": "ไถ่ถอนแล้ว",
+            "total_paid_amount": 5250.0
+        }
     }
 ]
 
-MOCK_INSTALLMENT_TRANSACTIONS = [
+# ==============================================================================
+# 2. INSTALLMENT (ระบบผ่อนสินค้า)
+# ==============================================================================
+MOCK_INSTALLMENT_DATA = [
     {
-        "transaction_id": "INS-2026-001",
-        "client_id": 1,
+        "transaction_id": "INS-001",
         "transaction_type": "INSTALLMENT",
-        "customer_name": "1. อนันต์ (ผ่อนอยู่ - เกินกำหนดชำระงวด)",
+        "customer_name": "อนันต์ (เปิดอยู่ - เกินกำหนดชำระงวด)",
         "phone_number": "0855555555",
         "channel": "LINE",
         "current_status": "ACTIVE",
-        "note": "ค้างชำระงวดล่าสุด",
-        "created_at": "2026-01-01T08:00:00Z",
-        "products": {"product_detail": "iPhone 15 Pro 128GB"},
-        "transaction_installment": [
-            {
-                "id": "ins-sub-001",
-                "installment_amount": 3000.0,
-                "total_periods": 10,
-                "current_period": 2,
-                "monthly_due_day": today.day,
-                "start_month": 1,
-                "start_year": 2026,
-                "next_due_date": yesterday,  # เกินกำหนด
-                "total_paid_amount": 3000.0,
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "iPhone 15 Pro 128GB",
+        "transaction_installment": {
+            "installment_amount": 3000.0,
+            "total_periods": 10,
+            "current_period": 2,
+            "monthly_due_day": 1,
+            "due_date": "2026-09-01",  # เกินกำหนด
+            "payment_date": None,
+            "total_paid_amount": 3000.0,
+            "input_status": "ค้างชำระ"
+        }
     },
     {
-        "transaction_id": "INS-2026-002",
-        "client_id": 1,
+        "transaction_id": "INS-002",
         "transaction_type": "INSTALLMENT",
-        "customer_name": "2. กนก (ผ่อนอยู่ - ครบกำหนดงวดวันนี้)",
+        "customer_name": "กนก (เปิดอยู่ - ครบกำหนดงวดวันนี้)",
         "phone_number": "0866666666",
         "channel": "FB",
         "current_status": "ACTIVE",
-        "note": "ดิวชำระวันนี้",
-        "created_at": "2026-01-15T10:00:00Z",
-        "products": {"product_detail": "Samsung Galaxy S24 Ultra"},
-        "transaction_installment": [
-            {
-                "id": "ins-sub-002",
-                "installment_amount": 3500.0,
-                "total_periods": 12,
-                "current_period": 1,
-                "monthly_due_day": today.day,
-                "start_month": 2,
-                "start_year": 2026,
-                "next_due_date": today_str,  # ครบกำหนดวันนี้
-                "total_paid_amount": 0.0,
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "Samsung Galaxy S24 Ultra",
+        "transaction_installment": {
+            "installment_amount": 3500.0,
+            "total_periods": 12,
+            "current_period": 1,
+            "monthly_due_day": 9,
+            "due_date": "2026-09-09",  # ครบกำหนดวันนี้
+            "payment_date": None,
+            "total_paid_amount": 0.0,
+            "input_status": "ถึงกำหนดชำระ"
+        }
     },
     {
-        "transaction_id": "INS-2026-003",
-        "client_id": 1,
+        "transaction_id": "INS-003",
         "transaction_type": "INSTALLMENT",
-        "customer_name": "3. พิมล (ผ่อนจบแล้ว - ปิดสัญญา)",
+        "customer_name": "พิมล (เปิดอยู่ - ยังไม่ถึงกำหนดงวดถัดไป)",
         "phone_number": "0877777777",
         "channel": "LINE",
+        "current_status": "ACTIVE",
+        "closed": "NO",
+        "client_id": 1,
+        "product": "iPad Pro M2",
+        "transaction_installment": {
+            "installment_amount": 2500.0,
+            "total_periods": 6,
+            "current_period": 3,
+            "monthly_due_day": 20,
+            "due_date": "2026-09-20",  # ยังไม่ถึงกำหนด
+            "payment_date": None,
+            "total_paid_amount": 5000.0,
+            "input_status": "ปกติ"
+        }
+    },
+    {
+        "transaction_id": "INS-004",
+        "transaction_type": "INSTALLMENT",
+        "customer_name": "สมศักดิ์ (ปิดแล้ว - ผ่อนครบทุกงวด)",
+        "phone_number": "0888888888",
+        "channel": "OTHER",
         "current_status": "CLOSED",
-        "note": "ผ่อนครบทุกงวดเรียบร้อย",
-        "created_at": "2025-05-01T09:00:00Z",
-        "products": {"product_detail": "iPad Pro M2"},
-        "transaction_installment": [
-            {
-                "id": "ins-sub-003",
-                "installment_amount": 2000.0,
-                "total_periods": 6,
-                "current_period": 6,
-                "monthly_due_day": 1,
-                "start_month": 5,
-                "start_year": 2025,
-                "next_due_date": yesterday,
-                "total_paid_amount": 12000.0,
-                "closed": "YES"
-            }
-        ]
+        "closed": "YES",
+        "client_id": 1,
+        "product": "MacBook Pro M3",
+        "transaction_installment": {
+            "installment_amount": 5000.0,
+            "total_periods": 10,
+            "current_period": 10,
+            "monthly_due_day": 1,
+            "due_date": "2026-09-01",
+            "payment_date": "2026-09-09",
+            "total_paid_amount": 50000.0,
+            "input_status": "ผ่อนชำระครบแล้ว"
+        }
     }
 ]
 
-MOCK_DEPOSIT_TRANSACTIONS = [
+# ==============================================================================
+# 3. DEPOSIT (ระบบมัดจำ)
+# ==============================================================================
+MOCK_DEPOSIT_DATA = [
     {
-        "transaction_id": "DEP-2026-001",
-        "client_id": 1,
+        "transaction_id": "DEP-001",
         "transaction_type": "DEPOSIT",
-        "customer_name": "1. ธนกฤต (มัดจำอยู่ - เลยวันนัดรับ)",
-        "phone_number": "0888888888",
+        "customer_name": "ธนกฤต (เปิดอยู่ - เกินกำหนดนัดรับ)",
+        "phone_number": "0899999999",
         "channel": "IG",
         "current_status": "ACTIVE",
-        "note": "เลยวันนัดชำระส่วนที่เหลือ",
-        "created_at": "2026-02-01T11:00:00Z",
-        "products": {"product_detail": "PlayStation 5 Disc Edition"},
-        "transaction_deposit": [
-            {
-                "id": "dep-sub-001",
-                "deposit_amount": 2000.0,
-                "remaining_balance": 12000.0,
-                "due_date": yesterday,  # เกินกำหนด
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "PlayStation 5 Disc Edition",
+        "transaction_deposit": {
+            "deposit_amount": 2000.0,
+            "remaining_balance": 12000.0,
+            "due_date": "2026-09-01",  # เกินกำหนด
+            "payment_date": None,
+            "deposit_date": "2026-08-25",
+            "total_paid_amount": 2000.0,
+            "input_status": "เกินกำหนดนัดรับ"
+        }
     },
     {
-        "transaction_id": "DEP-2026-002",
-        "client_id": 1,
+        "transaction_id": "DEP-002",
         "transaction_type": "DEPOSIT",
-        "customer_name": "2. วรวุฒิ (มัดจำอยู่ - นัดรับวันนี้)",
-        "phone_number": "0899999999",
+        "customer_name": "วรวุฒิ (เปิดอยู่ - ครบกำหนดนัดรับวันนี้)",
+        "phone_number": "0800000000",
         "channel": "LINE",
         "current_status": "ACTIVE",
-        "note": "นัดเข้ามารับของและจ่ายส่วนที่เหลือวันนี้",
-        "created_at": "2026-02-10T15:00:00Z",
-        "products": {"product_detail": "Marshall Stanmore III"},
-        "transaction_deposit": [
-            {
-                "id": "dep-sub-002",
-                "deposit_amount": 1000.0,
-                "remaining_balance": 8900.0,
-                "due_date": today_str,  # ครบกำหนดวันนี้
-                "closed": "NO"
-            }
-        ]
+        "closed": "NO",
+        "client_id": 1,
+        "product": "Marshall Stanmore III",
+        "transaction_deposit": {
+            "deposit_amount": 1000.0,
+            "remaining_balance": 8900.0,
+            "due_date": "2026-09-09",  # ครบกำหนดวันนี้
+            "payment_date": None,
+            "deposit_date": "2026-09-01",
+            "total_paid_amount": 1000.0,
+            "input_status": "นัดรับวันนี้"
+        }
     },
     {
-        "transaction_id": "DEP-2026-003",
-        "client_id": 1,
+        "transaction_id": "DEP-003",
         "transaction_type": "DEPOSIT",
-        "customer_name": "3. ศิริพร (ชำระครบ/รับของแล้ว - ปิดเคส)",
-        "phone_number": "0800000000",
+        "customer_name": "เมธา (เปิดอยู่ - ยังไม่ถึงกำหนดนัดรับ)",
+        "phone_number": "0812345678",
         "channel": "FB",
+        "current_status": "ACTIVE",
+        "closed": "NO",
+        "client_id": 1,
+        "product": "Nintendo Switch OLED",
+        "transaction_deposit": {
+            "deposit_amount": 1500.0,
+            "remaining_balance": 8500.0,
+            "due_date": "2026-09-20",  # ยังไม่ถึงกำหนด
+            "payment_date": None,
+            "deposit_date": "2026-09-09",
+            "total_paid_amount": 1500.0,
+            "input_status": "รอรับสินค้า"
+        }
+    },
+    {
+        "transaction_id": "DEP-004",
+        "transaction_type": "DEPOSIT",
+        "customer_name": "ศิริพร (ปิดแล้ว - จ่ายครบรับของแล้ว)",
+        "phone_number": "0823456789",
+        "channel": "LINE",
         "current_status": "CLOSED",
-        "note": "รับสินค้าและจ่ายยอดครบแล้ว",
-        "created_at": "2026-02-15T16:30:00Z",
-        "products": {"product_detail": "AirPods Pro 2"},
-        "transaction_deposit": [
-            {
-                "id": "dep-sub-003",
-                "deposit_amount": 1000.0,
-                "remaining_balance": 0.0,
-                "due_date": today_str,
-                "closed": "YES"
-            }
-        ]
+        "closed": "YES",
+        "client_id": 1,
+        "product": "AirPods Pro 2",
+        "transaction_deposit": {
+            "deposit_amount": 1000.0,
+            "remaining_balance": 0.0,
+            "due_date": "2026-09-09",
+            "payment_date": "2026-09-09",
+            "deposit_date": "2026-09-01",
+            "total_paid_amount": 8900.0,
+            "input_status": "ชำระครบถ้วนแล้ว"
+        }
+    }
+]
+
+# ==============================================================================
+# 4. REPAIR (ระบบงานซ่อม)
+# ==============================================================================
+MOCK_REPAIR_DATA = [
+    {
+        "transaction_id": "REP-001",
+        "transaction_type": "REPAIR",
+        "customer_name": "กิตติ (เปิดอยู่ - รอดำเนินการ)",
+        "phone_number": "0834567890",
+        "channel": "LINE",
+        "current_status": "PENDING",  # รอดำเนินการ
+        "closed": "NO",
+        "client_id": 1,
+        "product": "Notebook Asus - เปลี่ยนจอ",
+        "transaction_repair": {
+            "received_date": "2026-09-08",
+            "repaired_date": None,
+            "delivery_date": None,
+            "input_status": "รอดำเนินการ"
+        }
+    },
+    {
+        "transaction_id": "REP-002",
+        "transaction_type": "REPAIR",
+        "customer_name": "อนุชา (เปิดอยู่ - ซ่อมเสร็จแล้ว)",
+        "phone_number": "0845678901",
+        "channel": "FB",
+        "current_status": "REPAIRED",  # ซ่อมเสร็จแล้ว
+        "closed": "NO",
+        "client_id": 1,
+        "product": "iPhone 13 - เปลี่ยนแบต",
+        "transaction_repair": {
+            "received_date": "2026-09-08",
+            "repaired_date": "2026-09-09",
+            "delivery_date": None,
+            "input_status": "ซ่อมเสร็จแล้ว"
+        }
+    },
+    {
+        "transaction_id": "REP-003",
+        "transaction_type": "REPAIR",
+        "customer_name": "พรทิพย์ (ปิดแล้ว - จัดส่งแล้ว)",
+        "phone_number": "0856789012",
+        "channel": "LINE",
+        "current_status": "DELIVERED",  # จัดส่งแล้ว
+        "closed": "YES",
+        "client_id": 1,
+        "product": "PS5 - ล้างเครื่อง",
+        "transaction_repair": {
+            "received_date": "2026-09-08",
+            "repaired_date": "2026-09-08",
+            "delivery_date": "2026-09-09",
+            "input_status": "จัดส่งแล้ว"
+        }
+    }
+]
+
+# ==============================================================================
+# 5. TRACKING (ระบบติดตามพัสดุ)
+# ==============================================================================
+MOCK_TRACKING_DATA = [
+    {
+        "transaction_id": "TRK-001",
+        "transaction_type": "TRACKING",
+        "customer_name": "พัสดุรับเข้า (รับเข้า - ยังไม่รับ)",
+        "phone_number": "0867890123",
+        "channel": "LINE",
+        "current_status": "IN_TRANSIT",
+        "closed": "NO",  # ยืนยันรับแล้ว: NO
+        "client_id": "1",
+        "product": "กล่องพัสดุเครื่องซ่อม",
+        "transaction_tracking": {
+            "tracking_number": "TH1234567890",
+            "direction": "INBOUND",  # ประเภทรายการ: รับเข้า
+            "shipping_date": "2026-09-08",
+            "expected_date": "2026-09-09",
+            "thailand_post_status": "อยู่ระหว่างการขนส่ง"
+        }
+    },
+    {
+        "transaction_id": "TRK-002",
+        "transaction_type": "TRACKING",
+        "customer_name": "พัสดุส่งออก (ส่งออก - ยังไม่รับ)",
+        "phone_number": "0878901234",
+        "channel": "FB",
+        "current_status": "IN_TRANSIT",
+        "closed": "NO",  # ยืนยันรับแล้ว: NO
+        "client_id": "1",
+        "product": "กล่องพัสดุสินค้าผ่อน",
+        "transaction_tracking": {
+            "tracking_number": "TH0987654321",
+            "direction": "OUTBOUND",  # ประเภทรายการ: ส่งออก
+            "shipping_date": "2026-09-09",
+            "expected_date": "2026-09-20",
+            "thailand_post_status": "รับฝากเรียบร้อย"
+        }
+    },
+    {
+        "transaction_id": "TRK-003",
+        "transaction_type": "TRACKING",
+        "customer_name": "พัสดุจัดส่งสำเร็จ (ส่งออก - รับแล้ว)",
+        "phone_number": "0889012345",
+        "channel": "LINE",
+        "current_status": "COMPLETED",
+        "closed": "YES",  # ยืนยันรับแล้ว: YES
+        "client_id": "1",
+        "product": "กล่องพัสดุสินค้าคืน",
+        "transaction_tracking": {
+            "tracking_number": "TH1122334455",
+            "direction": "OUTBOUND",  # ประเภทรายการ: ส่งออก
+            "shipping_date": "2026-09-08",
+            "expected_date": "2026-09-09",
+            "thailand_post_status": "ผู้รับได้รับเรียบร้อยแล้ว"
+        }
     }
 ]
 
