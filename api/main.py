@@ -835,38 +835,42 @@ def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, to
 def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
     
-    # 1. ดึงข้อมูลที่ Join ระหว่าง Master กับ Child Table ตามปกติ
-    raw_transactions = _get_joined_transactions("TRACKING", TRANSACTION_TRACKING)
-    
-    # 2. Map โครงสร้าง Payload ให้ตรงตาม MOCK_TRACKING_TRANSACTIONS_RESPONSE
+    # 1. จัดเตรียม Tracking Data ให้ดึงตาม transaction_id ได้ ไม่ว่าจะเป็น Dict หรือ List
+    tracking_lookup = {}
+    if isinstance(TRANSACTION_TRACKING_MAP, dict):
+        tracking_lookup = TRANSACTION_TRACKING_MAP
+    elif isinstance(TRANSACTION_TRACKING_MAP, list):
+        tracking_lookup = { item.get("transaction_id"): item for item in TRANSACTION_TRACKING_MAP }
+
+    # 2. วน loop จาก TRANSACTION_MASTER โดยตรง (ไม่ผ่าน filter transaction_type ที่อาจทำข้อมูลหลุด)
     formatted_results = []
-    for item in raw_transactions:
-        # สร้าง Object ภายใน thailand_post_view
+    for master in TRANSACTION_MASTER:
+        tx_id = master.get("transaction_id")
+        
+        # ดึงข้อมูล tracking จาก map (ถ้ามี)
+        t_info = tracking_lookup.get(tx_id, {})
+        
+        # ดึง tracking_number จาก tracking data หรือ master data
+        tracking_no = t_info.get("tracking_number") or master.get("tracking_number", "")
+        
+        # ดึงสถานะ last_status
+        last_status = t_info.get("last_status") or t_info.get("thailand_post_status", "")
+
+        # สร้าง Object thailand_post_view
         thailand_post_item = {
-            "direction": item.get("direction", "OUTBOUND"),
-            "shipping_date": item.get("shipping_date"),
-            "expected_date": item.get("expected_date"),
-            "tracking_number": item.get("tracking_number", ""),
-            "last_status": item.get("last_status") or item.get("thailand_post_status", "")
+            "direction": t_info.get("direction", "OUTBOUND"),
+            "shipping_date": t_info.get("shipping_date"),
+            "expected_date": t_info.get("expected_date"),
+            "tracking_number": tracking_no,
+            "last_status": last_status
         }
         
-        # จัดการ Data Item ให้ตรงกับ Mockup
-        formatted_item = {
-            "transaction_id": item.get("transaction_id"),
-            "product": item.get("product", ""),
-            "customer_name": item.get("customer_name", ""),
-            "phone_number": item.get("phone_number", ""),
-            "channel": item.get("channel", ""),
-            "chat_link": item.get("chat_link", ""),
-            "tracking_number": item.get("tracking_number", ""),
-            "closed": item.get("closed", "NO"),
-            "note": item.get("note", ""),
-            "created_by_name": item.get("created_by_name", ""),
-            "updated_by_name": item.get("updated_by_name", ""),
-            "thailand_post_view": [thailand_post_item]
-        }
+        # รวม Data ทั้งหมดให้อยู่ใน Object เดียวกัน (รักษาทุก Field ใน Master ไว้ทั้งหมด)
+        item = dict(master)
+        item["tracking_number"] = tracking_no
+        item["thailand_post_view"] = [thailand_post_item]
         
-        formatted_results.append(formatted_item)
+        formatted_results.append(item)
         
     return formatted_results
 
