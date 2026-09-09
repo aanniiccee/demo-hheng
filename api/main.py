@@ -835,44 +835,20 @@ def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, to
 def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
     
-    # 1. จัดเตรียม Tracking Data ให้ดึงตาม transaction_id ได้ ไม่ว่าจะเป็น Dict หรือ List
-    tracking_lookup = {}
-    if isinstance(TRANSACTION_TRACKING_MAP, dict):
-        tracking_lookup = TRANSACTION_TRACKING_MAP
-    elif isinstance(TRANSACTION_TRACKING_MAP, list):
-        tracking_lookup = { item.get("transaction_id"): item for item in TRANSACTION_TRACKING_MAP }
-
-    # 2. วน loop จาก TRANSACTION_MASTER โดยตรง (ไม่ผ่าน filter transaction_type ที่อาจทำข้อมูลหลุด)
-    formatted_results = []
+    results = []
     for master in TRANSACTION_MASTER:
-        tx_id = master.get("transaction_id")
+        tx_id = master["transaction_id"]
         
-        # ดึงข้อมูล tracking จาก map (ถ้ามี)
-        t_info = tracking_lookup.get(tx_id, {})
+        # ดึงข้อมูลจาก Map ตรงๆ ได้เลย (ถ้าไม่มีให้คืนค่า dict ว่าง)
+        tracking_info = TRANSACTION_TRACKING_MAP.get(tx_id, {})
         
-        # ดึง tracking_number จาก tracking data หรือ master data
-        tracking_no = t_info.get("tracking_number") or master.get("tracking_number", "")
-        
-        # ดึงสถานะ last_status
-        last_status = t_info.get("last_status") or t_info.get("thailand_post_status", "")
-
-        # สร้าง Object thailand_post_view
-        thailand_post_item = {
-            "direction": t_info.get("direction", "OUTBOUND"),
-            "shipping_date": t_info.get("shipping_date"),
-            "expected_date": t_info.get("expected_date"),
-            "tracking_number": tracking_no,
-            "last_status": last_status
-        }
-        
-        # รวม Data ทั้งหมดให้อยู่ใน Object เดียวกัน (รักษาทุก Field ใน Master ไว้ทั้งหมด)
+        # ก๊อบปี้ข้อมูล Master เดิมมา แล้วแปะ thailand_post_view เข้าไปตรงๆ
         item = dict(master)
-        item["tracking_number"] = tracking_no
-        item["thailand_post_view"] = [thailand_post_item]
+        item["thailand_post_view"] = [tracking_info]
         
-        formatted_results.append(item)
+        results.append(item)
         
-    return formatted_results
+    return results
 
 @app.post('/api/tracking-transactions')
 def add_tracking_transaction(payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
