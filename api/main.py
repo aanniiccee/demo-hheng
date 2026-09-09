@@ -451,7 +451,7 @@ TRANSACTION_TRACKING = [
     {
         "transaction_id": "TK_1_2",
         "tracking_number": "TH01928374652A",
-        "direction": "OUTBOUND",
+        "direction": "INBOUND",
         "shipping_date": "2026-07-10",
         "expected_date": "2026-07-12",
         "thailand_post_status": "ส่งมอบสำเร็จ",
