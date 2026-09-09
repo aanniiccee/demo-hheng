@@ -34,10 +34,12 @@ def validate_token(
     # ปลดล็อกระบบ Token validation เพื่อให้ Demo UI ใช้งานได้โดยไม่ต้องมี Token จริง
     return {"client_id": 1}
 
-
 @app.get("/api/config/liff-id")
 def get_liff_config():
-    return {"liff_id": os.environ.get("LIFF_ID", "1234567890-DEMO")}
+    liff_id = os.environ.get("LIFF_ID")
+    if not liff_id:
+        raise HTTPException(status_code=500, detail="LIFF_ID is not configured in .env")
+    return {"liff_id": liff_id}
 
 
 # --- Schema สำหรับรับข้อมูลขาเข้าจากฟอร์มหน้าบ้าน ---
