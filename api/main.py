@@ -17,8 +17,8 @@ load_dotenv()
 
 app = FastAPI()
 
-# กำหนด Security Token ที่ยอมรับ
-EXPECTED_TOKEN = "c925e1c7-5663-4ffa-8add-8c019d5a73f9"
+# ดึงค่า Security Token จาก ENV (ถ้าระบุใน .env) หรือใช้ Default Token
+EXPECTED_TOKEN = os.getenv("CLIENT_ACCESS_TOKEN") or os.getenv("EXPECTED_TOKEN") or "c925e1c7-5663-4ffa-8add-8c019d5a73f9"
 
 
 # --- ฟังก์ชันยืนยัน Security Token & LINE Token ---
@@ -28,17 +28,21 @@ def verify_access_and_token(
     admin_line_id: Optional[str] = None
 ):
     # 1. ตรวจสอบ Security Token ก่อนเป็นอันดับแรก
-    if token != EXPECTED_TOKEN:
+    clean_token = token.strip() if token else ""
+    if not clean_token or clean_token != EXPECTED_TOKEN:
+        print(f"[AUTH FAILED] Received token: {repr(clean_token)} | Expected: {repr(EXPECTED_TOKEN)}")
         raise HTTPException(
             status_code=401,
             detail="Unauthorized: Security Token ไม่ถูกต้องหรือไม่มีสิทธิ์เข้าถึง"
         )
 
-    # 2. ตรวจสอบ LINE ID Token (ถ้ามี)
-    liff_channel_id = os.environ.get("LINE_CHANNEL_ID")
+    # 2. ตรวจสอบ LINE ID Token (ถ้ามีการส่ง Authorization Header มา)
+    liff_channel_id = os.getenv("LINE_CHANNEL_ID") or os.getenv("LIFF_ID")
+    
     if authorization and authorization.startswith("Bearer "):
         id_token = authorization.split(" ")[1]
         try:
+            # ยิงไปตรวจสอบ ID Token กับทาง LINE API
             resp = requests.post(
                 "https://api.line.me/oauth2/v2.1/verify",
                 data={"id_token": id_token, "client_id": liff_channel_id},
@@ -49,22 +53,31 @@ def verify_access_and_token(
                 return {
                     "client_id": 1,
                     "line_user_id": payload.get("sub"),
-                    "name": payload.get("name")
+                    "name": payload.get("name", "LINE User")
                 }
-        except Exception:
-            pass
-            
-    return {"client_id": 1, "line_user_id": admin_line_id or "U_DEMO_USER"}
+            else:
+                print(f"[LINE VERIFY WARNING] LINE API returned status {resp.status_code}: {resp.text}")
+        except Exception as e:
+            print(f"[LINE VERIFY ERROR] Exception: {e}")
+
+    # หากไม่มี Authorization หรือ verify LINE ไม่ผ่าน แต่อนุญาตให้ผ่านในโหมดทดลอง
+    return {
+        "client_id": 1,
+        "line_user_id": admin_line_id or "U_DEMO_USER",
+        "name": "Demo Admin"
+    }
 
 
 @app.get("/api/config/liff-id")
 def get_liff_config(token: Optional[str] = Query(None)):
-    if token != EXPECTED_TOKEN:
+    clean_token = token.strip() if token else ""
+    if clean_token != EXPECTED_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
         
-    liff_id = os.environ.get("LIFF_ID")
+    liff_id = os.getenv("LIFF_ID")
     if not liff_id:
         raise HTTPException(status_code=500, detail="LIFF_ID is not configured in .env")
+        
     return {"liff_id": liff_id}
 
 
@@ -362,11 +375,11 @@ class DepositTransactionIn(BaseModel):
     product_id: Optional[str] = None          
     customer_name: str
     phone_number: Optional[str] = ''
-    channel: str  # LINE, FB, IG, OTHER                 
+    channel: str  # LINE, FB, IG, OTHER                
     deposit_amount: float = 0.0                  
     deposit_date: Optional[str] = None
     remaining_balance: float = 0.0                
-    due_date: Optional[str] = None                           
+    due_date: Optional[str] = None                          
     total_paid_amount: Optional[float] = 0.0
     payment_date: Optional[str] = None      
     closed: str = 'NO'                      
@@ -527,12 +540,12 @@ def update_repair_transaction(
 # ==========================================
 class TrackingTransactionIn(BaseModel):
     product: Optional[str] = ''              
-    customer_name: str                       
-    phone_number: Optional[str] = ''         
-    channel: str  # LINE, FB, IG, OTHER                           
+    customer_name: str                      
+    phone_number: Optional[str] = ''        
+    channel: str  # LINE, FB, IG, OTHER                          
     chat_link: Optional[str] = None          
-    tracking_number: str                     
-    direction: str = 'INBOUND'               
+    tracking_number: str                    
+    direction: str = 'INBOUND'              
     shipping_date: Optional[str] = None      
     expected_date: Optional[str] = None      
     created_by_line_id: Optional[str] = 'Unknown'
