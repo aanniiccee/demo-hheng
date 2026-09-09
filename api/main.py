@@ -3,7 +3,7 @@ import os
 import re
 import urllib.parse
 from calendar import monthrange
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional, List, Dict, Any
 
 from dotenv import load_dotenv
@@ -19,26 +19,36 @@ router = APIRouter(prefix="/api")
 # 1. MOCK DATA (จำลองข้อมูลในหน่วยความจำ)
 # ==============================================================================
 
-MOCK_PAWN_TRANSACTIONS: List[Dict[str, Any]] = [
+# คำนวณวันที่อ้างอิงจากวันนี้เพื่อให้ Filter สถานะระบบ (ยังไม่ถึง/ครบกำหนด/เกินกำหนด) ทำงานได้เป๊ะเสมอ
+today = date.today()
+yesterday = (today - timedelta(days=5)).isoformat()  # เกินกำหนด (OVERDUE)
+today_str = today.isoformat()                        # ครบกำหนดวันนี้ (DUE)
+next_week = (today + timedelta(days=7)).isoformat()   # ยังไม่ถึงกำหนด (PENDING)
+
+# ==============================================================================
+# MOCK DATA ชุดครอบคลุมทุก Filter
+# ==============================================================================
+
+MOCK_PAWN_TRANSACTIONS = [
     {
         "transaction_id": "PAWN-2026-001",
         "client_id": 1,
         "transaction_type": "PAWN",
-        "customer_name": "สมชาย ใจดี",
-        "phone_number": "0812345678",
+        "customer_name": "1. สุชาติ (เปิดอยู่ - เกินกำหนด)",
+        "phone_number": "0811111111",
         "channel": "LINE",
         "current_status": "ACTIVE",
-        "note": "สภาพดี มีรอยขีดข่วนเล็กน้อย",
-        "created_at": "2026-01-15T10:30:00Z",
-        "products": {"product_detail": "iPhone 15 Pro Max 256GB สีไทเทเนียมธรรมชาติ"},
+        "note": "ตั๋วนี้เกินกำหนดชำระแล้ว",
+        "created_at": "2026-01-01T10:00:00Z",
+        "products": {"product_detail": "iPhone 15 Pro Max 256GB"},
         "transaction_pawn": [
             {
                 "id": "pawn-sub-001",
                 "interest_per_month": 500.0,
-                "payment_date": "2026-02-15",
-                "next_due_date": "2026-03-15",
-                "total_paid_amount": 1000.0,
-                "input_status": "ปกติ",
+                "payment_date": None,
+                "next_due_date": yesterday,  # เกินกำหนด
+                "total_paid_amount": 0.0,
+                "input_status": "ค้างชำระ",
                 "closed": "NO"
             }
         ]
@@ -47,20 +57,66 @@ MOCK_PAWN_TRANSACTIONS: List[Dict[str, Any]] = [
         "transaction_id": "PAWN-2026-002",
         "client_id": 1,
         "transaction_type": "PAWN",
-        "customer_name": "นภา สว่างศรี",
-        "phone_number": "0898765432",
+        "customer_name": "2. วิภา (เปิดอยู่ - ครบกำหนดวันนี้)",
+        "phone_number": "0822222222",
         "channel": "FB",
-        "current_status": "CLOSED",
-        "note": "ไถ่ถอนเรียบร้อยแล้ว",
-        "created_at": "2026-02-01T14:15:00Z",
+        "current_status": "ACTIVE",
+        "note": "ต้องชำระดอกเบี้ยวันนี้",
+        "created_at": "2026-01-10T11:00:00Z",
         "products": {"product_detail": "iPad Air 5 M1 Wi-Fi 64GB"},
         "transaction_pawn": [
             {
                 "id": "pawn-sub-002",
                 "interest_per_month": 300.0,
-                "payment_date": "2026-02-28",
-                "next_due_date": "2026-03-28",
-                "total_paid_amount": 300.0,
+                "payment_date": None,
+                "next_due_date": today_str,  # ครบกำหนดวันนี้
+                "total_paid_amount": 0.0,
+                "input_status": "ถึงกำหนดชำระ",
+                "closed": "NO"
+            }
+        ]
+    },
+    {
+        "transaction_id": "PAWN-2026-003",
+        "client_id": 1,
+        "transaction_type": "PAWN",
+        "customer_name": "3. สมชาย (เปิดอยู่ - ยังไม่ถึงกำหนด)",
+        "phone_number": "0833333333",
+        "channel": "LINE",
+        "current_status": "ACTIVE",
+        "note": "สถานะปกติ ชำระสัปดาห์หน้า",
+        "created_at": "2026-02-01T09:30:00Z",
+        "products": {"product_detail": "MacBook Air M2"},
+        "transaction_pawn": [
+            {
+                "id": "pawn-sub-003",
+                "interest_per_month": 800.0,
+                "payment_date": None,
+                "next_due_date": next_week,  # ยังไม่ถึงกำหนด
+                "total_paid_amount": 0.0,
+                "input_status": "ปกติ",
+                "closed": "NO"
+            }
+        ]
+    },
+    {
+        "transaction_id": "PAWN-2026-004",
+        "client_id": 1,
+        "transaction_type": "PAWN",
+        "customer_name": "4. นภา (ปิดแล้ว - ไถ่ถอนเรียบร้อย)",
+        "phone_number": "0844444444",
+        "channel": "หน้าร้าน",
+        "current_status": "CLOSED",
+        "note": "ปิดสัญญาและไถ่ถอนของคืนแล้ว",
+        "created_at": "2026-01-05T14:00:00Z",
+        "products": {"product_detail": "Apple Watch Series 9"},
+        "transaction_pawn": [
+            {
+                "id": "pawn-sub-004",
+                "interest_per_month": 250.0,
+                "payment_date": today_str,
+                "next_due_date": next_week,
+                "total_paid_amount": 5250.0,
                 "input_status": "ไถ่ถอนแล้ว",
                 "closed": "YES"
             }
@@ -68,98 +124,148 @@ MOCK_PAWN_TRANSACTIONS: List[Dict[str, Any]] = [
     }
 ]
 
-MOCK_INSTALLMENT_TRANSACTIONS: List[Dict[str, Any]] = [
+MOCK_INSTALLMENT_TRANSACTIONS = [
     {
         "transaction_id": "INS-2026-001",
         "client_id": 1,
         "transaction_type": "INSTALLMENT",
-        "customer_name": "วิชัย มีสุข",
-        "phone_number": "0823334444",
+        "customer_name": "1. อนันต์ (ผ่อนอยู่ - เกินกำหนดชำระงวด)",
+        "phone_number": "0855555555",
         "channel": "LINE",
         "current_status": "ACTIVE",
-        "note": "ผ่อนชำระตรงเวลา",
-        "created_at": "2026-01-10T09:00:00Z",
-        "products": {"product_detail": "MacBook Air M2 8GB/256GB"},
+        "note": "ค้างชำระงวดล่าสุด",
+        "created_at": "2026-01-01T08:00:00Z",
+        "products": {"product_detail": "iPhone 15 Pro 128GB"},
         "transaction_installment": [
             {
                 "id": "ins-sub-001",
-                "installment_amount": 2500.0,
+                "installment_amount": 3000.0,
                 "total_periods": 10,
                 "current_period": 2,
-                "monthly_due_day": 15,
+                "monthly_due_day": today.day,
                 "start_month": 1,
                 "start_year": 2026,
-                "total_paid_amount": 5000.0
+                "next_due_date": yesterday,  # เกินกำหนด
+                "total_paid_amount": 3000.0,
+                "closed": "NO"
+            }
+        ]
+    },
+    {
+        "transaction_id": "INS-2026-002",
+        "client_id": 1,
+        "transaction_type": "INSTALLMENT",
+        "customer_name": "2. กนก (ผ่อนอยู่ - ครบกำหนดงวดวันนี้)",
+        "phone_number": "0866666666",
+        "channel": "FB",
+        "current_status": "ACTIVE",
+        "note": "ดิวชำระวันนี้",
+        "created_at": "2026-01-15T10:00:00Z",
+        "products": {"product_detail": "Samsung Galaxy S24 Ultra"},
+        "transaction_installment": [
+            {
+                "id": "ins-sub-002",
+                "installment_amount": 3500.0,
+                "total_periods": 12,
+                "current_period": 1,
+                "monthly_due_day": today.day,
+                "start_month": 2,
+                "start_year": 2026,
+                "next_due_date": today_str,  # ครบกำหนดวันนี้
+                "total_paid_amount": 0.0,
+                "closed": "NO"
+            }
+        ]
+    },
+    {
+        "transaction_id": "INS-2026-003",
+        "client_id": 1,
+        "transaction_type": "INSTALLMENT",
+        "customer_name": "3. พิมล (ผ่อนจบแล้ว - ปิดสัญญา)",
+        "phone_number": "0877777777",
+        "channel": "LINE",
+        "current_status": "CLOSED",
+        "note": "ผ่อนครบทุกงวดเรียบร้อย",
+        "created_at": "2025-05-01T09:00:00Z",
+        "products": {"product_detail": "iPad Pro M2"},
+        "transaction_installment": [
+            {
+                "id": "ins-sub-003",
+                "installment_amount": 2000.0,
+                "total_periods": 6,
+                "current_period": 6,
+                "monthly_due_day": 1,
+                "start_month": 5,
+                "start_year": 2025,
+                "next_due_date": yesterday,
+                "total_paid_amount": 12000.0,
+                "closed": "YES"
             }
         ]
     }
 ]
 
-MOCK_DEPOSIT_TRANSACTIONS: List[Dict[str, Any]] = [
+MOCK_DEPOSIT_TRANSACTIONS = [
     {
         "transaction_id": "DEP-2026-001",
         "client_id": 1,
         "transaction_type": "DEPOSIT",
-        "customer_name": "กมลวรรณ รักดี",
-        "phone_number": "0845556666",
+        "customer_name": "1. ธนกฤต (มัดจำอยู่ - เลยวันนัดรับ)",
+        "phone_number": "0888888888",
         "channel": "IG",
         "current_status": "ACTIVE",
-        "note": "มัดจำสินค้าไว้ นัดรับสิ้นเดือน",
-        "created_at": "2026-02-20T11:20:00Z",
-        "products": {"product_detail": "Apple Watch Series 9 45mm"},
+        "note": "เลยวันนัดชำระส่วนที่เหลือ",
+        "created_at": "2026-02-01T11:00:00Z",
+        "products": {"product_detail": "PlayStation 5 Disc Edition"},
         "transaction_deposit": [
             {
                 "id": "dep-sub-001",
-                "deposit_amount": 1000.0,
-                "remaining_balance": 4500.0,
-                "due_date": "2026-03-31",
+                "deposit_amount": 2000.0,
+                "remaining_balance": 12000.0,
+                "due_date": yesterday,  # เกินกำหนด
                 "closed": "NO"
             }
         ]
-    }
-]
-
-MOCK_REPAIR_TRANSACTIONS: List[Dict[str, Any]] = [
+    },
     {
-        "transaction_id": "REP-2026-001",
+        "transaction_id": "DEP-2026-002",
         "client_id": 1,
-        "transaction_type": "REPAIR",
-        "customer_name": "ธนกฤต ชัยชนะ",
-        "phone_number": "0867778888",
-        "channel": "หน้าร้าน",
-        "current_status": "IN_PROGRESS",
-        "note": "เปลี่ยนจอและแบตเตอรี่",
-        "created_at": "2026-03-01T13:00:00Z",
-        "transaction_repair": [
-            {
-                "id": "rep-sub-001",
-                "received_date": "2026-03-01",
-                "repaired_date": None,
-                "delivery_date": "2026-03-05",
-                "input_status": "กำลังซ่อม",
-                "closed": "NO"
-            }
-        ]
-    }
-]
-
-MOCK_TRACKING_TRANSACTIONS: List[Dict[str, Any]] = [
-    {
-        "transaction_id": "TRK-2026-001",
-        "client_id": 1,
-        "transaction_type": "TRACKING",
-        "customer_name": "อนันต์ ตั้งใจ",
-        "phone_number": "0889990000",
+        "transaction_type": "DEPOSIT",
+        "customer_name": "2. วรวุฒิ (มัดจำอยู่ - นัดรับวันนี้)",
+        "phone_number": "0899999999",
         "channel": "LINE",
-        "created_at": "2026-03-02T08:45:00Z",
-        "thailand_post_view": [
+        "current_status": "ACTIVE",
+        "note": "นัดเข้ามารับของและจ่ายส่วนที่เหลือวันนี้",
+        "created_at": "2026-02-10T15:00:00Z",
+        "products": {"product_detail": "Marshall Stanmore III"},
+        "transaction_deposit": [
             {
-                "id": "trk-sub-001",
-                "tracking_number": "ED123456789TH",
-                "direction": "OUTBOUND",
-                "shipping_date": "2026-03-02",
-                "expected_date": "2026-03-04",
-                "is_delivered": "NO"
+                "id": "dep-sub-002",
+                "deposit_amount": 1000.0,
+                "remaining_balance": 8900.0,
+                "due_date": today_str,  # ครบกำหนดวันนี้
+                "closed": "NO"
+            }
+        ]
+    },
+    {
+        "transaction_id": "DEP-2026-003",
+        "client_id": 1,
+        "transaction_type": "DEPOSIT",
+        "customer_name": "3. ศิริพร (ชำระครบ/รับของแล้ว - ปิดเคส)",
+        "phone_number": "0800000000",
+        "channel": "FB",
+        "current_status": "CLOSED",
+        "note": "รับสินค้าและจ่ายยอดครบแล้ว",
+        "created_at": "2026-02-15T16:30:00Z",
+        "products": {"product_detail": "AirPods Pro 2"},
+        "transaction_deposit": [
+            {
+                "id": "dep-sub-003",
+                "deposit_amount": 1000.0,
+                "remaining_balance": 0.0,
+                "due_date": today_str,
+                "closed": "YES"
             }
         ]
     }
