@@ -837,16 +837,13 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
     
     results = []
     for master in TRANSACTION_MASTER:
-        tx_id = master["transaction_id"]
+        tx_id = master.get("transaction_id")
         
-        # ดึงข้อมูลจาก Map ตรงๆ ได้เลย (ถ้าไม่มีให้คืนค่า dict ว่าง)
-        tracking_info = TRANSACTION_TRACKING_MAP.get(tx_id, {})
-        
-        # ก๊อบปี้ข้อมูล Master เดิมมา แล้วแปะ thailand_post_view เข้าไปตรงๆ
-        item = dict(master)
-        item["thailand_post_view"] = [tracking_info]
-        
-        results.append(item)
+        # 🌟 เอาเฉพาะรายการที่มีอยู่ใน TRANSACTION_TRACKING_MAP เท่านั้น
+        if tx_id in TRANSACTION_TRACKING_MAP:
+            item = dict(master)
+            item["thailand_post_view"] = [TRANSACTION_TRACKING_MAP[tx_id]]
+            results.append(item)
         
     return results
 
