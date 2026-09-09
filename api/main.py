@@ -436,31 +436,106 @@ TRANSACTION_REPAIR = [
     },
 ]
 
-TRANSACTION_TRACKING = [
-    {
-        "transaction_id": "TK_1_1",
-        "tracking_number": "EF123456789TH",
+# 1. Mock Data TRANSACTION_TRACKING (ปรับ key thailand_post_status ให้ส่งออกเป็น last_status ด้วย)
+TRANSACTION_TRACKING_MAP = {
+    "TK_1_1": {
         "direction": "OUTBOUND",
         "shipping_date": "2026-07-20",
         "expected_date": "2026-07-22",
-        "thailand_post_status": "นำจ่ายสำเร็จ",
-        "is_delivered": "NO",
-        "client_id": 1,  # แก้จาก "1" เป็น 1
-        "created_at": "2026-07-20 05:50:02.096949+00",
-        "updated_at": "2026-07-20 05:56:15.099386+00",
+        "tracking_number": "EF123456789TH",
+        "last_status": "นำจ่ายสำเร็จ",
+        "status_detail": "พัสดุจัดส่งถึงผู้รับเรียบร้อยแล้ว",
+        "status_update_at": "2026-07-22 14:30:00"
     },
-    {
-        "transaction_id": "TK_1_2",
-        "tracking_number": "TH01928374652A",
+    "TK_1_2": {
         "direction": "OUTBOUND",
         "shipping_date": "2026-07-10",
         "expected_date": "2026-07-12",
-        "thailand_post_status": "ส่งมอบสำเร็จ",
-        "is_delivered": "YES",
-        "client_id": 1,  # แก้จาก "1" เป็น 1
-        "created_at": "2026-07-10 03:00:00.000000+00",
-        "updated_at": "2026-07-12 08:30:00.000000+00",
+        "tracking_number": "TH01928374652A",
+        "last_status": "ส่งมอบสำเร็จ",
+        "status_detail": "นำจ่ายเรียบร้อย",
+        "status_update_at": "2026-07-12 11:20:00"
     },
+    "TK_1_3": {
+        "direction": "INBOUND",
+        "shipping_date": "2026-08-01",
+        "expected_date": "2026-08-05",
+        "tracking_number": "ED987654321TH",
+        "last_status": "อยู่ระหว่างการขนส่ง",
+        "status_detail": "ศูนย์ส่งมอบพัสดุ",
+        "status_update_at": "2026-08-02 09:00:00"
+    }
+}
+
+# 2. Mock Master Transactions ที่จับคู่กับ thailand_post_view เรียบร้อยแล้ว
+MOCK_TRACKING_TRANSACTIONS_RESPONSE = [
+    {
+        "transaction_id": "TK_1_1",
+        "product": "Rolex Submariner",
+        "customer_name": "คุณสมชาย สายเปย์",
+        "phone_number": "0812345678",
+        "channel": "FB",
+        "chat_link": "https://m.me/demo_shop_page",
+        "tracking_number": "EF123456789TH",
+        "closed": "NO",
+        "note": "ลูกค้าขอระบุวันส่ง",
+        "created_by_name": "Admin Alex",
+        "updated_by_name": "Admin Alex",
+        # 🌟 ฟิลด์สำคัญที่ Frontend ดึงไปแสดงผล
+        "thailand_post_view": [
+            {
+                "direction": "OUTBOUND",
+                "shipping_date": "2026-07-20",
+                "expected_date": "2026-07-22",
+                "tracking_number": "EF123456789TH",
+                "last_status": "นำจ่ายสำเร็จ"
+            }
+        ]
+    },
+    {
+        "transaction_id": "TK_1_2",
+        "product": "Hermes Birkin 30",
+        "customer_name": "คุณวิภาวี มั่นคง",
+        "phone_number": "0835447001",
+        "channel": "LINE",
+        "chat_link": "https://line.me/R/ti/p/@demo_shop",
+        "tracking_number": "TH01928374652A",
+        "closed": "YES",
+        "note": "ปิดเคสรับของเรียบร้อย",
+        "created_by_name": "Admin Bella",
+        "updated_by_name": "Admin Bella",
+        "thailand_post_view": [
+            {
+                "direction": "OUTBOUND",
+                "shipping_date": "2026-07-10",
+                "expected_date": "2026-07-12",
+                "tracking_number": "TH01928374652A",
+                "last_status": "ส่งมอบสำเร็จ"
+            }
+        ]
+    },
+    {
+        "transaction_id": "TK_1_3",
+        "product": "Chanel Classic Flap",
+        "customer_name": "คุณกิตติศักดิ์ มีทรัพย์",
+        "phone_number": "0891112233",
+        "channel": "IG",
+        "chat_link": "https://instagram.com/direct/t/demo_chat",
+        "tracking_number": "ED987654321TH",
+        "closed": "NO",
+        "note": "ลูกค้ามัดจำไว้แล้ว ส่งพัสดุรับเข้า",
+        "created_by_name": "Admin Alex",
+        "updated_by_name": "Admin Alex",
+        "thailand_post_view": [
+            {
+                "direction": "INBOUND",
+                "shipping_date": "2026-08-01",
+                "expected_date": "2026-08-05",
+                "tracking_number": "ED987654321TH",
+                "last_status": "อยู่ระหว่างการขนส่ง"
+            }
+        ]
+    }
 ]
 # ==============================================================================
 # 2. VALIDATION & HELPERS
@@ -759,7 +834,41 @@ def update_repair_transaction(transaction_id: str, data: RepairTransactionIn, to
 @app.get('/api/tracking-transactions')
 def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Optional[str] = None):
     validate_token(token, admin_line_id)
-    return _get_joined_transactions("TRACKING", TRANSACTION_TRACKING)
+    
+    # 1. ดึงข้อมูลที่ Join ระหว่าง Master กับ Child Table ตามปกติ
+    raw_transactions = _get_joined_transactions("TRACKING", TRANSACTION_TRACKING)
+    
+    # 2. Map โครงสร้าง Payload ให้ตรงตาม MOCK_TRACKING_TRANSACTIONS_RESPONSE
+    formatted_results = []
+    for item in raw_transactions:
+        # สร้าง Object ภายใน thailand_post_view
+        thailand_post_item = {
+            "direction": item.get("direction", "OUTBOUND"),
+            "shipping_date": item.get("shipping_date"),
+            "expected_date": item.get("expected_date"),
+            "tracking_number": item.get("tracking_number", ""),
+            "last_status": item.get("last_status") or item.get("thailand_post_status", "")
+        }
+        
+        # จัดการ Data Item ให้ตรงกับ Mockup
+        formatted_item = {
+            "transaction_id": item.get("transaction_id"),
+            "product": item.get("product", ""),
+            "customer_name": item.get("customer_name", ""),
+            "phone_number": item.get("phone_number", ""),
+            "channel": item.get("channel", ""),
+            "chat_link": item.get("chat_link", ""),
+            "tracking_number": item.get("tracking_number", ""),
+            "closed": item.get("closed", "NO"),
+            "note": item.get("note", ""),
+            "created_by_name": item.get("created_by_name", ""),
+            "updated_by_name": item.get("updated_by_name", ""),
+            "thailand_post_view": [thailand_post_item]
+        }
+        
+        formatted_results.append(formatted_item)
+        
+    return formatted_results
 
 @app.post('/api/tracking-transactions')
 def add_tracking_transaction(payload: dict = Body(...), token: Optional[str] = None, admin_line_id: Optional[str] = None):
