@@ -71,14 +71,20 @@ def get_single_pawn_transaction(tx_id: str, token: Optional[str] = None, admin_l
         "phone_number": "081-234-5678",
         "channel": "LINE",
         "current_status": "ACTIVE",
+        "closed": "NO",
+        "note": "ต่อดอกเบี้ยเรียบร้อยแล้วรอบที่ 2",
         "created_at": "2026-03-01T10:00:00Z",
+        "created_by_line_id": "U111122223333",
+        "created_by_name": "แอดมินเจมส์",
+        "chat_link": "https://line.me/R/oaMessage/@demo/?somchai",
         "product": "ทองคำแท่ง 1 บาท",
         "products": {"product_detail": "ทองคำแท่ง 96.5% น้ำหนัก 15.16 กรัม"},
         "transaction_pawn": [{
             "pawn_amount": 35000.0,
             "interest_per_month": 1050.0,
             "next_due_date": "2026-04-01",
-            "last_paid_date": "2026-03-01"
+            "last_paid_date": "2026-03-01",
+            "input_status": "ต่อดอกแล้ว"
         }]
     }]
 
@@ -94,13 +100,19 @@ def get_pawn_transactions(token: Optional[str] = None, admin_line_id: Optional[s
             "phone_number": "081-234-5678",
             "channel": "LINE",
             "current_status": "ACTIVE",
+            "closed": "NO",
+            "note": "ลูกค้าแจ้งต่อดอกทุกวันที่ 1 ของเดือน",
             "created_at": "2026-03-01T10:00:00Z",
+            "created_by_line_id": "U111122223333",
+            "created_by_name": "แอดมินเจมส์",
+            "chat_link": "https://line.me/R/oaMessage/@demo/?somchai",
             "product": "ทองคำแท่ง 1 บาท",
             "products": {"product_detail": "ทองคำแท่ง 96.5% น้ำหนัก 15.16 กรัม"},
             "transaction_pawn": [{
                 "pawn_amount": 35000.0,
                 "interest_per_month": 1050.0,
-                "next_due_date": "2026-04-01"
+                "next_due_date": "2026-04-01",
+                "input_status": "ปกติ"
             }]
         },
         {
@@ -111,13 +123,42 @@ def get_pawn_transactions(token: Optional[str] = None, admin_line_id: Optional[s
             "phone_number": "089-876-5432",
             "channel": "Facebook",
             "current_status": "EXPIRED",
+            "closed": "NO",
+            "note": "เกินกำหนดชำระแล้ว อยู่ระหว่างส่ง LINE ตาม",
             "created_at": "2026-02-15T14:30:00Z",
+            "created_by_line_id": "U444455556666",
+            "created_by_name": "แอดมินเมย์",
+            "chat_link": "https://m.me/demo.shop",
             "product": "iPhone 15 Pro Max 256GB",
             "products": {"product_detail": "iPhone 15 Pro Max สี Natural Titanium สภาพ 95%"},
             "transaction_pawn": [{
                 "pawn_amount": 28000.0,
                 "interest_per_month": 840.0,
-                "next_due_date": "2026-03-15"
+                "next_due_date": "2026-03-15",
+                "input_status": "ค้างชำระ"
+            }]
+        },
+        {
+            "transaction_id": "PW-202602-008",
+            "transaction_type": "PAWN",
+            "client_id": 1,
+            "customer_name": "ณรงค์เดช โชคดี",
+            "phone_number": "086-111-2244",
+            "channel": "หน้าร้าน",
+            "current_status": "REDEEMED",
+            "closed": "YES",
+            "note": "ไถ่ถอนคืนสินค้าเรียบร้อยแล้ว จ่ายเงินสด",
+            "created_at": "2026-02-01T11:00:00Z",
+            "created_by_line_id": "U111122223333",
+            "created_by_name": "แอดมินเจมส์",
+            "chat_link": None,
+            "product": "MacBook Air M2",
+            "products": {"product_detail": "MacBook Air M2 Space Gray RAM 8GB SSD 256GB"},
+            "transaction_pawn": [{
+                "pawn_amount": 18000.0,
+                "interest_per_month": 540.0,
+                "next_due_date": "2026-03-01",
+                "input_status": "ไถ่ถอนแล้ว"
             }]
         }
     ]
@@ -170,14 +211,21 @@ def get_single_transaction(tx_id: str, token: Optional[str] = None, admin_line_i
         "phone_number": "082-111-2233",
         "channel": "หน้าร้าน",
         "current_status": "IN_PROGRESS",
+        "closed": "NO",
+        "note": "จ่ายตรงเวลาทุกงวด",
         "created_at": "2026-01-10T11:20:00Z",
+        "created_by_line_id": "U444455556666",
+        "created_by_name": "แอดมินเมย์",
+        "chat_link": None,
+        "product": "iPad Air 5 64GB Wi-Fi",
         "products": {"product_detail": "iPad Air 5 64GB Wi-Fi"},
         "transaction_installment": [{
             "total_amount": 20000.0,
             "installment_amount": 2000.0,
             "total_periods": 10,
             "current_period": 3,
-            "next_due_date": "2026-04-10"
+            "next_due_date": "2026-04-10",
+            "input_status": "กำลังผ่อน"
         }]
     }
 
@@ -193,7 +241,12 @@ def get_installment_transactions(token: Optional[str] = None, admin_line_id: Opt
             "phone_number": "082-111-2233",
             "channel": "หน้าร้าน",
             "current_status": "IN_PROGRESS",
+            "closed": "NO",
+            "note": "ขอโอนจ่ายทุกวันที่ 10 ของเดือน",
             "created_at": "2026-01-10T11:20:00Z",
+            "created_by_line_id": "U444455556666",
+            "created_by_name": "แอดมินเมย์",
+            "chat_link": None,
             "product": "iPad Air 5 64GB Wi-Fi",
             "products": {"product_detail": "iPad Air 5 64GB Wi-Fi สี Space Gray"},
             "transaction_installment": [{
@@ -201,7 +254,8 @@ def get_installment_transactions(token: Optional[str] = None, admin_line_id: Opt
                 "installment_amount": 2000.0,
                 "total_periods": 10,
                 "current_period": 3,
-                "next_due_date": "2026-04-10"
+                "next_due_date": "2026-04-10",
+                "input_status": "กำลังผ่อน"
             }]
         },
         {
@@ -212,7 +266,12 @@ def get_installment_transactions(token: Optional[str] = None, admin_line_id: Opt
             "phone_number": "086-555-4433",
             "channel": "LINE",
             "current_status": "COMPLETED",
+            "closed": "YES",
+            "note": "ผ่อนครบแล้ว ส่งมอบเครื่องเรียบร้อย",
             "created_at": "2025-11-01T09:00:00Z",
+            "created_by_line_id": "U111122223333",
+            "created_by_name": "แอดมินเจมส์",
+            "chat_link": "https://line.me/R/oaMessage/@demo/?kamonwan",
             "product": "Samsung Galaxy S24 Ultra",
             "products": {"product_detail": "Samsung S24 Ultra 512GB"},
             "transaction_installment": [{
@@ -220,7 +279,33 @@ def get_installment_transactions(token: Optional[str] = None, admin_line_id: Opt
                 "installment_amount": 7000.0,
                 "total_periods": 6,
                 "current_period": 6,
-                "next_due_date": "2026-04-01"
+                "next_due_date": "2026-04-01",
+                "input_status": "ผ่อนครบแล้ว"
+            }]
+        },
+        {
+            "transaction_id": "INS-202602-012",
+            "transaction_type": "INSTALLMENT",
+            "client_id": 1,
+            "customer_name": "ธีรภาพ ใจมั่น",
+            "phone_number": "089-333-7788",
+            "channel": "Instagram",
+            "current_status": "OVERDUE",
+            "closed": "NO",
+            "note": "ค่างวดที่ 2 ช้าไป 5 วัน แอดมินทักไลน์ตามแล้ว",
+            "created_at": "2026-02-05T14:00:00Z",
+            "created_by_line_id": "U777788889999",
+            "created_by_name": "แอดมินนิว",
+            "chat_link": "https://ig.me/m/demo.shop",
+            "product": "Apple Watch Ultra 2",
+            "products": {"product_detail": "Apple Watch Ultra 2 สาย Titanium"},
+            "transaction_installment": [{
+                "total_amount": 29000.0,
+                "installment_amount": 2900.0,
+                "total_periods": 10,
+                "current_period": 1,
+                "next_due_date": "2026-03-05",
+                "input_status": "ค้างชำระ"
             }]
         }
     ]
@@ -290,13 +375,19 @@ def get_deposit_transactions(token: Optional[str] = None, admin_line_id: Optiona
             "phone_number": "083-999-8877",
             "channel": "Facebook",
             "current_status": "WAITING_PAYMENT",
+            "closed": "NO",
+            "note": "วางมัดจำไว้ก่อน นัดมารับของหน้าร้านวันที่ 20",
             "created_at": "2026-03-05T13:15:00Z",
+            "created_by_line_id": "U777788889999",
+            "created_by_name": "แอดมินนิว",
+            "chat_link": "https://m.me/demo.shop",
             "product": "กระเป๋า Brandname Chanel Classic 10\"",
             "transaction_deposit": [{
                 "deposit_amount": 5000.0,
                 "remaining_balance": 45000.0,
                 "due_date": "2026-03-20",
-                "closed": "NO"
+                "closed": "NO",
+                "input_status": "รอมารับสินค้า"
             }]
         },
         {
@@ -307,13 +398,42 @@ def get_deposit_transactions(token: Optional[str] = None, admin_line_id: Optiona
             "phone_number": "087-444-1122",
             "channel": "Instagram",
             "current_status": "CLOSED",
+            "closed": "YES",
+            "note": "ชำระส่วนที่เหลือเรียบร้อย จัดส่งพัสดุแล้ว",
             "created_at": "2026-03-02T16:00:00Z",
+            "created_by_line_id": "U111122223333",
+            "created_by_name": "แอดมินเจมส์",
+            "chat_link": "https://ig.me/m/demo.shop",
             "product": "นาฬิกา Rolex Datejust 36mm",
             "transaction_deposit": [{
                 "deposit_amount": 20000.0,
                 "remaining_balance": 0.0,
                 "due_date": "2026-03-08",
-                "closed": "YES"
+                "closed": "YES",
+                "input_status": "จ่ายครบแล้ว"
+            }]
+        },
+        {
+            "transaction_id": "DEP-202602-005",
+            "transaction_type": "DEPOSIT",
+            "client_id": 1,
+            "customer_name": "ศรัณย์ เปรมปรีดิ์",
+            "phone_number": "085-222-3311",
+            "channel": "LINE",
+            "current_status": "CANCELLED",
+            "closed": "YES",
+            "note": "ยิบบริบเงินมัดจำ เนื่องจากเกินกำหนดนัดชำระ 14 วัน",
+            "created_at": "2026-02-10T10:00:00Z",
+            "created_by_line_id": "U444455556666",
+            "created_by_name": "แอดมินเมย์",
+            "chat_link": "https://line.me/R/oaMessage/@demo/?saran",
+            "product": "PlayStation 5 Slim Digital",
+            "transaction_deposit": [{
+                "deposit_amount": 2000.0,
+                "remaining_balance": 12000.0,
+                "due_date": "2026-02-24",
+                "closed": "YES",
+                "input_status": "ยกเลิก/หลุดมัดจำ"
             }]
         }
     ]
@@ -364,7 +484,12 @@ def get_repair_transactions(token: Optional[str] = None, admin_line_id: Optional
             "phone_number": "085-333-2211",
             "channel": "LINE",
             "current_status": "IN_PROGRESS",
+            "closed": "NO",
+            "note": "อาการเปิดไม่ติด ช่างกำลังเช็คไอซีระบบไฟ",
             "created_at": "2026-03-06T11:00:00Z",
+            "created_by_line_id": "U111122223333",
+            "created_by_name": "แอดมินเจมส์",
+            "chat_link": "https://line.me/R/oaMessage/@demo/?thanakrit",
             "product": "MacBook Pro M1 - อาการเปิดไม่ติด",
             "transaction_repair": [{
                 "received_date": "2026-03-06",
@@ -382,7 +507,12 @@ def get_repair_transactions(token: Optional[str] = None, admin_line_id: Optional
             "phone_number": "088-777-6655",
             "channel": "หน้าร้าน",
             "current_status": "COMPLETED",
+            "closed": "YES",
+            "note": "เปลี่ยนจอแท้ศูนย์ ประกันงานซ่อม 90 วัน",
             "created_at": "2026-03-01T09:30:00Z",
+            "created_by_line_id": "U444455556666",
+            "created_by_name": "แอดมินเมย์",
+            "chat_link": None,
             "product": "เปลี่ยนหน้าจอ iPhone 13 Pro",
             "transaction_repair": [{
                 "received_date": "2026-03-01",
@@ -390,6 +520,29 @@ def get_repair_transactions(token: Optional[str] = None, admin_line_id: Optional
                 "delivery_date": "2026-03-03",
                 "input_status": "ซ่อมเสร็จส่งคืนลูกค้าแล้ว",
                 "closed": "YES"
+            }]
+        },
+        {
+            "transaction_id": "REP-202602-009",
+            "transaction_type": "REPAIR",
+            "client_id": 1,
+            "customer_name": "ชยพล เจริญสุข",
+            "phone_number": "081-666-5544",
+            "channel": "Facebook",
+            "current_status": "TESTING",
+            "closed": "NO",
+            "note": "ซ่อมบอร์ดเสร็จแล้ว อยู่ระหว่างการทดสอบ QC 24 ชม.",
+            "created_at": "2026-02-28T15:20:00Z",
+            "created_by_line_id": "U777788889999",
+            "created_by_name": "แอดมินนิว",
+            "chat_link": "https://m.me/demo.shop",
+            "product": "iPad Pro 11\" โดนน้ำ ล้างบอร์ด",
+            "transaction_repair": [{
+                "received_date": "2026-02-28",
+                "repaired_date": "2026-03-08",
+                "delivery_date": None,
+                "input_status": "กำลัง QC เครื่อง",
+                "closed": "NO"
             }]
         }
     ]
@@ -438,7 +591,12 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
             "customer_name": "กิตติศักดิ์ มั่นคง",
             "phone_number": "084-222-1100",
             "channel": "LINE",
+            "closed": "NO",
+            "note": "ส่งคืนสินค้าหลังไถ่ถอน ห่อกันกระแทกอย่างดี",
             "created_at": "2026-03-08T15:00:00Z",
+            "created_by_line_id": "U111122223333",
+            "created_by_name": "แอดมินเจมส์",
+            "chat_link": "https://line.me/R/oaMessage/@demo/?kittisak",
             "product": "ส่งสินค้าคืนลูกค้า - แหวนเพชร",
             "thailand_post_view": [{
                 "tracking_number": "EF123456789TH",
@@ -456,7 +614,12 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
             "customer_name": "ศิริพร บุญส่ง",
             "phone_number": "081-999-0011",
             "channel": "Facebook",
+            "closed": "YES",
+            "note": "พัสดุถึงร้านแล้ว ตรวจสอบสภาพเครื่องสมบูรณ์ดี",
             "created_at": "2026-03-04T10:00:00Z",
+            "created_by_line_id": "U444455556666",
+            "created_by_name": "แอดมินเมย์",
+            "chat_link": "https://m.me/demo.shop",
             "product": "ลูกค้านำเครื่องส่งมาจำนำ",
             "thailand_post_view": [{
                 "tracking_number": "ED987654321TH",
@@ -465,6 +628,29 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
                 "expected_date": "2026-03-06",
                 "is_delivered": "YES",
                 "status_description": "นำจ่ายสำเร็จ"
+            }]
+        },
+        {
+            "transaction_id": "TRK-202603-003",
+            "transaction_type": "TRACKING",
+            "client_id": 1,
+            "customer_name": "วรวุฒิ สุวรรณ",
+            "phone_number": "089-111-9988",
+            "channel": "Instagram",
+            "closed": "NO",
+            "note": "จัดส่งอะไหล่จอไปให้ลูกค้าต่างจังหวัด",
+            "created_at": "2026-03-07T12:00:00Z",
+            "created_by_line_id": "U777788889999",
+            "created_by_name": "แอดมินนิว",
+            "chat_link": "https://ig.me/m/demo.shop",
+            "product": "จัดส่งสินค้าผ่อนชำระ - iPad Gen 10",
+            "thailand_post_view": [{
+                "tracking_number": "TH0123456789A",
+                "direction": "OUTBOUND",
+                "shipping_date": "2026-03-07",
+                "expected_date": "2026-03-09",
+                "is_delivered": "NO",
+                "status_description": "เตรียมการนำจ่าย"
             }]
         }
     ]
