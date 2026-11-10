@@ -6,6 +6,7 @@ from calendar import monthrange
 from datetime import date
 from typing import Any, Dict, List, Optional
 
+import requests
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel
@@ -436,7 +437,6 @@ TRANSACTION_REPAIR = [
     },
 ]
 
-# 1. Mock Data TRANSACTION_TRACKING (ปรับ key thailand_post_status ให้ส่งออกเป็น last_status ด้วย)
 TRANSACTION_TRACKING_MAP = {
     "TK_1_1": {
         "direction": "OUTBOUND",
@@ -467,112 +467,19 @@ TRANSACTION_TRACKING_MAP = {
     }
 }
 
-# 2. Mock Master Transactions ที่จับคู่กับ thailand_post_view เรียบร้อยแล้ว
-MOCK_TRACKING_TRANSACTIONS_RESPONSE = [
-    {
-        "transaction_id": "TK_1_1",
-        "product": "Rolex Submariner",
-        "customer_name": "คุณสมชาย สายเปย์",
-        "phone_number": "0812345678",
-        "channel": "FB",
-        "chat_link": "https://m.me/demo_shop_page",
-        "tracking_number": "EF123456789TH",
-        "closed": "NO",
-        "note": "ลูกค้าขอระบุวันส่ง",
-        "created_by_name": "Admin Alex",
-        "updated_by_name": "Admin Alex",
-        # 🌟 ฟิลด์สำคัญที่ Frontend ดึงไปแสดงผล
-        "thailand_post_view": [
-            {
-                "direction": "OUTBOUND",
-                "shipping_date": "2026-07-20",
-                "expected_date": "2026-07-22",
-                "tracking_number": "EF123456789TH",
-                "last_status": "นำจ่ายสำเร็จ"
-            }
-        ]
-    },
-    {
-        "transaction_id": "TK_1_2",
-        "product": "Hermes Birkin 30",
-        "customer_name": "คุณวิภาวี มั่นคง",
-        "phone_number": "0835447001",
-        "channel": "LINE",
-        "chat_link": "https://line.me/R/ti/p/@demo_shop",
-        "tracking_number": "TH01928374652A",
-        "closed": "YES",
-        "note": "ปิดเคสรับของเรียบร้อย",
-        "created_by_name": "Admin Bella",
-        "updated_by_name": "Admin Bella",
-        "thailand_post_view": [
-            {
-                "direction": "OUTBOUND",
-                "shipping_date": "2026-07-10",
-                "expected_date": "2026-07-12",
-                "tracking_number": "TH01928374652A",
-                "last_status": "ส่งมอบสำเร็จ"
-            }
-        ]
-    },
-    {
-        "transaction_id": "TK_1_3",
-        "product": "Chanel Classic Flap",
-        "customer_name": "คุณกิตติศักดิ์ มีทรัพย์",
-        "phone_number": "0891112233",
-        "channel": "IG",
-        "chat_link": "https://instagram.com/direct/t/demo_chat",
-        "tracking_number": "ED987654321TH",
-        "closed": "NO",
-        "note": "ลูกค้ามัดจำไว้แล้ว ส่งพัสดุรับเข้า",
-        "created_by_name": "Admin Alex",
-        "updated_by_name": "Admin Alex",
-        "thailand_post_view": [
-            {
-                "direction": "INBOUND",
-                "shipping_date": "2026-08-01",
-                "expected_date": "2026-08-05",
-                "tracking_number": "ED987654321TH",
-                "last_status": "อยู่ระหว่างการขนส่ง"
-            }
-        ]
-    }
-]
 # ==============================================================================
-# 2. VALIDATION & HELPERS
+# 2. VALIDATION & HELPERS (ตัด access_token ออก เช็คสิทธิ์ผ่านชีตอย่างเดียว)
 # ==============================================================================
 
 def validate_token(
     token: Optional[str] = None, admin_line_id: Optional[str] = None
 ):
-    target_token = token
-    if (
-        not target_token
-        or target_token.strip() == ""
-        or target_token == "undefined"
-        or target_token == "null"
-    ):
-        target_token = os.getenv("CLIENT_ACCESS_TOKEN", "")
-
-    if not target_token:
-        raise HTTPException(
-            401,
-            "Missing token. Please configure CLIENT_ACCESS_TOKEN in Vercel.",
-        )
-
-    expected_token = os.getenv("CLIENT_ACCESS_TOKEN", "")
-    if expected_token and target_token != expected_token:
-        raise HTTPException(401, "Invalid token")
-
-    allowed_admins_raw = os.getenv("ALLOWED_ADMINS", "")
-    if not allowed_admins_raw or allowed_admins_raw.strip() == "":
-        return {"client_id": 1}
-
-    allowed_admins = [
-        x.strip() for x in allowed_admins_raw.split(",") if x.strip()
-    ]
-
-    if not admin_line_id or admin_line_id not in allowed_admins:
-        raise HTTPException(403, "Unauthorized LINE User ID")
+    """
+    ข้ามการตรวจเช็ค CLIENT_ACCESS_TOKEN 
+    เนื่องจากเปลี่ยนมาใช้ระบบเช็คสิทธิ์ในชีต/Apps Script แทนแล้ว
+    """
+    if not admin_line_id or admin_line_id.strip() == "" or admin_line_id == "undefined":
+        raise HTTPException(403, "Unauthorized: Missing admin_line_id")
 
     return {"client_id": 1}
 
@@ -598,6 +505,11 @@ def calculate_next_due_date(start_year, start_month, due_day, period_index):
 # ==============================================================================
 # 3. SCHEMAS
 # ==============================================================================
+
+class RedeemRequestIn(BaseModel):
+    invite_code: Optional[str] = ""
+    line_user_id: str
+    admin_name: Optional[str] = "Unknown"
 
 class PawnTransactionIn(BaseModel):
     product: Optional[str] = ''
@@ -700,6 +612,33 @@ def get_liff_config():
             detail="ระบบยังไม่ได้ตั้งค่า LIFF_ID ใน Environment Variables",
         )
     return {"liff_id": liff_id}
+
+# --- REDEEM & AUTH ENDPOINT (เชื่อมต่อไปยัง Google Apps Script ของจริง) ---
+@app.post('/api/redeem')
+def redeem_admin_invite(payload: RedeemRequestIn):
+    script_url = os.getenv("GOOGLE_SCRIPT_URL")
+    if not script_url:
+        raise HTTPException(
+            status_code=500,
+            detail="Server configuration error: GOOGLE_SCRIPT_URL is missing"
+        )
+
+    try:
+        response = requests.post(
+            script_url,
+            json={
+                "invite_code": payload.invite_code,
+                "line_user_id": payload.line_user_id,
+                "admin_name": payload.admin_name
+            },
+            timeout=10
+        )
+        return response.json()
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to connect to Google Script: {str(e)}"
+        )
 
 # --- PAWN ENDPOINTS ---
 @app.get('/api/pawn-transactions/{tx_id}')
@@ -839,7 +778,6 @@ def get_tracking_transactions(token: Optional[str] = None, admin_line_id: Option
     for master in TRANSACTION_MASTER:
         tx_id = master.get("transaction_id")
         
-        # 🌟 เอาเฉพาะรายการที่มีอยู่ใน TRANSACTION_TRACKING_MAP เท่านั้น
         if tx_id in TRANSACTION_TRACKING_MAP:
             item = dict(master)
             item["thailand_post_view"] = [TRANSACTION_TRACKING_MAP[tx_id]]
