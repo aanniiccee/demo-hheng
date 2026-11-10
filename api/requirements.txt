@@ -1,6 +1,5 @@
 fastapi
 uvicorn
-jinja2
-supabase
-python-multipart
+requests
+pydantic
 python-dotenv
