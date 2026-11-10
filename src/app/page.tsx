@@ -13,8 +13,18 @@ export default function HomePage() {
   const [adminLineId, setAdminLineId] = useState("");
 
   useEffect(() => {
-    setToken(searchParams.get("token") || "");
-    setAdminLineId(sessionStorage.getItem("admin_line_id") || "");
+    // 1. ดึงค่าจาก URL Query Params ก่อน
+    const urlToken = searchParams.get("token") || "";
+    const urlAdminLineId = searchParams.get("admin_line_id") || "";
+
+    // 2. ถ้าใน URL มี admin_line_id ให้บันทึกลง sessionStorage ไว้ด้วยเพื่อความเสถียร
+    if (urlAdminLineId) {
+      sessionStorage.setItem("admin_line_id", urlAdminLineId);
+    }
+
+    // 3. เซ็ต State โดยเช็กทั้งจาก URL หรือดึงจาก Session เผื่อกรณี URL ไม่มี
+    setToken(urlToken);
+    setAdminLineId(urlAdminLineId || sessionStorage.getItem("admin_line_id") || "");
   }, [searchParams]);
 
   // สร้าง Helper ฟังก์ชันต่อสายพารามิเตอร์แบบฉลาด
@@ -60,8 +70,6 @@ export default function HomePage() {
           <span>ระบบติดตามพัสดุ</span>
         </Link>
       </div>
-
-      {/* 🌟 ลบโค้ดแท็ก <style jsx> เดิมตรงนี้ออกไปเรียบร้อยแล้ว */}
     </div>
   );
 }
